@@ -1,0 +1,59 @@
+# Miscellaneous
+*.class
+*.log
+*.swp
+.DS_Store
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.history/
+
+# Dart & Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub/
+.pub-cache/
+build/
+coverage/
+doc/api/
+pubspec.lock
+
+# Melos / pub workspaces
+pubspec_overrides.yaml
+.melos_tool/
+
+# Failed golden tests
+**/test/**/failures/
+
+# Android
+**/android/.gradle/
+**/android/captures/
+**/android/local.properties
+**/android/key.properties
+**/android/**/gradle-wrapper.jar
+*.jks
+
+# iOS & macOS
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/.symlinks/
+**/ios/Pods/
+**/macos/Flutter/ephemeral/
+**/macos/Pods/
+**/Podfile.lock
+*.ipa
+
+# Windows & Linux
+**/windows/flutter/ephemeral/
+**/linux/flutter/ephemeral/
