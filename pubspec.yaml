@@ -1,0 +1,70 @@
+name: peek_workspace
+description: Development workspace for the Peek packages.
+publish_to: none
+
+environment:
+  sdk: ^3.6.0
+
+workspace: []
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  melos: ^8.7.0
+
+melos:
+  command:
+    bootstrap:
+      runPubGetInParallel: true
+    version:
+      workspaceChangelog: true
+
+  scripts:
+    analyze:
+      description: Analyze every package, failing on infos as well.
+      exec:
+        command: flutter analyze --fatal-infos
+        concurrency: 4
+        failFast: true
+
+    format:
+      description: Format every Dart source in place.
+      run: dart format .
+
+    format:check:
+      description: Fail if any Dart source is not formatted.
+      run: dart format --output none --set-exit-if-changed .
+
+    test:
+      description: Run the tests of every package that has them.
+      exec:
+        command: flutter test
+        concurrency: 1
+        failFast: true
+      packageFilters:
+        dirExists: test
+
+    test:coverage:
+      description: Run the tests of every package and collect coverage.
+      exec:
+        command: flutter test --coverage
+        concurrency: 1
+      packageFilters:
+        dirExists: test
+
+    pana:
+      description: Score the publishable packages the way pub.dev does.
+      exec:
+        command: dart pub global run pana --no-warning --exit-code-threshold 0
+      packageFilters:
+        includePrivatePackages: false
+
+    publish:dry:
+      description: Dry-run publishing of the publishable packages.
+      run: dart run melos publish --dry-run --yes
+
+    ci:
+      description: Everything CI runs, in the same order.
+      steps:
+        - dart run melos run format:check
+        - dart run melos run analyze
+        - dart run melos run test

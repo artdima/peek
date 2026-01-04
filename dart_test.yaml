@@ -1,0 +1,5 @@
+timeout: 60s
+
+tags:
+  golden:
+  integration:
