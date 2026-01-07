@@ -28,7 +28,6 @@ independent project, written from scratch for Flutter.
 ## Status
 
 Peek is in early development and is not published to pub.dev yet.
-The step-by-step development plan lives in [TODO.md](TODO.md).
 
 ## License
 
