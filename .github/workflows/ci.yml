@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Format, analyze, test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: .fvmrc
+          cache: true
+
+      - uses: actions/cache@v6
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: pub-${{ runner.os }}-
+
+      - run: flutter pub get
+      - run: dart run melos run format:check
+      - run: dart run melos run analyze
+      - run: dart run melos run test:coverage
+
+      # Each package reports paths relative to itself; prefix them so one
+      # merged report maps back onto the repository.
+      - name: Merge coverage reports
+        run: |
+          shopt -s nullglob
+          mkdir -p coverage
+          for report in packages/*/coverage/lcov.info; do
+            package=$(dirname "$(dirname "$report")")
+            sed "s|^SF:\([^/]\)|SF:$package/\1|" "$report"
+          done > coverage/lcov.info
+
+      - uses: codecov/codecov-action@v5
+        with:
+          files: coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  floor:
+    name: Minimum Flutter (${{ matrix.package }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: [peek]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.29.0
+          cache: true
+
+      # The workspace tooling needs a newer Dart than the packages promise,
+      # so each package is checked on its own against the oldest SDK it claims.
+      - name: Detach the package from the workspace
+        run: |
+          cp -r packages/${{ matrix.package }} "$RUNNER_TEMP/floor"
+          cd "$RUNNER_TEMP/floor"
+          sed -i '/^resolution: workspace$/d' pubspec.yaml
+          rm -f analysis_options.yaml test/analysis_options.yaml
+
+      - run: flutter pub get
+        working-directory: ${{ runner.temp }}/floor
+      - run: flutter analyze --fatal-infos
+        working-directory: ${{ runner.temp }}/floor
+      - run: flutter test
+        working-directory: ${{ runner.temp }}/floor
+
+  pana:
+    name: pub.dev score (${{ matrix.package }})
+    runs-on: ubuntu-latest
+    # Advisory until the packages are ready for pub.dev; then make it blocking.
+    continue-on-error: true
+    strategy:
+      matrix:
+        package: [peek]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: .fvmrc
+          cache: true
+
+      - run: dart pub global activate pana
+      - run: >-
+          dart pub global run pana
+          --no-warning --exit-code-threshold 0
+          packages/${{ matrix.package }}

@@ -3,7 +3,7 @@ description: Development workspace for the Peek packages.
 publish_to: none
 
 environment:
-  sdk: ^3.6.0
+  sdk: ^3.9.0
 
 workspace:
   - packages/peek

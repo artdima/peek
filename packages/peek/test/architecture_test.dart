@@ -13,13 +13,14 @@ final RegExp _flutterDirective = RegExp(
 
 bool importsFlutter(String source) => _flutterDirective.hasMatch(source);
 
-List<String> dartFilesImportingFlutter(Directory directory) => directory
-    .listSync(recursive: true)
-    .whereType<File>()
-    .where((file) => file.path.endsWith('.dart'))
-    .where((file) => importsFlutter(file.readAsStringSync()))
-    .map((file) => file.path)
-    .toList();
+List<String> dartFilesImportingFlutter(Directory directory) =>
+    directory
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((file) => file.path.endsWith('.dart'))
+        .where((file) => importsFlutter(file.readAsStringSync()))
+        .map((file) => file.path)
+        .toList();
 
 void main() {
   test('core imports no Flutter', () {
@@ -38,15 +39,12 @@ void main() {
     addTearDown(() => directory.deleteSync(recursive: true));
 
     final nested = Directory('${directory.path}/nested')..createSync();
-    File('${nested.path}/offender.dart')
-        .writeAsStringSync("import 'package:flutter/material.dart';");
-    File('${directory.path}/clean.dart')
-        .writeAsStringSync("import 'package:meta/meta.dart';");
+    final offender = File('${nested.path}/offender.dart');
+    final clean = File('${directory.path}/clean.dart');
+    offender.writeAsStringSync("import 'package:flutter/material.dart';");
+    clean.writeAsStringSync("import 'package:meta/meta.dart';");
 
-    expect(
-      dartFilesImportingFlutter(directory),
-      [endsWith('offender.dart')],
-    );
+    expect(dartFilesImportingFlutter(directory), [endsWith('offender.dart')]);
   });
 
   test('the detector reads directives, not any mention of Flutter', () {
