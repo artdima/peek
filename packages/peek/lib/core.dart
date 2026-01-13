@@ -4,3 +4,6 @@
 /// Adapter packages import this library and nothing else — it never depends
 /// on Flutter.
 library;
+
+export 'src/core/model/peek_id.dart';
+export 'src/core/peek_clock.dart';
