@@ -5,5 +5,7 @@
 /// on Flutter.
 library;
 
+export 'src/core/model/peek_cookie.dart';
+export 'src/core/model/peek_headers.dart';
 export 'src/core/model/peek_id.dart';
 export 'src/core/peek_clock.dart';
