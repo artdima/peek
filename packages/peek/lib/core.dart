@@ -7,8 +7,12 @@ library;
 
 export 'src/core/model/peek_body.dart';
 export 'src/core/model/peek_cookie.dart';
+export 'src/core/model/peek_failure.dart';
 export 'src/core/model/peek_form_data.dart';
 export 'src/core/model/peek_headers.dart';
 export 'src/core/model/peek_id.dart';
 export 'src/core/model/peek_media_type.dart';
+export 'src/core/model/peek_request.dart';
+export 'src/core/model/peek_response.dart';
+export 'src/core/model/peek_status_class.dart';
 export 'src/core/peek_clock.dart';
