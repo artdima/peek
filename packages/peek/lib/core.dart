@@ -21,3 +21,5 @@ export 'src/core/peek_clock.dart';
 export 'src/core/sink/peek_adapter.dart';
 export 'src/core/sink/peek_event.dart';
 export 'src/core/sink/peek_sink.dart';
+export 'src/core/store/in_memory_peek_store.dart';
+export 'src/core/store/peek_store.dart';
