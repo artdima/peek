@@ -18,6 +18,8 @@ export 'src/core/model/peek_response.dart';
 export 'src/core/model/peek_status_class.dart';
 export 'src/core/model/peek_timings.dart';
 export 'src/core/peek_clock.dart';
+export 'src/core/redaction/peek_redaction_policy.dart';
+export 'src/core/redaction/peek_redactor.dart';
 export 'src/core/sink/peek_adapter.dart';
 export 'src/core/sink/peek_event.dart';
 export 'src/core/sink/peek_sink.dart';

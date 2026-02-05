@@ -17,3 +17,10 @@ bool mapEquals<K, V>(Map<K, V> a, Map<K, V> b) {
   }
   return true;
 }
+
+/// Whether [a] and [b] hold the same elements, in any order.
+bool setEquals<T>(Set<T> a, Set<T> b) {
+  if (identical(a, b)) return true;
+  if (a.length != b.length) return false;
+  return a.every(b.contains);
+}
