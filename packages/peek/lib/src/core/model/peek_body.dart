@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 
 import '../internal/collection_equality.dart';
+import '../internal/utf8.dart';
 import 'peek_form_data.dart';
 import 'peek_media_type.dart';
 
@@ -88,7 +89,7 @@ sealed class PeekBody {
 final class PeekTextBody extends PeekBody {
   /// See [PeekBody.text].
   factory PeekTextBody(String text, {PeekMediaType? contentType, int? size}) {
-    final captured = _utf8Length(text);
+    final captured = utf8Length(text);
     return PeekTextBody._(
       text,
       contentType: contentType,
@@ -291,20 +292,4 @@ final class PeekUnavailableBody extends PeekBody {
 
   @override
   String toString() => 'PeekUnavailableBody(${reason.name})';
-}
-
-int _utf8Length(String text) {
-  var length = 0;
-  for (final rune in text.runes) {
-    if (rune < 0x80) {
-      length += 1;
-    } else if (rune < 0x800) {
-      length += 2;
-    } else if (rune < 0x10000) {
-      length += 3;
-    } else {
-      length += 4;
-    }
-  }
-  return length;
 }
