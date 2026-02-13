@@ -4,9 +4,13 @@ import 'package:meta/meta.dart';
 @immutable
 final class PeekLimits {
   /// Creates limits; the defaults suit a debug build of a typical app.
-  const PeekLimits({this.maxEntries = 1000, this.maxBodyBytes = 512 * 1024})
-    : assert(maxEntries >= 1, 'maxEntries must be positive'),
-      assert(maxBodyBytes >= 0, 'maxBodyBytes must not be negative');
+  const PeekLimits({
+    this.maxEntries = 1000,
+    this.maxBodyBytes = 512 * 1024,
+    this.maxPinned = 50,
+  }) : assert(maxEntries >= 1, 'maxEntries must be positive'),
+       assert(maxBodyBytes >= 0, 'maxBodyBytes must not be negative'),
+       assert(maxPinned >= 0, 'maxPinned must not be negative');
 
   /// The most entries the store holds before evicting old ones.
   final int maxEntries;
@@ -15,22 +19,30 @@ final class PeekLimits {
   /// marked as truncated. Zero keeps sizes but no content.
   final int maxBodyBytes;
 
+  /// The most entries a user can pin. Pinned entries survive eviction, so
+  /// this keeps the store from filling up with them.
+  final int maxPinned;
+
   /// A copy with the given fields replaced.
-  PeekLimits copyWith({int? maxEntries, int? maxBodyBytes}) => PeekLimits(
-    maxEntries: maxEntries ?? this.maxEntries,
-    maxBodyBytes: maxBodyBytes ?? this.maxBodyBytes,
-  );
+  PeekLimits copyWith({int? maxEntries, int? maxBodyBytes, int? maxPinned}) =>
+      PeekLimits(
+        maxEntries: maxEntries ?? this.maxEntries,
+        maxBodyBytes: maxBodyBytes ?? this.maxBodyBytes,
+        maxPinned: maxPinned ?? this.maxPinned,
+      );
 
   @override
   bool operator ==(Object other) =>
       other is PeekLimits &&
       other.maxEntries == maxEntries &&
-      other.maxBodyBytes == maxBodyBytes;
+      other.maxBodyBytes == maxBodyBytes &&
+      other.maxPinned == maxPinned;
 
   @override
-  int get hashCode => Object.hash(maxEntries, maxBodyBytes);
+  int get hashCode => Object.hash(maxEntries, maxBodyBytes, maxPinned);
 
   @override
   String toString() =>
-      'PeekLimits($maxEntries entries, $maxBodyBytes body bytes)';
+      'PeekLimits($maxEntries entries, $maxBodyBytes body bytes, '
+      '$maxPinned pinned)';
 }

@@ -1,4 +1,5 @@
 import 'limits/peek_body_truncator.dart';
+import 'model/peek_id.dart';
 import 'peek_options.dart';
 import 'redaction/peek_redactor.dart';
 import 'sink/peek_adapter.dart';
@@ -94,10 +95,46 @@ final class Peek implements PeekSink {
     if (_adapters.remove(adapter)) _guard(adapter.dispose);
   }
 
-  /// Removes every entry.
+  /// Removes every entry, pinned ones included.
   void clear() {
     if (_disposed) return;
     _guard(store.clear);
+  }
+
+  /// How many entries are pinned.
+  int get pinnedCount => store.entries.where((entry) => entry.isPinned).length;
+
+  /// Whether one more entry may be pinned under the limit in [options].
+  bool get canPin => pinnedCount < options.limits.maxPinned;
+
+  /// Pins the entry with [id] so eviction skips it. Returns whether it is
+  /// pinned afterwards: `false` for an unknown id or when [canPin] is not.
+  bool pin(PeekId id) {
+    if (_disposed) return false;
+    final entry = store.find(id);
+    if (entry == null) return false;
+    if (entry.isPinned) return true;
+    if (!canPin) return false;
+    _guard(() => store.upsert(entry.copyWith(isPinned: true)));
+    return store.find(id)?.isPinned ?? false;
+  }
+
+  /// Unpins the entry with [id], if it is there.
+  void unpin(PeekId id) {
+    if (_disposed) return;
+    final entry = store.find(id);
+    if (entry == null || !entry.isPinned) return;
+    _guard(() => store.upsert(entry.copyWith(isPinned: false)));
+  }
+
+  /// Pins or unpins the entry with [id]; returns whether it is pinned
+  /// afterwards.
+  bool togglePin(PeekId id) {
+    if (store.find(id)?.isPinned ?? false) {
+      unpin(id);
+      return false;
+    }
+    return pin(id);
   }
 
   @override

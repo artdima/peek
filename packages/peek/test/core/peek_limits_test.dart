@@ -7,11 +7,13 @@ void main() {
       const limits = PeekLimits();
       expect(limits.maxEntries, 1000);
       expect(limits.maxBodyBytes, 512 * 1024);
+      expect(limits.maxPinned, 50);
     });
 
     test('rejects nonsense', () {
       expect(() => PeekLimits(maxEntries: 0), throwsAssertionError);
       expect(() => PeekLimits(maxBodyBytes: -1), throwsAssertionError);
+      expect(() => PeekLimits(maxPinned: -1), throwsAssertionError);
       expect(const PeekLimits(maxBodyBytes: 0).maxBodyBytes, 0);
     });
 
@@ -27,7 +29,11 @@ void main() {
         const PeekLimits(maxEntries: 10, maxBodyBytes: 100).hashCode,
       );
       expect(limits, isNot(const PeekLimits(maxEntries: 10)));
-      expect(limits.toString(), 'PeekLimits(10 entries, 100 body bytes)');
+      expect(limits, isNot(limits.copyWith(maxPinned: 1)));
+      expect(
+        limits.toString(),
+        'PeekLimits(10 entries, 100 body bytes, 50 pinned)',
+      );
     });
   });
 }

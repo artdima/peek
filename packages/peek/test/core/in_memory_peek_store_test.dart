@@ -97,6 +97,26 @@ void main() {
       expect(ids(store), ['b', 'c', 'd']);
     });
 
+    test('never evicts a pinned entry while an unpinned one exists', () {
+      store.upsert(completed('a').copyWith(isPinned: true));
+      store.upsert(pending('b').copyWith(isPinned: true));
+      store.upsert(completed('c'));
+      store.upsert(completed('d'));
+      expect(ids(store), ['a', 'b', 'd']);
+
+      store.upsert(pending('e'));
+      expect(ids(store), ['a', 'b', 'e']);
+    });
+
+    test('evicts the oldest pinned entry only as a last resort', () {
+      store.upsert(completed('a').copyWith(isPinned: true));
+      store.upsert(completed('b').copyWith(isPinned: true));
+      store.upsert(completed('c').copyWith(isPinned: true));
+      store.upsert(completed('d'));
+      expect(ids(store), ['b', 'c', 'd']);
+      expect(store.length, 3);
+    });
+
     test('does not evict when updating an entry of a full store', () {
       store.upsert(completed('a'));
       store.upsert(completed('b'));

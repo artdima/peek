@@ -69,6 +69,16 @@ void main() {
     response: response,
   );
 
+  PeekRequestStarted startedFor(String name) => PeekRequestStarted(
+    id: PeekId(name),
+    timestamp: t0,
+    request: request,
+    source: 'test',
+  );
+
+  PeekResponseReceived receivedFor(String name) =>
+      PeekResponseReceived(id: PeekId(name), timestamp: t1, response: response);
+
   late List<Object> errors;
   late Peek peek;
 
@@ -223,10 +233,57 @@ void main() {
       expect(errors, isEmpty);
     });
 
-    test('clears the store', () {
+    test('clears the store, pinned entries included', () {
       peek.report(started);
+      peek.pin(id);
       peek.clear();
       expect(peek.store.length, 0);
+    });
+
+    test('pins, unpins and toggles within the limit', () {
+      final pinned = Peek(
+        options: const PeekOptions(
+          limits: PeekLimits(maxEntries: 5, maxPinned: 2),
+        ),
+      );
+      addTearDown(pinned.dispose);
+      for (final name in ['a', 'b', 'c']) {
+        pinned.report(startedFor(name));
+      }
+
+      expect(pinned.pin(const PeekId('zzz')), isFalse);
+      expect(pinned.pin(const PeekId('a')), isTrue);
+      expect(pinned.pin(const PeekId('a')), isTrue);
+      expect(pinned.togglePin(const PeekId('b')), isTrue);
+      expect(pinned.pinnedCount, 2);
+      expect(pinned.canPin, isFalse);
+      expect(pinned.pin(const PeekId('c')), isFalse);
+      expect(pinned.togglePin(const PeekId('c')), isFalse);
+      expect(pinned.store.find(const PeekId('c'))?.isPinned, isFalse);
+
+      expect(pinned.togglePin(const PeekId('a')), isFalse);
+      expect(pinned.pinnedCount, 1);
+      expect(pinned.canPin, isTrue);
+      pinned.unpin(const PeekId('a'));
+      pinned.unpin(const PeekId('zzz'));
+      expect(pinned.pinnedCount, 1);
+    });
+
+    test('keeps pinned entries through eviction', () {
+      for (final name in ['a', 'b', 'c']) {
+        peek.report(startedFor(name));
+        peek.report(receivedFor(name));
+      }
+      peek.pin(const PeekId('a'));
+      peek.report(startedFor('d'));
+      peek.report(startedFor('e'));
+
+      expect(peek.store.entries.map((entry) => entry.id.value), [
+        'a',
+        'd',
+        'e',
+      ]);
+      expect(peek.store.find(const PeekId('a'))?.isPinned, isTrue);
     });
 
     test('registers adapters and disposes them with itself', () async {

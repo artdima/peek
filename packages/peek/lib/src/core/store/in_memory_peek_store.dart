@@ -6,9 +6,10 @@ import 'peek_store.dart';
 
 /// A [PeekStore] that keeps at most [maxEntries] entries in memory.
 ///
-/// When full, adding an entry evicts the oldest completed one, so calls
-/// still in flight are not lost; only when every entry is pending does the
-/// oldest of them go.
+/// When full, adding an entry evicts the oldest unpinned completed one, so
+/// calls still in flight and entries the user pinned are not lost. Only
+/// when nothing else is left does the oldest pending, and as a last resort
+/// the oldest pinned, entry go — the limit is never exceeded.
 final class InMemoryPeekStore implements PeekStore {
   /// Creates a store bounded to [maxEntries], which must be positive.
   InMemoryPeekStore({this.maxEntries = 1000}) {
@@ -75,9 +76,14 @@ final class InMemoryPeekStore implements PeekStore {
   }
 
   void _evict() {
-    final victim = _entries.values.firstWhere(
-      (entry) => entry.state != PeekEntryState.pending,
-      orElse: () => _entries.values.first,
+    final entries = _entries.values;
+    final victim = entries.firstWhere(
+      (entry) => !entry.isPinned && entry.state != PeekEntryState.pending,
+      orElse:
+          () => entries.firstWhere(
+            (entry) => !entry.isPinned,
+            orElse: () => entries.first,
+          ),
     );
     _entries.remove(victim.id);
     _changes.add(PeekEntryRemoved(victim));
