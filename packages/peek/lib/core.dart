@@ -22,6 +22,8 @@ export 'src/core/model/peek_timings.dart';
 export 'src/core/peek.dart';
 export 'src/core/peek_clock.dart';
 export 'src/core/peek_options.dart';
+export 'src/core/query/peek_facets.dart';
+export 'src/core/query/peek_filter.dart';
 export 'src/core/redaction/peek_redaction_policy.dart';
 export 'src/core/redaction/peek_redactor.dart';
 export 'src/core/sink/peek_adapter.dart';

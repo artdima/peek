@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../internal/collection_equality.dart';
 import 'peek_body.dart';
 import 'peek_headers.dart';
+import 'peek_media_type.dart';
 import 'peek_status_class.dart';
 
 /// The response half of a network call: what came back.
@@ -37,6 +38,10 @@ final class PeekResponse {
 
   /// Body size from the `Content-Length` header, else from the body itself.
   int? get contentLength => headers.contentLength ?? body.size;
+
+  /// The body's media type, else the parsed `Content-Type` header.
+  PeekMediaType? get mediaType =>
+      body.contentType ?? PeekMediaType.tryParse(headers.contentType);
 
   /// A copy with the given fields replaced.
   PeekResponse copyWith({

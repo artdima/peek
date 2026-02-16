@@ -52,6 +52,25 @@ void main() {
       expect(unknown.contentLength, isNull);
     });
 
+    test('reads its media type from the body, else from the headers', () {
+      final typed = PeekRequest(
+        method: 'POST',
+        uri: uri,
+        headers: PeekHeaders.fromMap({'Content-Type': 'text/plain'}),
+        body: PeekBody.text('{}', contentType: PeekMediaType.json),
+      );
+      expect(typed.mediaType, PeekMediaType.json);
+
+      final fromHeaders = PeekRequest(
+        method: 'POST',
+        uri: uri,
+        headers: PeekHeaders.fromMap({'Content-Type': 'text/plain'}),
+        body: PeekBody.text('{}'),
+      );
+      expect(fromHeaders.mediaType, PeekMediaType.plainText);
+      expect(PeekRequest(method: 'GET', uri: uri).mediaType, isNull);
+    });
+
     test('copies extra and freezes the copy', () {
       final extra = <String, Object?>{};
       extra['client'] = 'shop';

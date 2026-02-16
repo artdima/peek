@@ -37,6 +37,22 @@ void main() {
       );
     });
 
+    test('reads its media type from the body, else from the headers', () {
+      final fromHeaders = PeekResponse(
+        statusCode: 200,
+        headers: PeekHeaders.fromMap({'content-type': 'image/png'}),
+      );
+      expect(fromHeaders.mediaType?.mimeType, 'image/png');
+      expect(
+        PeekResponse(
+          statusCode: 200,
+          body: PeekBody.text('x', contentType: PeekMediaType.html),
+        ).mediaType,
+        PeekMediaType.html,
+      );
+      expect(PeekResponse(statusCode: 204).mediaType, isNull);
+    });
+
     test('copies redirects and freezes the copy', () {
       final redirects = <PeekRedirect>[];
       redirects.add(
