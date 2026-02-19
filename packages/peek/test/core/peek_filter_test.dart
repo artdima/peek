@@ -133,6 +133,25 @@ void main() {
       ]);
     });
 
+    test('searches text as one more criterion', () {
+      expect(keep(const PeekFilter(query: PeekSearchQuery('users'))), [
+        'e1',
+        'e5',
+      ]);
+      expect(
+        keep(
+          const PeekFilter(query: PeekSearchQuery('users'), onlyErrors: true),
+        ),
+        ['e5'],
+      );
+      const filter = PeekFilter(query: PeekSearchQuery('users'));
+      expect(filter.matches(e1), isTrue);
+      expect(filter.matches(e2), isFalse);
+      expect(filter.activeCount, 1);
+      expect(filter.copyWith(query: PeekSearchQuery.none).isEmpty, isTrue);
+      expect(filter, isNot(const PeekFilter(query: PeekSearchQuery('x'))));
+    });
+
     test('requires every set criterion to hold', () {
       const filter = PeekFilter(
         methods: {'GET'},

@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../internal/collection_equality.dart';
 import '../model/peek_entry.dart';
 import '../model/peek_status_class.dart';
+import 'peek_search_query.dart';
 
 /// A closed or half-open range of durations.
 @immutable
@@ -79,7 +80,7 @@ final class PeekDateRange {
 }
 
 /// Which entries to show. Every criterion that is set must hold; an empty
-/// set or an unbounded range means "any".
+/// set, an unbounded range or an empty [query] means "any".
 ///
 /// Names match case-insensitively: methods are compared uppercase, hosts
 /// lowercase. [contentTypes] hold bare media types such as
@@ -99,6 +100,7 @@ final class PeekFilter {
     this.onlyPinned = false,
     this.duration = PeekDurationRange.any,
     this.dates = PeekDateRange.any,
+    this.query = PeekSearchQuery.none,
   });
 
   /// Matches everything.
@@ -137,6 +139,9 @@ final class PeekFilter {
   /// Keep only calls started within the range.
   final PeekDateRange dates;
 
+  /// Keep only entries containing the searched text.
+  final PeekSearchQuery query;
+
   /// Whether nothing is set, so everything matches.
   bool get isEmpty => activeCount == 0;
 
@@ -154,10 +159,14 @@ final class PeekFilter {
         onlyPinned,
         !duration.isUnbounded,
         !dates.isUnbounded,
+        !query.isEmpty,
       ].where((active) => active).length;
 
   /// Whether [entry] satisfies every criterion that is set.
-  bool matches(PeekEntry entry) {
+  bool matches(PeekEntry entry) =>
+      _matchesCriteria(entry) && query.matches(entry);
+
+  bool _matchesCriteria(PeekEntry entry) {
     if (onlyErrors && !entry.isError) return false;
     if (onlyPinned && !entry.isPinned) return false;
     if (methods.isNotEmpty &&
@@ -194,11 +203,15 @@ final class PeekFilter {
   }
 
   /// The entries of [entries] that match, in order.
-  Iterable<PeekEntry> apply(Iterable<PeekEntry> entries) =>
-      isEmpty ? entries : entries.where(matches);
+  Iterable<PeekEntry> apply(Iterable<PeekEntry> entries) {
+    if (isEmpty) return entries;
+    final search = query.compile();
+    return entries.where((entry) => _matchesCriteria(entry) && search(entry));
+  }
 
-  /// A copy with the given fields replaced. Pass an empty set or
-  /// [PeekDurationRange.any] / [PeekDateRange.any] to clear a criterion.
+  /// A copy with the given fields replaced. Pass an empty set,
+  /// [PeekDurationRange.any], [PeekDateRange.any] or [PeekSearchQuery.none]
+  /// to clear a criterion.
   PeekFilter copyWith({
     Set<String>? methods,
     Set<PeekStatusClass>? statusClasses,
@@ -211,6 +224,7 @@ final class PeekFilter {
     bool? onlyPinned,
     PeekDurationRange? duration,
     PeekDateRange? dates,
+    PeekSearchQuery? query,
   }) => PeekFilter(
     methods: methods ?? this.methods,
     statusClasses: statusClasses ?? this.statusClasses,
@@ -223,6 +237,7 @@ final class PeekFilter {
     onlyPinned: onlyPinned ?? this.onlyPinned,
     duration: duration ?? this.duration,
     dates: dates ?? this.dates,
+    query: query ?? this.query,
   );
 
   @override
@@ -238,7 +253,8 @@ final class PeekFilter {
       other.onlyErrors == onlyErrors &&
       other.onlyPinned == onlyPinned &&
       other.duration == duration &&
-      other.dates == dates;
+      other.dates == dates &&
+      other.query == query;
 
   @override
   int get hashCode => Object.hash(
@@ -253,6 +269,7 @@ final class PeekFilter {
     onlyPinned,
     duration,
     dates,
+    query,
   );
 
   @override
