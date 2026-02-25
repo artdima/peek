@@ -24,6 +24,7 @@ export 'src/core/peek_clock.dart';
 export 'src/core/peek_options.dart';
 export 'src/core/query/peek_facets.dart';
 export 'src/core/query/peek_filter.dart';
+export 'src/core/query/peek_query.dart';
 export 'src/core/query/peek_search_query.dart';
 export 'src/core/query/peek_sort.dart';
 export 'src/core/redaction/peek_redaction_policy.dart';
