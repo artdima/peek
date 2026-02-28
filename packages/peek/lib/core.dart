@@ -5,6 +5,7 @@
 /// on Flutter.
 library;
 
+export 'src/core/export/peek_curl_exporter.dart';
 export 'src/core/limits/peek_body_truncator.dart';
 export 'src/core/limits/peek_limits.dart';
 export 'src/core/model/peek_body.dart';
