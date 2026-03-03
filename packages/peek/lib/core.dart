@@ -6,6 +6,7 @@
 library;
 
 export 'src/core/export/peek_curl_exporter.dart';
+export 'src/core/export/peek_har_exporter.dart';
 export 'src/core/limits/peek_body_truncator.dart';
 export 'src/core/limits/peek_limits.dart';
 export 'src/core/model/peek_body.dart';
@@ -36,3 +37,4 @@ export 'src/core/sink/peek_sink.dart';
 export 'src/core/store/in_memory_peek_store.dart';
 export 'src/core/store/peek_event_reducer.dart';
 export 'src/core/store/peek_store.dart';
+export 'src/core/version.dart';
