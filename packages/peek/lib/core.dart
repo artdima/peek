@@ -6,7 +6,10 @@
 library;
 
 export 'src/core/export/peek_curl_exporter.dart';
+export 'src/core/export/peek_exporters.dart';
 export 'src/core/export/peek_har_exporter.dart';
+export 'src/core/export/peek_markdown_exporter.dart';
+export 'src/core/export/peek_text_exporter.dart';
 export 'src/core/limits/peek_body_truncator.dart';
 export 'src/core/limits/peek_limits.dart';
 export 'src/core/model/peek_body.dart';
