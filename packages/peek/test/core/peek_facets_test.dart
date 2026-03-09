@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peek/core.dart';
 
-import 'fixtures.dart';
+import '../support/entries.dart';
 
 void main() {
   group('PeekFacets', () {

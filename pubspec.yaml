@@ -52,6 +52,14 @@ melos:
       packageFilters:
         dirExists: test
 
+    update:goldens:
+      description: Rewrite the golden files; Linux only, as CI compares them.
+      exec:
+        command: flutter test --update-goldens
+        concurrency: 1
+      packageFilters:
+        dirExists: test
+
     pana:
       description: Score the publishable packages the way pub.dev does.
       exec:
