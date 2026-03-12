@@ -6,3 +6,4 @@
 library;
 
 export 'core.dart';
+export 'src/ui/theme/peek_theme.dart';

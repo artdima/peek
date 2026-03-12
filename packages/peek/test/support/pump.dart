@@ -22,6 +22,10 @@ final Object skipGoldens =
 ///
 /// [size] sets the surface, so a golden is the same size everywhere;
 /// [textScale] exercises large-text layouts.
+///
+/// `MaterialApp` animates theme changes, so a second call with a different
+/// theme lands mid-transition: settle before asserting. This helper does not
+/// settle on its own — a pending call's spinner would never stop.
 Future<void> pumpPeek(
   WidgetTester tester,
   Widget child, {
