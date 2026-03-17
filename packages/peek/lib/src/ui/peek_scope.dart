@@ -2,18 +2,23 @@ import 'package:flutter/widgets.dart';
 
 import '../core/peek.dart';
 import 'peek_controller.dart';
+import 'peek_strings.dart';
 
-/// Hands the [PeekController] to the widgets below it.
+/// Hands the [PeekController] and the [PeekStrings] to the widgets below.
 ///
 /// [PeekScope.of] rebuilds its caller when the controller changes;
 /// [PeekScope.read] does not, which is what callbacks want.
 final class PeekScope extends InheritedNotifier<PeekController> {
-  /// Creates a scope over [controller].
+  /// Creates a scope over [controller], showing [strings].
   const PeekScope({
     required PeekController controller,
     required super.child,
+    this.strings = const PeekStrings(),
     super.key,
   }) : super(notifier: controller);
+
+  /// The words to show.
+  final PeekStrings strings;
 
   /// The controller above [context], rebuilding on every change.
   static PeekController of(BuildContext context) {
@@ -32,4 +37,15 @@ final class PeekScope extends InheritedNotifier<PeekController> {
 
   /// The instance the controller shows.
   static Peek peekOf(BuildContext context) => of(context).peek;
+
+  /// The words to show, without subscribing to the controller.
+  static PeekStrings stringsOf(BuildContext context) {
+    final scope = context.getInheritedWidgetOfExactType<PeekScope>();
+    assert(scope != null, 'No PeekScope found above this widget');
+    return scope!.strings;
+  }
+
+  @override
+  bool updateShouldNotify(PeekScope oldWidget) =>
+      strings != oldWidget.strings || super.updateShouldNotify(oldWidget);
 }
