@@ -36,13 +36,17 @@ final class PeekStatusChip extends StatelessWidget {
         children: [
           _Leading(entry: entry, color: color),
           const SizedBox(width: 5),
-          Text(
-            label,
-            style: theme.monoTextStyle.copyWith(
-              color: color,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              height: 1.2,
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.monoTextStyle.copyWith(
+                color: color,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                height: 1.2,
+              ),
             ),
           ),
         ],

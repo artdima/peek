@@ -139,20 +139,22 @@ final class PeekEntryTile extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          PeekStatusChip(entry),
-                          const SizedBox(height: 4),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              PeekDurationLabel(entry.duration),
-                              const SizedBox(width: 8),
-                              PeekSizeLabel(entry.responseSize),
-                            ],
-                          ),
-                        ],
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            PeekStatusChip(entry),
+                            const SizedBox(height: 4),
+                            Wrap(
+                              alignment: WrapAlignment.end,
+                              spacing: 8,
+                              children: [
+                                PeekDurationLabel(entry.duration),
+                                PeekSizeLabel(entry.responseSize),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
