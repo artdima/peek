@@ -52,6 +52,22 @@ jobs:
           files: coverage/lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
 
+  example:
+    name: Example app builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: .fvmrc
+          cache: true
+
+      - run: flutter pub get
+      - run: flutter build apk --debug
+        working-directory: example
+
   floor:
     name: Minimum Flutter (${{ matrix.package }})
     runs-on: ubuntu-latest

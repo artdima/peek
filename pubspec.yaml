@@ -6,6 +6,7 @@ environment:
   sdk: ^3.9.0
 
 workspace:
+  - example
   - packages/peek
 
 dev_dependencies:
