@@ -35,8 +35,9 @@ void main() {
       expect(theme.colorForEntry(e2), theme.clientError);
       expect(theme.colorForEntry(e6), theme.serverError);
       expect(theme.colorForEntry(e4), theme.pending);
-      expect(theme.colorForEntry(e5), theme.cancelled);
+      expect(theme.colorForEntry(e5), theme.failure);
       expect(theme.colorForEntry(cancelled), theme.cancelled);
+      expect(theme.failure, isNot(theme.cancelled));
 
       final failedWithStatus = e5.copyWith(
         response: PeekResponse(statusCode: 503),
@@ -157,6 +158,7 @@ void main() {
       final scheme = ColorScheme.fromSeed(seedColor: Colors.deepPurple);
       final derived = PeekTheme.fromColorScheme(scheme);
       expect(derived.serverError, scheme.error);
+      expect(derived.failure, scheme.error);
       expect(derived.redirect, scheme.primary);
       expect(derived.surface, scheme.surfaceContainerLowest);
       expect(derived.monoTextStyle.color, scheme.onSurface);

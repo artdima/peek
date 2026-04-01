@@ -80,6 +80,13 @@ void main() {
       expect(strings.elapsed(const Duration(milliseconds: 250)), '250 ms');
       expect(strings.truncatedBody(512, 5120), 'Showing 512 B of 5 KB');
       expect(strings.moreCharacters(12), '12 more characters');
+      expect(
+        strings.metrics(const Duration(milliseconds: 120), 179),
+        '120 ms · 179 B',
+      );
+      expect(strings.metrics(const Duration(seconds: 30), null), '30 s');
+      expect(strings.metrics(null, 0), isEmpty);
+      expect(strings.metrics(null, null), isEmpty);
     });
 
     test('describes an entry for a screen reader', () {

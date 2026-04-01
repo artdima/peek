@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/model/peek_entry.dart';
+import '../../core/model/peek_failure.dart';
 import '../../core/model/peek_status_class.dart';
 
 /// Colours, type and metrics Peek's widgets read.
@@ -23,6 +24,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     required this.serverError,
     required this.pending,
     required this.cancelled,
+    required this.failure,
     required this.methodColors,
     required this.monoTextStyle,
     required this.surface,
@@ -39,6 +41,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     serverError: const Color(0xFFEF4B3C),
     pending: const Color(0xFF8A8F98),
     cancelled: const Color(0xFF8A8F98),
+    failure: const Color(0xFFEF4B3C),
     methodColors: _methodColors(dark: false),
     monoTextStyle: _mono(const Color(0xFF16181D)),
     surface: const Color(0xFFF6F7F9),
@@ -55,6 +58,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     serverError: const Color(0xFFFF6B5E),
     pending: const Color(0xFF9BA1AA),
     cancelled: const Color(0xFF9BA1AA),
+    failure: const Color(0xFFFF6B5E),
     methodColors: _methodColors(dark: true),
     monoTextStyle: _mono(const Color(0xFFE6E8EB)),
     surface: const Color(0xFF16181D),
@@ -79,6 +83,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
             : PeekTheme.light();
     return base.copyWith(
       serverError: scheme.error,
+      failure: scheme.error,
       redirect: scheme.primary,
       surface: scheme.surfaceContainerLowest,
       monoTextStyle: base.monoTextStyle.copyWith(color: scheme.onSurface),
@@ -100,8 +105,11 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
   /// A call still in flight.
   final Color pending;
 
-  /// A call that failed or was cancelled.
+  /// A call the app cancelled on purpose.
   final Color cancelled;
+
+  /// A call that failed before a status could arrive.
+  final Color failure;
 
   /// Colour per HTTP method, keyed uppercase; unknown methods fall back to
   /// [pending].
@@ -134,11 +142,13 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
       };
 
   /// The colour standing for [entry]: its status, or the failure that
-  /// replaced it.
+  /// replaced it. A cancellation is not an error, so it stays neutral.
   Color colorForEntry(PeekEntry entry) {
     final statusClass = entry.statusClass;
     if (statusClass != null) return colorForStatusClass(statusClass);
-    return entry.state == PeekEntryState.failed ? cancelled : pending;
+    final kind = entry.failure?.kind;
+    if (kind == null) return pending;
+    return kind == PeekFailureKind.cancelled ? cancelled : failure;
   }
 
   /// The colour standing for [method], case-insensitively.
@@ -153,6 +163,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     Color? serverError,
     Color? pending,
     Color? cancelled,
+    Color? failure,
     Map<String, Color>? methodColors,
     TextStyle? monoTextStyle,
     Color? surface,
@@ -166,6 +177,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     serverError: serverError ?? this.serverError,
     pending: pending ?? this.pending,
     cancelled: cancelled ?? this.cancelled,
+    failure: failure ?? this.failure,
     methodColors: methodColors ?? this.methodColors,
     monoTextStyle: monoTextStyle ?? this.monoTextStyle,
     surface: surface ?? this.surface,
@@ -184,6 +196,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
       serverError: Color.lerp(serverError, other.serverError, t)!,
       pending: Color.lerp(pending, other.pending, t)!,
       cancelled: Color.lerp(cancelled, other.cancelled, t)!,
+      failure: Color.lerp(failure, other.failure, t)!,
       methodColors: {
         for (final name in {...methodColors.keys, ...other.methodColors.keys})
           name:

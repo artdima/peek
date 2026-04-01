@@ -36,7 +36,7 @@ void main() {
       expect(find.text('api.example.com'), findsOneWidget);
       expect(find.text('GET'), findsOneWidget);
       expect(find.text('200'), findsOneWidget);
-      expect(find.text('120 ms'), findsOneWidget);
+      expect(find.text('120 ms · 10 B'), findsOneWidget);
     });
 
     testWidgets('shows a slash for a bare host', (tester) async {
@@ -45,6 +45,17 @@ void main() {
       );
       await pumpTile(tester, PeekEntryTile(root));
       expect(find.text('/'), findsOneWidget);
+    });
+
+    testWidgets('leaves the metrics line out when nothing is known', (
+      tester,
+    ) async {
+      await pumpTile(tester, PeekEntryTile(e4));
+      expect(find.textContaining('—'), findsNothing);
+      expect(find.text('Pending'), findsOneWidget);
+
+      await pumpTile(tester, PeekEntryTile(e5));
+      expect(find.text('5 s'), findsOneWidget);
     });
 
     testWidgets('marks a pinned entry', (tester) async {

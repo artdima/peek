@@ -76,7 +76,11 @@ class _PeekScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.surface,
       appBar: AppBar(
+        backgroundColor: theme.surface,
+        surfaceTintColor: Colors.transparent,
         title: Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
           children: [
             Flexible(
               child: Text(strings.requests, overflow: TextOverflow.ellipsis),
@@ -90,7 +94,8 @@ class _PeekScaffold extends StatelessWidget {
                 ),
                 overflow: TextOverflow.ellipsis,
                 style: theme.monoTextStyle.copyWith(
-                  fontSize: 12,
+                  fontSize: 13,
+                  height: 1,
                   color: theme.monoTextStyle.color?.withValues(alpha: 0.6),
                 ),
               ),

@@ -64,9 +64,9 @@ class _Leading extends StatelessWidget {
   @override
   Widget build(BuildContext context) => switch (entry.state) {
     PeekEntryState.pending => SizedBox(
-      width: 9,
-      height: 9,
-      child: CircularProgressIndicator(strokeWidth: 1.6, color: color),
+      width: 11,
+      height: 11,
+      child: CircularProgressIndicator(strokeWidth: 2, color: color),
     ),
     PeekEntryState.failed => Icon(Icons.error_outline, size: 11, color: color),
     PeekEntryState.completed => Container(

@@ -241,6 +241,12 @@ class PeekStrings {
   /// A duration, formatted.
   String elapsed(Duration value) => formatDuration(value);
 
+  /// Duration and size as one line; empty when neither is known.
+  String metrics(Duration? duration, int? size) => [
+    if (duration != null) elapsed(duration),
+    if (size != null && size > 0) bytes(size),
+  ].join(' · ');
+
   /// Says a body was cut short.
   String truncatedBody(int shown, int total) =>
       'Showing ${formatBytes(shown)} of ${formatBytes(total)}';

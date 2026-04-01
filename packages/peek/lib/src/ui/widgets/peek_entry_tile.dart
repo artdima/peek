@@ -5,7 +5,6 @@ import '../../core/model/peek_entry.dart';
 import '../peek_scope.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
-import 'peek_labels.dart';
 import 'peek_method_badge.dart';
 import 'peek_status_chip.dart';
 
@@ -61,6 +60,7 @@ final class PeekEntryTile extends StatelessWidget {
     final accent = theme.colorForEntry(entry);
     final request = entry.request;
     final muted = theme.monoTextStyle.color?.withValues(alpha: 0.55);
+    final metrics = strings.metrics(entry.duration, entry.responseSize);
 
     return MergeSemantics(
       child: Semantics(
@@ -144,15 +144,18 @@ final class PeekEntryTile extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             PeekStatusChip(entry),
-                            const SizedBox(height: 4),
-                            Wrap(
-                              alignment: WrapAlignment.end,
-                              spacing: 8,
-                              children: [
-                                PeekDurationLabel(entry.duration),
-                                PeekSizeLabel(entry.responseSize),
-                              ],
-                            ),
+                            if (metrics.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                metrics,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.monoTextStyle.copyWith(
+                                  fontSize: 11,
+                                  color: muted,
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
