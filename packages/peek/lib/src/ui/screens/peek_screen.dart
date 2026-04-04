@@ -121,6 +121,7 @@ class _PeekScaffold extends StatelessWidget {
       body: Column(
         children: [
           if (controller.isPaused) _PausedBanner(strings: strings),
+          const PeekSearchBar(),
           Expanded(
             child: PeekEntryList(
               onTap: (entry) {},

@@ -5,6 +5,7 @@ import '../../core/model/peek_entry.dart';
 import '../peek_scope.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
+import 'peek_highlighted_text.dart';
 import 'peek_method_badge.dart';
 import 'peek_status_chip.dart';
 
@@ -35,6 +36,7 @@ final class PeekEntryTile extends StatelessWidget {
     this.onAction,
     this.selected = false,
     this.showShare = false,
+    this.highlight = '',
     super.key,
   });
 
@@ -52,6 +54,9 @@ final class PeekEntryTile extends StatelessWidget {
 
   /// Whether the menu offers sharing; hidden without a share delegate.
   final bool showShare;
+
+  /// Text the search matched, marked wherever it appears in the URL.
+  final String highlight;
 
   @override
   Widget build(BuildContext context) {
@@ -109,8 +114,9 @@ final class PeekEntryTile extends StatelessWidget {
                                 PeekMethodBadge(request.method),
                                 const SizedBox(width: 6),
                                 Expanded(
-                                  child: Text(
+                                  child: PeekHighlightedText(
                                     request.path.isEmpty ? '/' : request.path,
+                                    highlight: highlight,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: theme.monoTextStyle.copyWith(
@@ -126,8 +132,9 @@ final class PeekEntryTile extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 2),
-                            Text(
+                            PeekHighlightedText(
                               request.host,
+                              highlight: highlight,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.monoTextStyle.copyWith(

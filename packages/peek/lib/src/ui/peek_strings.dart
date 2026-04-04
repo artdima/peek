@@ -30,6 +30,9 @@ class PeekStrings {
   /// Label of the search field.
   String get search => 'Search';
 
+  /// Tooltip of the button that empties the search field.
+  String get clearSearch => 'Clear search';
+
   /// Tooltip of the filter button.
   String get filters => 'Filters';
 

@@ -218,6 +218,32 @@ void main() {
     });
   });
 
+  group('PeekHighlightedText', () {
+    testWidgets('stays a plain Text with nothing to mark', (tester) async {
+      await pumpWidgetInScope(tester, const PeekHighlightedText('/users'));
+      expect(find.text('/users'), findsOneWidget);
+      expect(tester.widget<Text>(find.byType(Text)).textSpan, isNull);
+    });
+
+    testWidgets('marks every match, ignoring case', (tester) async {
+      await pumpWidgetInScope(
+        tester,
+        const PeekHighlightedText('/Users/user', highlight: ' user '),
+      );
+
+      final span = tester.widget<Text>(find.byType(Text)).textSpan! as TextSpan;
+      final parts = span.children!.cast<TextSpan>();
+      expect(parts.map((part) => part.text), ['/', 'User', 's/', 'user']);
+
+      final context = tester.element(find.byType(PeekHighlightedText));
+      final marked = PeekTheme.of(context).highlight;
+      expect(
+        parts.where((part) => part.style?.backgroundColor == marked).length,
+        2,
+      );
+    });
+  });
+
   group('PeekEmptyState', () {
     testWidgets('shows a title, a message and an action', (tester) async {
       await pumpWidgetInScope(

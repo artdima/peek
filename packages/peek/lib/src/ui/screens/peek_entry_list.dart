@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/model/peek_entry.dart';
 import '../../core/model/peek_id.dart';
+import '../../core/query/peek_search_query.dart';
 import '../peek_scope.dart';
 import '../theme/peek_theme.dart';
 import '../widgets/widgets.dart';
@@ -56,6 +57,9 @@ class _PeekEntryListState extends State<PeekEntryList> {
     final strings = PeekScope.stringsOf(context);
     final theme = PeekTheme.of(context);
     final entries = controller.entries;
+    final search = controller.filter.query;
+    final highlight =
+        search.scopes.contains(PeekSearchScope.url) ? search.text : '';
 
     _trackArrivals(entries);
 
@@ -94,6 +98,7 @@ class _PeekEntryListState extends State<PeekEntryList> {
               key: ValueKey(entry.id),
               selected: entry.id == widget.selectedId,
               showShare: widget.showShare,
+              highlight: highlight,
               onTap: widget.onTap == null ? null : () => widget.onTap!(entry),
               onAction:
                   widget.onAction == null

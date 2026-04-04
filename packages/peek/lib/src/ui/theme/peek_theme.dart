@@ -25,6 +25,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     required this.pending,
     required this.cancelled,
     required this.failure,
+    required this.highlight,
     required this.methodColors,
     required this.monoTextStyle,
     required this.surface,
@@ -42,6 +43,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     pending: const Color(0xFF8A8F98),
     cancelled: const Color(0xFF8A8F98),
     failure: const Color(0xFFEF4B3C),
+    highlight: const Color(0xFFFFE9A8),
     methodColors: _methodColors(dark: false),
     monoTextStyle: _mono(const Color(0xFF16181D)),
     surface: const Color(0xFFF6F7F9),
@@ -59,6 +61,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     pending: const Color(0xFF9BA1AA),
     cancelled: const Color(0xFF9BA1AA),
     failure: const Color(0xFFFF6B5E),
+    highlight: const Color(0xFF5C4A14),
     methodColors: _methodColors(dark: true),
     monoTextStyle: _mono(const Color(0xFFE6E8EB)),
     surface: const Color(0xFF16181D),
@@ -110,6 +113,9 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
 
   /// A call that failed before a status could arrive.
   final Color failure;
+
+  /// The wash behind text a search matched.
+  final Color highlight;
 
   /// Colour per HTTP method, keyed uppercase; unknown methods fall back to
   /// [pending].
@@ -164,6 +170,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     Color? pending,
     Color? cancelled,
     Color? failure,
+    Color? highlight,
     Map<String, Color>? methodColors,
     TextStyle? monoTextStyle,
     Color? surface,
@@ -178,6 +185,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     pending: pending ?? this.pending,
     cancelled: cancelled ?? this.cancelled,
     failure: failure ?? this.failure,
+    highlight: highlight ?? this.highlight,
     methodColors: methodColors ?? this.methodColors,
     monoTextStyle: monoTextStyle ?? this.monoTextStyle,
     surface: surface ?? this.surface,
@@ -197,6 +205,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
       pending: Color.lerp(pending, other.pending, t)!,
       cancelled: Color.lerp(cancelled, other.cancelled, t)!,
       failure: Color.lerp(failure, other.failure, t)!,
+      highlight: Color.lerp(highlight, other.highlight, t)!,
       methodColors: {
         for (final name in {...methodColors.keys, ...other.methodColors.keys})
           name:

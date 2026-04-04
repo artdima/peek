@@ -59,6 +59,7 @@ void main() {
       expect(light.success, isNot(dark.success));
       expect(light.surface, isNot(dark.surface));
       expect(light.monoTextStyle.color, isNot(dark.monoTextStyle.color));
+      expect(light.highlight, isNot(dark.highlight));
       expect(dark.methodColors.keys, light.methodColors.keys);
       expect(dark.gutter, light.gutter);
       expect(light.monoTextStyle.fontFamily, 'monospace');

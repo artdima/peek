@@ -76,6 +76,30 @@ void main() {
       expect(find.byType(PeekEntryTile), findsNWidgets(3));
     });
 
+    testWidgets('filters the list from the search field', (tester) async {
+      await pumpScreen(tester, entries: fixtures);
+      await tester.enterText(find.byType(TextField), 'login');
+      await tester.pump(PeekController.searchDebounce);
+      await tester.pump();
+
+      expect(find.byType(PeekEntryTile), findsOneWidget);
+      expect(find.text('1 of 6'), findsOneWidget);
+    });
+
+    testWidgets('keeps the search field over an empty result', (tester) async {
+      await pumpScreen(tester, entries: fixtures);
+      await tester.enterText(find.byType(TextField), 'nothing-matches-this');
+      await tester.pump(PeekController.searchDebounce);
+      await tester.pump();
+
+      expect(find.text('Nothing matches'), findsOneWidget);
+      expect(find.byType(PeekSearchBar), findsOneWidget);
+
+      await tester.tap(find.text('Clear filters'));
+      await tester.pump();
+      expect(find.byType(PeekEntryTile), findsNWidgets(6));
+    });
+
     testWidgets('offers an empty state before anything arrives', (
       tester,
     ) async {
