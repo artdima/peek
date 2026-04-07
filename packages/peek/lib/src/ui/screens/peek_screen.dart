@@ -4,12 +4,14 @@ import 'package:flutter/services.dart';
 import '../../core/export/peek_exporters.dart';
 import '../../core/model/peek_entry.dart';
 import '../../core/peek.dart';
+import '../../core/query/peek_search_query.dart';
 import '../peek_controller.dart';
 import '../peek_scope.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
 import '../widgets/widgets.dart';
 import 'peek_entry_list.dart';
+import 'peek_filters_sheet.dart';
 
 /// The screen listing the calls Peek has recorded.
 ///
@@ -103,6 +105,7 @@ class _PeekScaffold extends StatelessWidget {
           ],
         ),
         actions: [
+          _FiltersButton(strings: strings),
           IconButton(
             onPressed: controller.togglePause,
             icon: Icon(controller.isPaused ? Icons.play_arrow : Icons.pause),
@@ -122,6 +125,7 @@ class _PeekScaffold extends StatelessWidget {
         children: [
           if (controller.isPaused) _PausedBanner(strings: strings),
           const PeekSearchBar(),
+          const PeekActiveFilters(),
           Expanded(
             child: PeekEntryList(
               onTap: (entry) {},
@@ -202,6 +206,31 @@ class _PeekScaffold extends StatelessWidget {
         content: Text(strings.copied),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+}
+
+class _FiltersButton extends StatelessWidget {
+  const _FiltersButton({required this.strings});
+
+  final PeekStrings strings;
+
+  @override
+  Widget build(BuildContext context) {
+    // The search has a field of its own, so it is not part of the badge.
+    final count =
+        PeekScope.of(
+          context,
+        ).filter.copyWith(query: PeekSearchQuery.none).activeCount;
+
+    return IconButton(
+      onPressed: () => showPeekFilters(context),
+      tooltip: strings.filters,
+      icon: Badge(
+        isLabelVisible: count > 0,
+        label: Text('$count'),
+        child: const Icon(Icons.filter_list),
       ),
     );
   }

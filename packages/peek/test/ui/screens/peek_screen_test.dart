@@ -100,6 +100,52 @@ void main() {
       expect(find.byType(PeekEntryTile), findsNWidgets(6));
     });
 
+    testWidgets('opens the filters sheet from the app bar', (tester) async {
+      await pumpScreen(tester, entries: fixtures);
+      await tester.tap(find.byTooltip('Filters'));
+      await settle(tester);
+
+      expect(find.byType(PeekFiltersSheet), findsOneWidget);
+      await tester.tap(find.widgetWithText(FilterChip, '4xx'));
+      await settle(tester);
+      expect(controller.entries, hasLength(1));
+    });
+
+    testWidgets('badges the filter button with what is set', (tester) async {
+      await pumpScreen(tester, entries: fixtures);
+      expect(tester.widget<Badge>(find.byType(Badge)).isLabelVisible, isFalse);
+
+      controller.filter = const PeekFilter(
+        onlyErrors: true,
+        methods: {'GET'},
+        query: PeekSearchQuery('users'),
+      );
+      await tester.pump();
+
+      final badge = tester.widget<Badge>(find.byType(Badge));
+      expect(badge.isLabelVisible, isTrue);
+      expect((badge.label! as Text).data, '2');
+    });
+
+    testWidgets('shows what is filtered as removable chips', (tester) async {
+      await pumpScreen(tester, entries: fixtures);
+      expect(find.byType(InputChip), findsNothing);
+
+      controller.filter = const PeekFilter(onlyErrors: true, methods: {'GET'});
+      await tester.pump();
+      expect(find.byType(InputChip), findsNWidgets(2));
+
+      await tester.tap(
+        find.descendant(
+          of: find.widgetWithText(InputChip, 'GET'),
+          matching: find.byIcon(Icons.close),
+        ),
+      );
+      await tester.pump();
+      expect(controller.filter.methods, isEmpty);
+      expect(controller.filter.onlyErrors, isTrue);
+    });
+
     testWidgets('offers an empty state before anything arrives', (
       tester,
     ) async {

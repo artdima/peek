@@ -24,6 +24,26 @@ final List<RegExp> _renderedText = [
 
 const Set<String> _exempt = {'peek_strings.dart'};
 
+/// The first quoted run on a line, without its quotes.
+final RegExp _literal = RegExp(r'''['"]((?:[^'"\\]|\\.)*)['"]''');
+
+/// Interpolations, which carry a value rather than a word.
+final List<RegExp> _interpolations = [RegExp(r'\$\{[^}]*\}'), RegExp(r'\$\w+')];
+
+/// Whether [line] renders text a translator would have to touch. A literal
+/// that is nothing but an interpolated value — a count, a status code —
+/// reads the same in every language.
+bool _rendersWords(String line) {
+  if (!_renderedText.any((pattern) => pattern.hasMatch(line))) return false;
+  final literal = _literal.firstMatch(line)?.group(1);
+  if (literal == null) return true;
+  final words = _interpolations.fold(
+    literal,
+    (rest, pattern) => rest.replaceAll(pattern, ''),
+  );
+  return RegExp('[a-zA-Z]').hasMatch(words);
+}
+
 List<String> literalsIn(File file) {
   final offenders = <String>[];
   var lineNumber = 0;
@@ -35,7 +55,7 @@ List<String> literalsIn(File file) {
         trimmed.contains('ignore: peek-literal')) {
       continue;
     }
-    if (_renderedText.any((pattern) => pattern.hasMatch(line))) {
+    if (_rendersWords(line)) {
       offenders.add('${file.path}:$lineNumber: $trimmed');
     }
   }
@@ -177,6 +197,7 @@ void main() {
           "Tooltip(message: 'Pin this'),",
           "Semantics(semanticsLabel: 'Loading'),",
           'Text(strings.requests),',
+          "Text('\$count'),",
         ].join('\n'),
       );
       final found = literalsIn(offender);
@@ -186,6 +207,7 @@ void main() {
       expect(found[2], endsWith("Semantics(semanticsLabel: 'Loading'),"));
       expect(found.join(), isNot(contains('strings.requests')));
       expect(found.join(), isNot(contains('monospace')));
+      expect(found.join(), isNot(contains(r'$count')));
     });
   });
 }

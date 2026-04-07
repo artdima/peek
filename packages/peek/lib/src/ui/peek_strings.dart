@@ -4,6 +4,8 @@ import '../core/internal/formatting.dart';
 import '../core/model/peek_body.dart';
 import '../core/model/peek_entry.dart';
 import '../core/model/peek_failure.dart';
+import '../core/model/peek_status_class.dart';
+import '../core/query/peek_filter.dart';
 import '../core/query/peek_search_query.dart';
 import '../core/query/peek_sort.dart';
 
@@ -146,6 +148,9 @@ class PeekStrings {
   /// Shown where a value is missing.
   String get none => '—';
 
+  /// The option of a range that matches anything.
+  String get any => 'Any';
+
   /// Shown when a section has no rows.
   String get empty => 'Empty';
 
@@ -226,6 +231,46 @@ class PeekStrings {
 
   /// Name of a sort direction.
   String get largestFirst => 'Largest first';
+
+  /// Names a status class as a filter option.
+  String statusClassName(PeekStatusClass statusClass) => switch (statusClass) {
+    PeekStatusClass.informational => '1xx',
+    PeekStatusClass.success => '2xx',
+    PeekStatusClass.redirect => '3xx',
+    PeekStatusClass.clientError => '4xx',
+    PeekStatusClass.serverError => '5xx',
+    PeekStatusClass.unknown => 'Other',
+  };
+
+  /// Names a window reaching back from now.
+  String recent(Duration window) =>
+      window.inMinutes < 60
+          ? 'Last ${window.inMinutes} min'
+          : 'Last ${window.inHours} h';
+
+  /// Names a range of durations.
+  String durationFilter(PeekDurationRange range) {
+    final min = range.min;
+    final max = range.max;
+    if (min == null && max == null) return any;
+    if (min == null) return 'Under ${elapsed(max!)}';
+    if (max == null) return 'Over ${elapsed(min)}';
+    return '${elapsed(min)} – ${elapsed(max)}';
+  }
+
+  /// Names a range of moments.
+  String dateFilter(PeekDateRange range) {
+    final from = range.from;
+    final to = range.to;
+    if (from == null && to == null) return any;
+    if (from == null) return 'Until ${clockTime(to!)}';
+    if (to == null) return 'Since ${clockTime(from)}';
+    return '${clockTime(from)} – ${clockTime(to)}';
+  }
+
+  /// A moment as hours and minutes on a 24-hour clock.
+  String clockTime(DateTime moment) =>
+      '${_twoDigits(moment.hour)}:${_twoDigits(moment.minute)}';
 
   /// The count shown next to the title.
   String requestCount(int shown, int total) =>
@@ -323,4 +368,6 @@ class PeekStrings {
       if (entry.isPinned) pinnedOnly,
     ].join(', ');
   }
+
+  static String _twoDigits(int value) => value.toString().padLeft(2, '0');
 }
