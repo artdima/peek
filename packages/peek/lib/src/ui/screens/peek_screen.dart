@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -11,6 +13,8 @@ import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
 import '../widgets/widgets.dart';
 import 'peek_entry_list.dart';
+import 'peek_entry_screen.dart';
+import 'peek_entry_view.dart';
 import 'peek_filters_sheet.dart';
 
 /// The screen listing the calls Peek has recorded.
@@ -40,6 +44,9 @@ final class PeekScreen extends StatefulWidget {
   /// A controller to use instead of one created here.
   final PeekController? controller;
 
+  /// The width from which the list and the call sit side by side.
+  static const double wideLayout = 720;
+
   @override
   State<PeekScreen> createState() => _PeekScreenState();
 }
@@ -65,6 +72,9 @@ class _PeekScreenState extends State<PeekScreen> {
     child: const _PeekScaffold(),
   );
 }
+
+/// How much of a wide layout the list keeps for itself.
+const double _listPaneWidth = 360;
 
 class _PeekScaffold extends StatelessWidget {
   const _PeekScaffold();
@@ -121,28 +131,64 @@ class _PeekScaffold extends StatelessWidget {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          if (controller.isPaused) _PausedBanner(strings: strings),
-          const PeekSearchBar(),
-          const PeekQuickBar(),
-          const PeekActiveFilters(),
-          Expanded(
-            child: PeekEntryList(
-              onTap: (entry) {},
-              onAction:
-                  (entry, action) => _handleAction(
-                    context,
-                    controller,
-                    strings,
-                    entry,
-                    action,
-                  ),
-            ),
-          ),
-        ],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= PeekScreen.wideLayout;
+          final list = _list(context, controller, strings, wide: wide);
+          if (!wide) return list;
+
+          return Row(
+            children: [
+              SizedBox(width: _listPaneWidth, child: list),
+              VerticalDivider(
+                width: 1,
+                thickness: 1,
+                color: theme.monoTextStyle.color?.withValues(alpha: 0.08),
+              ),
+              Expanded(child: _detail(controller, strings)),
+            ],
+          );
+        },
       ),
     );
+  }
+
+  Widget _list(
+    BuildContext context,
+    PeekController controller,
+    PeekStrings strings, {
+    required bool wide,
+  }) => Column(
+    children: [
+      if (controller.isPaused) _PausedBanner(strings: strings),
+      const PeekSearchBar(),
+      const PeekQuickBar(),
+      const PeekActiveFilters(),
+      Expanded(
+        child: PeekEntryList(
+          selectedId: wide ? controller.selectedId : null,
+          onTap: (entry) {
+            controller.select(entry.id);
+            if (!wide) unawaited(showPeekEntry(context, entry.id));
+          },
+          onAction:
+              (entry, action) =>
+                  _handleAction(context, controller, strings, entry, action),
+        ),
+      ),
+    ],
+  );
+
+  Widget _detail(PeekController controller, PeekStrings strings) {
+    final entry = controller.selected;
+    if (entry == null) {
+      return PeekEmptyState(
+        title: strings.noSelection,
+        message: strings.noSelectionHint,
+        icon: Icons.touch_app_outlined,
+      );
+    }
+    return PeekEntryView(entry, key: ValueKey(entry.id));
   }
 
   Future<void> _confirmClear(

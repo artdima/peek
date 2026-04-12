@@ -88,6 +88,18 @@ class PeekStrings {
   /// What to do about that.
   String get noMatchesHint => 'Try a different search or clear the filters.';
 
+  /// Empty detail pane, before a call is picked.
+  String get noSelection => 'Nothing selected';
+
+  /// What to do about it.
+  String get noSelectionHint => 'Pick a request to see it here.';
+
+  /// Shown in place of a call that is no longer recorded.
+  String get removedEntry => 'This request is gone';
+
+  /// What happened to it.
+  String get removedEntryHint => 'It was cleared from the list.';
+
   /// Button that clears every filter.
   String get resetFilters => 'Clear filters';
 
