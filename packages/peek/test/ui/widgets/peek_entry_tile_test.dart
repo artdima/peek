@@ -217,7 +217,7 @@ class _TileList extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
     return ColoredBox(
-      color: theme.surface,
+      color: theme.background,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

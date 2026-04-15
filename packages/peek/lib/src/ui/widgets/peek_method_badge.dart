@@ -24,11 +24,9 @@ final class PeekMethodBadge extends StatelessWidget {
         method.toUpperCase(),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: theme.monoTextStyle.copyWith(
+        style: theme.caption.copyWith(
           color: color,
-          fontSize: 11,
           fontWeight: FontWeight.w700,
-          height: 1.2,
         ),
       ),
     );

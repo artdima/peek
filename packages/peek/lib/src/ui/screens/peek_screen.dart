@@ -86,9 +86,9 @@ class _PeekScaffold extends StatelessWidget {
     final theme = PeekTheme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.surface,
+      backgroundColor: theme.background,
       appBar: AppBar(
-        backgroundColor: theme.surface,
+        backgroundColor: theme.background,
         surfaceTintColor: Colors.transparent,
         title: Row(
           crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -105,10 +105,9 @@ class _PeekScaffold extends StatelessWidget {
                   controller.totalCount,
                 ),
                 overflow: TextOverflow.ellipsis,
-                style: theme.monoTextStyle.copyWith(
-                  fontSize: 13,
+                style: theme.footnote.copyWith(
                   height: 1,
-                  color: theme.monoTextStyle.color?.withValues(alpha: 0.6),
+                  color: theme.secondaryLabel,
                 ),
               ),
             ),
@@ -140,11 +139,7 @@ class _PeekScaffold extends StatelessWidget {
           return Row(
             children: [
               SizedBox(width: _listPaneWidth, child: list),
-              VerticalDivider(
-                width: 1,
-                thickness: 1,
-                color: theme.monoTextStyle.color?.withValues(alpha: 0.08),
-              ),
+              VerticalDivider(width: 1, thickness: 1, color: theme.separator),
               Expanded(child: _detail(controller, strings)),
             ],
           );
@@ -301,10 +296,7 @@ class _PausedBanner extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             strings.pausedBanner,
-            style: theme.monoTextStyle.copyWith(
-              fontSize: 11,
-              color: theme.pending,
-            ),
+            style: theme.caption.copyWith(color: theme.pending),
           ),
         ],
       ),

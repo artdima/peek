@@ -28,12 +28,8 @@ final class PeekKeyValueRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
-    final nameStyle = theme.monoTextStyle.copyWith(
-      fontSize: 12,
-      color: theme.monoTextStyle.color?.withValues(alpha: 0.6),
-    );
-    final valueStyle = theme.monoTextStyle.copyWith(
-      fontSize: 12,
+    final nameStyle = theme.footnote.copyWith(color: theme.secondaryLabel);
+    final valueStyle = theme.mono.copyWith(
       fontWeight: emphasised ? FontWeight.w700 : FontWeight.w400,
     );
 
@@ -72,11 +68,10 @@ final class PeekSectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
-    final style = theme.monoTextStyle.copyWith(
-      fontSize: 11,
+    final style = theme.caption.copyWith(
       fontWeight: FontWeight.w700,
       letterSpacing: 0.6,
-      color: theme.monoTextStyle.color?.withValues(alpha: 0.5),
+      color: theme.secondaryLabel,
     );
 
     return Padding(

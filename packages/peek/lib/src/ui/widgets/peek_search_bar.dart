@@ -80,7 +80,7 @@ class _PeekSearchBarState extends State<PeekSearchBar> {
     final controller = PeekScope.of(context);
     final strings = PeekScope.stringsOf(context);
     final theme = PeekTheme.of(context);
-    final muted = theme.monoTextStyle.color?.withValues(alpha: 0.55);
+    final muted = theme.secondaryLabel;
     final hasText = controller.searchText.isNotEmpty;
 
     return Padding(
@@ -93,17 +93,14 @@ class _PeekSearchBarState extends State<PeekSearchBar> {
             focusNode: _focus,
             autofocus: widget.autofocus,
             textInputAction: TextInputAction.search,
-            style: theme.monoTextStyle.copyWith(fontSize: 13),
+            style: theme.body,
             onChanged: controller.searchFor,
             decoration: InputDecoration(
               isDense: true,
               filled: true,
-              fillColor: theme.monoTextStyle.color?.withValues(alpha: 0.06),
+              fillColor: theme.fill,
               hintText: strings.search,
-              hintStyle: theme.monoTextStyle.copyWith(
-                fontSize: 13,
-                color: muted,
-              ),
+              hintStyle: theme.body.copyWith(color: muted),
               prefixIcon: Icon(Icons.search, size: 18, color: muted),
               prefixIconConstraints: const BoxConstraints(
                 minWidth: 38,

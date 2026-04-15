@@ -86,11 +86,8 @@ class _PeekEntryListState extends State<PeekEntryList> {
           controller: _scroll,
           itemCount: entries.length,
           separatorBuilder:
-              (context, index) => Divider(
-                height: 1,
-                thickness: 1,
-                color: theme.monoTextStyle.color?.withValues(alpha: 0.08),
-              ),
+              (context, index) =>
+                  Divider(height: 1, thickness: 1, color: theme.separator),
           itemBuilder: (context, index) {
             final entry = entries[index];
             return PeekEntryTile(
@@ -168,7 +165,7 @@ class _NewRequestsButton extends StatelessWidget {
     return Material(
       elevation: 3,
       borderRadius: BorderRadius.circular(20),
-      color: Theme.of(context).colorScheme.inverseSurface,
+      color: PeekTheme.of(context).accent,
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
         onTap: onPressed,
@@ -177,18 +174,17 @@ class _NewRequestsButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              const Icon(
                 Icons.arrow_upward,
                 size: 14,
-                color: Theme.of(context).colorScheme.onInverseSurface,
+                color: Color(0xFFFFFFFF),
               ),
               const SizedBox(width: 6),
               Text(
                 strings.newRequests(count),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Theme.of(context).colorScheme.onInverseSurface,
-                ),
+                style: PeekTheme.of(
+                  context,
+                ).footnote.copyWith(color: const Color(0xFFFFFFFF)),
               ),
             ],
           ),

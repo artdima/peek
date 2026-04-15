@@ -39,7 +39,7 @@ final class PeekCopyButton extends StatelessWidget {
       constraints:
           dense ? const BoxConstraints(minWidth: 32, minHeight: 32) : null,
       tooltip: tooltip ?? strings.copy,
-      color: theme.monoTextStyle.color?.withValues(alpha: 0.7),
+      color: theme.secondaryLabel,
     );
   }
 

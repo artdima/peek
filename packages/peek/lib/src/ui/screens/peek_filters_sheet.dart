@@ -52,12 +52,7 @@ final class PeekFiltersSheet extends StatelessWidget {
           children: [
             Row(
               children: [
-                Expanded(
-                  child: Text(
-                    strings.filters,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ),
+                Expanded(child: Text(strings.filters, style: theme.headline)),
                 TextButton(
                   onPressed: filter.isEmpty ? null : controller.resetFilter,
                   child: Text(strings.resetFilters),
@@ -308,10 +303,7 @@ class _Section extends StatelessWidget {
           if (title != null)
             Text(
               title,
-              style: theme.monoTextStyle.copyWith(
-                fontSize: 11,
-                color: theme.monoTextStyle.color?.withValues(alpha: 0.55),
-              ),
+              style: theme.caption.copyWith(color: theme.secondaryLabel),
             ),
           Wrap(spacing: 6, children: children),
         ],
@@ -356,10 +348,7 @@ class _FacetChip extends StatelessWidget {
             const SizedBox(width: 5),
             Text(
               '$count',
-              style: theme.monoTextStyle.copyWith(
-                fontSize: 10,
-                color: theme.monoTextStyle.color?.withValues(alpha: 0.55),
-              ),
+              style: theme.caption.copyWith(color: theme.secondaryLabel),
             ),
           ],
         ],

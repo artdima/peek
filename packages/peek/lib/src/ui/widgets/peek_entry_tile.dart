@@ -64,7 +64,7 @@ final class PeekEntryTile extends StatelessWidget {
     final strings = PeekScope.stringsOf(context);
     final accent = theme.colorForEntry(entry);
     final request = entry.request;
-    final muted = theme.monoTextStyle.color?.withValues(alpha: 0.55);
+    final muted = theme.secondaryLabel;
     final metrics = strings.metrics(entry.duration, entry.responseSize);
 
     return MergeSemantics(
@@ -119,10 +119,7 @@ final class PeekEntryTile extends StatelessWidget {
                                     highlight: highlight,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: theme.monoTextStyle.copyWith(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: theme.headline,
                                   ),
                                 ),
                                 if (entry.isPinned) ...[
@@ -137,10 +134,7 @@ final class PeekEntryTile extends StatelessWidget {
                               highlight: highlight,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: theme.monoTextStyle.copyWith(
-                                fontSize: 11,
-                                color: muted,
-                              ),
+                              style: theme.caption.copyWith(color: muted),
                             ),
                           ],
                         ),
@@ -157,10 +151,7 @@ final class PeekEntryTile extends StatelessWidget {
                                 metrics,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: theme.monoTextStyle.copyWith(
-                                  fontSize: 11,
-                                  color: muted,
-                                ),
+                                style: theme.caption.copyWith(color: muted),
                               ),
                             ],
                           ],

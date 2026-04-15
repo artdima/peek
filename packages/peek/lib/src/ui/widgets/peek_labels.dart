@@ -84,8 +84,5 @@ final class PeekTimeLabel extends StatelessWidget {
 
 TextStyle _secondaryStyle(BuildContext context) {
   final theme = PeekTheme.of(context);
-  return theme.monoTextStyle.copyWith(
-    fontSize: 11,
-    color: theme.monoTextStyle.color?.withValues(alpha: 0.6),
-  );
+  return theme.caption.copyWith(color: theme.secondaryLabel);
 }

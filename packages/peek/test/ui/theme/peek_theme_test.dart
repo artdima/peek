@@ -1,9 +1,26 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peek/peek.dart';
 
 import '../../support/entries.dart';
 import '../../support/pump.dart';
+
+/// Widgets must take their colours from [PeekTheme], not from the app's
+/// Material theme: Peek looks the same wherever it is embedded.
+List<String> materialThemeUses(File file) {
+  final pattern = RegExp(r'(?<!Peek)Theme\.of\(');
+  final offenders = <String>[];
+  var lineNumber = 0;
+  for (final line in file.readAsLinesSync()) {
+    lineNumber++;
+    if (pattern.hasMatch(line)) {
+      offenders.add('${file.path}:$lineNumber: ${line.trim()}');
+    }
+  }
+  return offenders;
+}
 
 void main() {
   group('PeekTheme', () {
@@ -57,12 +74,15 @@ void main() {
       final light = PeekTheme.light();
       final dark = PeekTheme.dark();
       expect(light.success, isNot(dark.success));
-      expect(light.surface, isNot(dark.surface));
-      expect(light.monoTextStyle.color, isNot(dark.monoTextStyle.color));
+      expect(light.background, isNot(dark.background));
+      expect(light.card, isNot(dark.card));
+      expect(light.label, isNot(dark.label));
       expect(light.highlight, isNot(dark.highlight));
       expect(dark.methodColors.keys, light.methodColors.keys);
       expect(dark.gutter, light.gutter);
-      expect(light.monoTextStyle.fontFamily, 'monospace');
+      expect(light.mono.fontFamily, 'monospace');
+      expect(light.body.fontFamily, isNull);
+      expect(light.largeTitle.fontSize, greaterThan(light.body.fontSize!));
     });
 
     test('copies with replaced values', () {
@@ -124,46 +144,81 @@ void main() {
     });
 
     for (final brightness in Brightness.values) {
-      testWidgets('derives a ${brightness.name} theme from the app colours', (
-        tester,
-      ) async {
+      testWidgets('takes only the brightness from the app in '
+          '${brightness.name}', (tester) async {
         late PeekTheme derived;
-        late ColorScheme scheme;
         await pumpPeek(
           tester,
           Builder(
             builder: (context) {
               derived = PeekTheme.of(context);
-              scheme = Theme.of(context).colorScheme;
               return const SizedBox();
             },
           ),
           brightness: brightness,
         );
 
-        final expected =
-            brightness == Brightness.dark
-                ? PeekTheme.dark()
-                : PeekTheme.light();
-        expect(scheme.brightness, brightness);
+        final expected = PeekTheme.fromBrightness(brightness);
+        expect(derived.background, expected.background);
+        expect(derived.accent, expected.accent);
         expect(derived.success, expected.success);
-        expect(derived.clientError, expected.clientError);
-        expect(derived.serverError, scheme.error);
-        expect(derived.redirect, scheme.primary);
-        expect(derived.surface, scheme.surfaceContainerLowest);
-        expect(derived.monoTextStyle.color, scheme.onSurface);
+        expect(derived.label, expected.label);
       });
     }
 
-    test('borrows error, primary and surface from a scheme', () {
+    testWidgets('none of the app colours reach it', (tester) async {
+      late PeekTheme derived;
+      await pumpPeek(
+        tester,
+        Builder(
+          builder: (context) {
+            derived = PeekTheme.of(context);
+            return const SizedBox();
+          },
+        ),
+        theme: ThemeData(colorSchemeSeed: Colors.deepPurple),
+      );
+
       final scheme = ColorScheme.fromSeed(seedColor: Colors.deepPurple);
-      final derived = PeekTheme.fromColorScheme(scheme);
-      expect(derived.serverError, scheme.error);
-      expect(derived.failure, scheme.error);
-      expect(derived.redirect, scheme.primary);
-      expect(derived.surface, scheme.surfaceContainerLowest);
-      expect(derived.monoTextStyle.color, scheme.onSurface);
-      expect(derived.success, PeekTheme.light().success);
+      expect(derived.accent, isNot(scheme.primary));
+      expect(derived.serverError, isNot(scheme.error));
+      expect(derived.background, PeekTheme.light().background);
+    });
+  });
+
+  group('widget code', () {
+    test('reads its colours from PeekTheme alone', () {
+      final directory = Directory('lib/src/ui');
+      expect(directory.existsSync(), isTrue);
+
+      final offenders = [
+        for (final entity in directory.listSync(recursive: true))
+          if (entity is File &&
+              entity.path.endsWith('.dart') &&
+              !entity.path.endsWith('peek_theme.dart'))
+            ...materialThemeUses(entity),
+      ];
+      expect(
+        offenders,
+        isEmpty,
+        reason: 'Read these from PeekTheme instead:\n${offenders.join('\n')}',
+      );
+    });
+
+    test('the scan finds a planted read', () {
+      final directory = Directory.systemTemp.createTempSync('peek_theme');
+      addTearDown(() => directory.deleteSync(recursive: true));
+      final offender = File('${directory.path}/widget.dart')..writeAsStringSync(
+        [
+          'final theme = PeekTheme.of(context);',
+          'final scheme = Theme.of(context).colorScheme;',
+          'style: Theme.of(context).textTheme.titleMedium,',
+        ].join('\n'),
+      );
+
+      final found = materialThemeUses(offender);
+      expect(found, hasLength(2));
+      expect(found.join(), isNot(contains('PeekTheme.of')));
     });
   });
 
@@ -174,7 +229,7 @@ void main() {
           tester,
           const _Palette(),
           brightness: brightness,
-          size: const Size(320, 440),
+          size: const Size(320, 640),
         );
         expect(tester.takeException(), isNull);
         await expectGolden(find.byType(_Palette), 'palette-${brightness.name}');
@@ -198,7 +253,7 @@ class _Palette extends StatelessWidget {
       ...theme.methodColors,
     };
     return ColoredBox(
-      color: theme.surface,
+      color: theme.background,
       child: Padding(
         padding: EdgeInsets.all(theme.gutter),
         child: Column(
@@ -219,10 +274,20 @@ class _Palette extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Text(key, style: theme.monoTextStyle),
+                    Text(key, style: theme.body),
                   ],
                 ),
               ),
+            for (final MapEntry(:key, :value)
+                in <String, TextStyle>{
+                  'largeTitle': theme.largeTitle,
+                  'headline': theme.headline,
+                  'body': theme.body,
+                  'footnote': theme.footnote,
+                  'caption': theme.caption,
+                  'mono': theme.mono,
+                }.entries)
+              Text(key, style: value),
           ],
         ),
       ),

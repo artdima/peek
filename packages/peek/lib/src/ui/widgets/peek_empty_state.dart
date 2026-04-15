@@ -28,7 +28,7 @@ final class PeekEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
-    final muted = theme.monoTextStyle.color?.withValues(alpha: 0.55);
+    final muted = theme.secondaryLabel;
 
     return Center(
       child: Padding(
@@ -38,19 +38,12 @@ final class PeekEmptyState extends StatelessWidget {
           children: [
             Icon(icon, size: 40, color: muted),
             SizedBox(height: theme.gutter),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: theme.monoTextStyle.copyWith(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+            Text(title, textAlign: TextAlign.center, style: theme.headline),
             SizedBox(height: theme.rowSpacing / 2),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: theme.monoTextStyle.copyWith(fontSize: 12, color: muted),
+              style: theme.footnote.copyWith(color: muted),
             ),
             if (action case final widget?) ...[
               SizedBox(height: theme.gutter),

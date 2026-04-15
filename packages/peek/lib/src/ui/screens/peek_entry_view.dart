@@ -47,13 +47,7 @@ final class PeekEntryView extends StatelessWidget {
             ],
           ),
         ),
-        SelectableText(
-          url,
-          style: theme.monoTextStyle.copyWith(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        SelectableText(url, style: theme.headline),
         Align(
           alignment: Alignment.centerLeft,
           child: PeekCopyButton(text: url),
