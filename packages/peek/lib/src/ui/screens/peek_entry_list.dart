@@ -85,9 +85,7 @@ class _PeekEntryListState extends State<PeekEntryList> {
         ListView.separated(
           controller: _scroll,
           itemCount: entries.length,
-          separatorBuilder:
-              (context, index) =>
-                  Divider(height: 1, thickness: 1, color: theme.separator),
+          separatorBuilder: (context, index) => const PeekSeparator(),
           itemBuilder: (context, index) {
             final entry = entries[index];
             return PeekEntryTile(

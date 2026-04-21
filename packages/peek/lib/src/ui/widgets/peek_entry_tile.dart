@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' show Icons, PopupMenuItem, showMenu;
+import 'package:flutter/widgets.dart';
 
 import '../../core/export/peek_exporters.dart';
 import '../../core/model/peek_entry.dart';
@@ -6,8 +7,8 @@ import '../peek_scope.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
 import 'peek_highlighted_text.dart';
-import 'peek_method_badge.dart';
-import 'peek_status_chip.dart';
+import 'peek_status_dot.dart';
+import 'peek_tappable.dart';
 
 /// What a long press on a tile offers.
 enum PeekTileAction {
@@ -26,8 +27,9 @@ enum PeekTileAction {
 
 /// One network call as a row of the list.
 ///
-/// The path carries the meaning, so it is the largest thing here; the host
-/// sits under it, and the outcome, timing and size line up on the right.
+/// Three lines, in the order a reader needs them: how it ended, what was
+/// asked, and of whom. The outcome leads, coloured and dotted, because
+/// that is what the eye scans a log for.
 final class PeekEntryTile extends StatelessWidget {
   /// Creates a tile for [entry].
   const PeekEntryTile(
@@ -64,7 +66,6 @@ final class PeekEntryTile extends StatelessWidget {
     final strings = PeekScope.stringsOf(context);
     final accent = theme.colorForEntry(entry);
     final request = entry.request;
-    final muted = theme.secondaryLabel;
     final metrics = strings.metrics(entry.duration, entry.responseSize);
 
     return MergeSemantics(
@@ -72,94 +73,101 @@ final class PeekEntryTile extends StatelessWidget {
         label: strings.entrySemantics(entry),
         button: onTap != null,
         selected: selected ? true : null,
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            onTap: onTap,
-            onLongPress:
-                onAction == null ? null : () => _showMenu(context, strings),
-            child: ExcludeSemantics(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color:
-                      selected
-                          ? accent.withValues(alpha: 0.12)
-                          : entry.isError
-                          ? accent.withValues(alpha: 0.06)
-                          : null,
-                  border: Border(
-                    left: BorderSide(
-                      color:
-                          selected || entry.isError
-                              ? accent
-                              : Colors.transparent,
-                      width: 3,
-                    ),
-                  ),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: theme.gutter,
-                    vertical: theme.rowSpacing,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+        child: PeekTappable(
+          onTap: onTap,
+          onLongPress:
+              onAction == null ? null : () => _showMenu(context, strings),
+          selected: selected,
+          child: ExcludeSemantics(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: theme.gutter,
+                vertical: 9,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
+                      PeekStatusDot(accent),
+                      const SizedBox(width: 7),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
                           children: [
-                            Row(
-                              children: [
-                                PeekMethodBadge(request.method),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: PeekHighlightedText(
-                                    request.path.isEmpty ? '/' : request.path,
-                                    highlight: highlight,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.headline,
+                            Flexible(
+                              child: Text(
+                                strings.outcome(entry),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.footnote.copyWith(
+                                  color: accent,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            if (metrics.isNotEmpty)
+                              Flexible(
+                                child: Text(
+                                  ' · $metrics',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.footnote.copyWith(
+                                    color: theme.secondaryLabel,
                                   ),
                                 ),
-                                if (entry.isPinned) ...[
-                                  const SizedBox(width: 6),
-                                  Icon(Icons.push_pin, size: 12, color: muted),
-                                ],
-                              ],
-                            ),
-                            const SizedBox(height: 2),
-                            PeekHighlightedText(
-                              request.host,
-                              highlight: highlight,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.caption.copyWith(color: muted),
-                            ),
+                              ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 8),
                       Flexible(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            PeekStatusChip(entry),
-                            if (metrics.isNotEmpty) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                metrics,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.caption.copyWith(color: muted),
-                              ),
-                            ],
-                          ],
+                        child: Text(
+                          strings.timestamp(entry.startedAt),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.caption.copyWith(
+                            color: theme.tertiaryLabel,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 3),
+                  Row(
+                    children: [
+                      Text(
+                        request.method.toUpperCase(),
+                        style: theme.body.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: PeekHighlightedText(
+                          request.path.isEmpty ? '/' : request.path,
+                          highlight: highlight,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.body,
+                        ),
+                      ),
+                      if (entry.isPinned) ...[
+                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.push_pin,
+                          size: 12,
+                          color: theme.tertiaryLabel,
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 1),
+                  PeekHighlightedText(
+                    request.host,
+                    highlight: highlight,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.footnote.copyWith(color: theme.secondaryLabel),
+                  ),
+                ],
               ),
             ),
           ),

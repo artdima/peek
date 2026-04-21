@@ -28,15 +28,34 @@ void main() {
   }
 
   group('PeekEntryTile', () {
-    testWidgets('leads with the path and puts the host under it', (
+    testWidgets('leads with the outcome, then the call, then the host', (
       tester,
     ) async {
       await pumpTile(tester, PeekEntryTile(e1));
+      expect(find.text('200'), findsOneWidget);
+      expect(find.text(' · 10 B · 120 ms'), findsOneWidget);
+      expect(find.text('GET'), findsOneWidget);
       expect(find.text('/users'), findsOneWidget);
       expect(find.text('api.example.com'), findsOneWidget);
-      expect(find.text('GET'), findsOneWidget);
-      expect(find.text('200'), findsOneWidget);
-      expect(find.text('120 ms · 10 B'), findsOneWidget);
+      expect(find.text('12:00:00.000'), findsOneWidget);
+
+      final context = tester.element(find.text('200'));
+      final theme = PeekTheme.of(context);
+      expect(tester.widget<Text>(find.text('200')).style?.color, theme.success);
+      expect(
+        tester.widget<PeekStatusDot>(find.byType(PeekStatusDot)).color,
+        theme.success,
+      );
+    });
+
+    testWidgets('gives the code the reason the server sent with it', (
+      tester,
+    ) async {
+      final withReason = e1.copyWith(
+        response: e1.response!.copyWith(statusMessage: 'OK'),
+      );
+      await pumpTile(tester, PeekEntryTile(withReason));
+      expect(find.text('200 OK'), findsOneWidget);
     });
 
     testWidgets('shows a slash for a bare host', (tester) async {
@@ -47,15 +66,25 @@ void main() {
       expect(find.text('/'), findsOneWidget);
     });
 
-    testWidgets('leaves the metrics line out when nothing is known', (
-      tester,
-    ) async {
+    testWidgets('leaves the metrics out when nothing is known', (tester) async {
       await pumpTile(tester, PeekEntryTile(e4));
       expect(find.textContaining('—'), findsNothing);
+      expect(find.textContaining(' · '), findsNothing);
       expect(find.text('Pending'), findsOneWidget);
+    });
 
+    testWidgets('names what stopped a call that never got a status', (
+      tester,
+    ) async {
       await pumpTile(tester, PeekEntryTile(e5));
-      expect(find.text('5 s'), findsOneWidget);
+      expect(find.text('Timed out'), findsOneWidget);
+      expect(find.text(' · 5 s'), findsOneWidget);
+
+      final context = tester.element(find.text('Timed out'));
+      expect(
+        tester.widget<Text>(find.text('Timed out')).style?.color,
+        PeekTheme.of(context).failure,
+      );
     });
 
     testWidgets('marks a pinned entry', (tester) async {
@@ -66,16 +95,19 @@ void main() {
       expect(find.byIcon(Icons.push_pin), findsOneWidget);
     });
 
-    testWidgets('tints errors and the selected row', (tester) async {
-      await pumpTile(tester, PeekEntryTile(e1));
-      expect(_tintOf(tester), isNull);
+    testWidgets('washes the selected row and nothing else', (tester) async {
+      final wash = find.descendant(
+        of: find.byType(PeekTappable),
+        matching: find.byType(ColoredBox),
+      );
 
-      await pumpTile(tester, PeekEntryTile(e6));
-      final errorTint = _tintOf(tester);
-      expect(errorTint, isNotNull);
+      await pumpTile(tester, PeekEntryTile(e6, onTap: () {}));
+      expect(wash, findsNothing);
 
-      await pumpTile(tester, PeekEntryTile(e6, selected: true));
-      expect(_tintOf(tester)?.a, greaterThan(errorTint!.a));
+      await pumpTile(tester, PeekEntryTile(e6, onTap: () {}, selected: true));
+      expect(wash, findsOneWidget);
+      final context = tester.element(find.byType(PeekEntryTile));
+      expect(tester.widget<ColoredBox>(wash).color, PeekTheme.of(context).fill);
     });
 
     testWidgets('calls back on tap', (tester) async {
@@ -196,18 +228,6 @@ void main() {
       });
     }
   });
-}
-
-Color? _tintOf(WidgetTester tester) {
-  final decorated = tester.widget<DecoratedBox>(
-    find
-        .descendant(
-          of: find.byType(ExcludeSemantics),
-          matching: find.byType(DecoratedBox),
-        )
-        .first,
-  );
-  return (decorated.decoration as BoxDecoration).color;
 }
 
 class _TileList extends StatelessWidget {

@@ -102,11 +102,37 @@ void main() {
       expect(strings.moreCharacters(12), '12 more characters');
       expect(
         strings.metrics(const Duration(milliseconds: 120), 179),
-        '120 ms · 179 B',
+        '179 B · 120 ms',
       );
       expect(strings.metrics(const Duration(seconds: 30), null), '30 s');
       expect(strings.metrics(null, 0), isEmpty);
       expect(strings.metrics(null, null), isEmpty);
+    });
+
+    test('names how a call ended', () {
+      const strings = PeekStrings();
+      expect(strings.outcome(e1), '200');
+      expect(
+        strings.outcome(
+          e1.copyWith(response: e1.response!.copyWith(statusMessage: 'OK')),
+        ),
+        '200 OK',
+      );
+      expect(strings.outcome(e4), 'Pending');
+      expect(strings.outcome(e5), 'Timed out');
+      expect(strings.outcome(notFound), '404 Not Found');
+    });
+
+    test('stamps a moment to the millisecond', () {
+      const strings = PeekStrings();
+      expect(
+        strings.timestamp(DateTime.utc(2026, 9, 10, 19, 7, 56, 481)),
+        '19:07:56.481',
+      );
+      expect(
+        strings.timestamp(DateTime.utc(2026, 9, 10, 9, 7, 6, 4)),
+        '09:07:06.004',
+      );
     });
 
     test('describes an entry for a screen reader', () {

@@ -53,14 +53,27 @@ class _PeekTappableState extends State<PeekTappable> {
     }
 
     if (inert) return child;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: widget.onTap,
-      onLongPress: widget.onLongPress,
-      onTapDown: (_) => _setPressed(true),
-      onTapUp: (_) => _setPressed(false),
-      onTapCancel: () => _setPressed(false),
-      child: child,
+    final tap = widget.onTap;
+    return FocusableActionDetector(
+      mouseCursor: SystemMouseCursors.click,
+      actions: {
+        if (tap != null)
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              tap();
+              return null;
+            },
+          ),
+      },
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: tap,
+        onLongPress: widget.onLongPress,
+        onTapDown: (_) => _setPressed(true),
+        onTapUp: (_) => _setPressed(false),
+        onTapCancel: () => _setPressed(false),
+        child: child,
+      ),
     );
   }
 

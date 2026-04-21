@@ -301,11 +301,28 @@ class PeekStrings {
   /// A duration, formatted.
   String elapsed(Duration value) => formatDuration(value);
 
-  /// Duration and size as one line; empty when neither is known.
+  /// Size and duration as one line; empty when neither is known.
   String metrics(Duration? duration, int? size) => [
-    if (duration != null) elapsed(duration),
     if (size != null && size > 0) bytes(size),
+    if (duration != null) elapsed(duration),
   ].join(' · ');
+
+  /// How a call ended, in a few words: the code with the reason the server
+  /// gave, what stopped it, or that it is still running.
+  String outcome(PeekEntry entry) {
+    final code = entry.statusCode;
+    if (code != null) {
+      final reason = entry.response?.statusMessage;
+      return reason == null || reason.isEmpty ? '$code' : '$code $reason';
+    }
+    final failure = entry.failure;
+    return failure == null ? pending : failureKind(failure.kind);
+  }
+
+  /// When a call started, to the millisecond.
+  String timestamp(DateTime moment) =>
+      '${clockTime(moment)}:${_twoDigits(moment.second)}'
+      '.${moment.millisecond.toString().padLeft(3, '0')}';
 
   /// Says a body was cut short.
   String truncatedBody(int shown, int total) =>
