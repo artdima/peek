@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' show Icons, SelectableText;
+import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_entry.dart';
 import '../peek_scope.dart';
@@ -34,15 +35,13 @@ final class PeekEntryView extends StatelessWidget {
             children: [
               PeekMethodBadge(request.method),
               const SizedBox(width: 8),
-              PeekStatusChip(entry),
+              Flexible(child: PeekStatusLabel(entry)),
               const Spacer(),
-              IconButton(
-                onPressed: () => controller.togglePin(entry.id),
+              PeekIconButton(
+                icon: entry.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
                 tooltip: entry.isPinned ? strings.unpin : strings.pin,
-                icon: Icon(
-                  entry.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
-                  size: 18,
-                ),
+                size: 18,
+                onPressed: () => controller.togglePin(entry.id),
               ),
             ],
           ),

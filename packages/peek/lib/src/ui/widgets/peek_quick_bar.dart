@@ -1,11 +1,18 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+
+import 'package:flutter/material.dart' show Icons;
+import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_entry.dart';
 import '../../core/query/peek_filter.dart';
 import '../../core/query/peek_sort.dart';
+import '../peek_controller.dart';
 import '../peek_scope.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
+import 'peek_icon_button.dart';
+import 'peek_segmented.dart';
+import 'peek_sheet.dart';
 
 /// The orders the menu offers; the controller can sort by any other
 /// field on request.
@@ -63,49 +70,50 @@ final class PeekQuickBar extends StatelessWidget {
     final strings = PeekScope.stringsOf(context);
     final theme = PeekTheme.of(context);
     final filter = controller.filter;
+    final chosen = _Mode.values.where((mode) => mode.holds(filter)).firstOrNull;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(theme.gutter, 0, theme.gutter - 8, 0),
       child: Row(
         children: [
           Expanded(
-            child: Wrap(
-              spacing: 6,
-              runSpacing: 4,
-              children: [
+            child: PeekSegmented<_Mode>(
+              selected: chosen,
+              onChanged:
+                  (mode) => controller.filter = mode.applyTo(controller.filter),
+              segments: [
                 for (final mode in _Mode.values)
-                  ChoiceChip(
-                    label: Text(
-                      mode.label(strings),
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    selected: mode.holds(filter),
-                    onSelected: (_) => controller.filter = mode.applyTo(filter),
-                  ),
+                  PeekSegment(value: mode, label: mode.label(strings)),
               ],
             ),
           ),
-          PopupMenuButton<PeekSort>(
+          PeekIconButton(
+            icon: Icons.swap_vert,
             tooltip: strings.sort,
-            icon: const Icon(Icons.swap_vert, size: 20),
-            onSelected: (sort) => controller.sort = sort,
-            itemBuilder:
-                (context) => [
-                  for (final sort in _sorts)
-                    CheckedPopupMenuItem(
-                      value: sort,
-                      checked: sort == controller.sort,
-                      child: Text(
-                        strings.sortOption(
-                          sort.field,
-                          descending: sort.descending,
-                        ),
-                      ),
-                    ),
-                ],
+            onPressed: () => unawaited(_pickSort(context, controller, strings)),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _pickSort(
+    BuildContext context,
+    PeekController controller,
+    PeekStrings strings,
+  ) async {
+    final picked = await showPeekActions<PeekSort>(
+      context,
+      title: strings.sort,
+      actions: [
+        for (final sort in _sorts)
+          PeekAction(
+            value: sort,
+            label: strings.sortOption(sort.field, descending: sort.descending),
+            selected: sort == controller.sort,
+          ),
+      ],
+    );
+    if (picked != null) controller.sort = picked;
   }
 }

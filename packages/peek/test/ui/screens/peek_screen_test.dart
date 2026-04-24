@@ -8,12 +8,25 @@ import '../../support/fake_store.dart';
 import '../../support/pump.dart';
 
 void main() {
-  /// Settles transient animations without waiting for a pending call's
-  /// spinner, which never stops.
+  /// Drives animations frame by frame. `pumpAndSettle` is out: a pending
+  /// call's spinner never stops, and a route that finished leaving needs
+  /// the frame after its last one.
   Future<void> settle(WidgetTester tester) async {
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+    for (var frame = 0; frame < 8; frame++) {
+      await tester.pump(const Duration(milliseconds: 60));
+    }
   }
+
+  /// What the filter button's badge reads, or zero when it has none.
+  int badgeOf(WidgetTester tester) =>
+      tester
+          .widget<PeekIconButton>(
+            find.ancestor(
+              of: find.byIcon(Icons.filter_list),
+              matching: find.byType(PeekIconButton),
+            ),
+          )
+          .badgeCount;
 
   late Peek peek;
   late FakePeekStore store;
@@ -113,7 +126,7 @@ void main() {
 
     testWidgets('badges the filter button with what is set', (tester) async {
       await pumpScreen(tester, entries: fixtures);
-      expect(tester.widget<Badge>(find.byType(Badge)).isLabelVisible, isFalse);
+      expect(badgeOf(tester), 0);
 
       controller.filter = const PeekFilter(
         onlyErrors: true,
@@ -122,22 +135,28 @@ void main() {
       );
       await tester.pump();
 
-      final badge = tester.widget<Badge>(find.byType(Badge));
-      expect(badge.isLabelVisible, isTrue);
-      expect((badge.label! as Text).data, '2');
+      expect(badgeOf(tester), 2);
+      expect(find.text('2'), findsOneWidget);
     });
 
     testWidgets('shows what is filtered as removable chips', (tester) async {
+      // The quick modes are pills too, so look only at the row of what is
+      // in force.
+      final active = find.descendant(
+        of: find.byType(PeekActiveFilters),
+        matching: find.byType(PeekPill),
+      );
+
       await pumpScreen(tester, entries: fixtures);
-      expect(find.byType(InputChip), findsNothing);
+      expect(active, findsNothing);
 
       controller.filter = const PeekFilter(onlyErrors: true, methods: {'GET'});
       await tester.pump();
-      expect(find.byType(InputChip), findsNWidgets(2));
+      expect(active, findsNWidgets(2));
 
       await tester.tap(
         find.descendant(
-          of: find.widgetWithText(InputChip, 'GET'),
+          of: find.widgetWithText(PeekPill, 'GET'),
           matching: find.byIcon(Icons.close),
         ),
       );
@@ -205,7 +224,7 @@ void main() {
 
       await tester.tap(find.byTooltip('Clear'));
       await settle(tester);
-      await tester.tap(find.widgetWithText(FilledButton, 'Clear'));
+      await tester.tap(find.text('Clear').last);
       await settle(tester);
       expect(store.length, 0);
       expect(find.text('No requests yet'), findsOneWidget);
@@ -213,10 +232,10 @@ void main() {
 
     testWidgets('cannot clear an empty store', (tester) async {
       await pumpScreen(tester);
-      final button = tester.widget<IconButton>(
+      final button = tester.widget<PeekIconButton>(
         find.ancestor(
           of: find.byIcon(Icons.delete_outline),
-          matching: find.byType(IconButton),
+          matching: find.byType(PeekIconButton),
         ),
       );
       expect(button.onPressed, isNull);
@@ -258,6 +277,7 @@ void main() {
 
       expect(copied.single, startsWith('curl '));
       expect(find.text('Copied'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 2));
     });
 
     testWidgets('creates its own controller when none is given', (

@@ -72,10 +72,10 @@ void main() {
       tester,
     ) async {
       await pumpBar(tester);
-      expect(find.byType(FilterChip), findsNothing);
+      expect(find.byType(PeekPill), findsNothing);
 
       await search(tester, 'users');
-      expect(find.byType(FilterChip), findsNWidgets(4));
+      expect(find.byType(PeekPill), findsNWidgets(4));
       expect(find.text('URL'), findsOneWidget);
       expect(find.text('Headers'), findsOneWidget);
       expect(find.text('Body'), findsOneWidget);
@@ -86,7 +86,7 @@ void main() {
       await pumpBar(tester);
       await search(tester, 'users');
 
-      await tester.tap(find.widgetWithText(FilterChip, 'Body'));
+      await tester.tap(find.widgetWithText(PeekPill, 'Body'));
       await tester.pump();
       expect(
         controller.filter.query.scopes,
@@ -97,7 +97,7 @@ void main() {
         isNot(contains(PeekSearchScope.responseBody)),
       );
 
-      await tester.tap(find.widgetWithText(FilterChip, 'Body'));
+      await tester.tap(find.widgetWithText(PeekPill, 'Body'));
       await tester.pump();
       expect(
         controller.filter.query.scopes,
@@ -113,16 +113,14 @@ void main() {
       await search(tester, 'users');
 
       for (final label in ['Headers', 'Body', 'Error']) {
-        await tester.tap(find.widgetWithText(FilterChip, label));
+        await tester.tap(find.widgetWithText(PeekPill, label));
         await tester.pump();
       }
       expect(controller.filter.query.scopes, {PeekSearchScope.url});
 
-      final url = tester.widget<FilterChip>(
-        find.widgetWithText(FilterChip, 'URL'),
-      );
+      final url = tester.widget<PeekPill>(find.widgetWithText(PeekPill, 'URL'));
       expect(url.selected, isTrue);
-      expect(url.onSelected, isNull);
+      expect(url.onTap, isNull);
     });
 
     testWidgets('marks what matched, and only where it looked', (tester) async {
@@ -136,7 +134,7 @@ void main() {
       await search(tester, 'e1');
       expect(marked(), 'e1');
 
-      await tester.tap(find.widgetWithText(FilterChip, 'URL'));
+      await tester.tap(find.widgetWithText(PeekPill, 'URL'));
       await tester.pump();
       expect(find.byType(PeekEntryTile), findsOneWidget);
       expect(marked(), isEmpty);

@@ -121,11 +121,11 @@ void main() {
 
     testWidgets('has nothing to clear until something is set', (tester) async {
       await pumpSheet(tester);
-      final reset = find.widgetWithText(TextButton, 'Clear filters');
-      expect(tester.widget<TextButton>(reset).onPressed, isNull);
+      final reset = find.widgetWithText(PeekTextButton, 'Clear filters');
+      expect(tester.widget<PeekTextButton>(reset).onPressed, isNull);
 
       await tapChip(tester, 'Errors');
-      expect(tester.widget<TextButton>(reset).onPressed, isNotNull);
+      expect(tester.widget<PeekTextButton>(reset).onPressed, isNotNull);
     });
 
     testWidgets('survives large text', (tester) async {

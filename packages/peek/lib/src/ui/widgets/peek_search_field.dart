@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart' show Icons, InputDecoration, TextField;
+import 'package:flutter/material.dart'
+    show Icons, InputDecoration, TextField, Tooltip;
 import 'package:flutter/services.dart' show TextInputAction;
 import 'package:flutter/widgets.dart';
 
@@ -95,9 +96,8 @@ final class PeekSearchField extends StatelessWidget {
                     return PeekTappable(
                       onTap: onClear,
                       fade: true,
-                      child: Semantics(
-                        button: true,
-                        label: clearLabel,
+                      child: Tooltip(
+                        message: clearLabel,
                         child: Padding(
                           padding: const EdgeInsets.only(left: 4),
                           child: Icon(

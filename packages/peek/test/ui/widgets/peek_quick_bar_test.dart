@@ -23,14 +23,12 @@ void main() {
   }
 
   Future<void> tapMode(WidgetTester tester, String label) async {
-    await tester.tap(find.widgetWithText(ChoiceChip, label));
+    await tester.tap(find.widgetWithText(PeekPill, label));
     await tester.pump();
   }
 
   bool isSelected(WidgetTester tester, String label) =>
-      tester
-          .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, label))
-          .selected;
+      tester.widget<PeekPill>(find.widgetWithText(PeekPill, label)).selected;
 
   group('PeekQuickBar', () {
     testWidgets('starts on all and switches between the modes', (tester) async {
@@ -82,11 +80,15 @@ void main() {
       expect(controller.sort, PeekSort.newestFirst);
 
       await tester.tap(find.byTooltip('Sort'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-      await tester.tap(find.text('Slowest first').last);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      for (var frame = 0; frame < 6; frame++) {
+        await tester.pump(const Duration(milliseconds: 60));
+      }
+      expect(find.text('Newest first'), findsOneWidget);
+
+      await tester.tap(find.text('Slowest first'));
+      for (var frame = 0; frame < 6; frame++) {
+        await tester.pump(const Duration(milliseconds: 60));
+      }
 
       expect(controller.sort, PeekSort.slowestFirst);
       expect(idsOf(controller.entries), ['e5', 'e6', 'e2', 'e1', 'e3', 'e4']);

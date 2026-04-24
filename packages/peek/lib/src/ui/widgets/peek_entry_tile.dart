@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' show Icons, PopupMenuItem, showMenu;
+import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
 import '../../core/export/peek_exporters.dart';
@@ -7,7 +7,8 @@ import '../peek_scope.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
 import 'peek_highlighted_text.dart';
-import 'peek_status_dot.dart';
+import 'peek_sheet.dart';
+import 'peek_status_label.dart';
 import 'peek_tappable.dart';
 
 /// What a long press on a tile offers.
@@ -64,7 +65,6 @@ final class PeekEntryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
     final strings = PeekScope.stringsOf(context);
-    final accent = theme.colorForEntry(entry);
     final request = entry.request;
     final metrics = strings.metrics(entry.duration, entry.responseSize);
 
@@ -89,22 +89,10 @@ final class PeekEntryTile extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      PeekStatusDot(accent),
-                      const SizedBox(width: 7),
                       Expanded(
                         child: Row(
                           children: [
-                            Flexible(
-                              child: Text(
-                                strings.outcome(entry),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.footnote.copyWith(
-                                  color: accent,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
+                            Flexible(child: PeekStatusLabel(entry)),
                             if (metrics.isNotEmpty)
                               Flexible(
                                 child: Text(
@@ -177,36 +165,18 @@ final class PeekEntryTile extends StatelessWidget {
   }
 
   Future<void> _showMenu(BuildContext context, PeekStrings strings) async {
-    final overlay =
-        Overlay.of(context).context.findRenderObject()! as RenderBox;
-    final box = context.findRenderObject()! as RenderBox;
-    final origin = box.localToGlobal(box.size.center(Offset.zero));
-    final action = await showMenu<PeekTileAction>(
-      context: context,
-      position: RelativeRect.fromLTRB(
-        origin.dx,
-        origin.dy,
-        overlay.size.width - origin.dx,
-        overlay.size.height - origin.dy,
-      ),
-      items: [
-        PopupMenuItem(
+    final action = await showPeekActions<PeekTileAction>(
+      context,
+      title: '${entry.request.method} ${entry.request.path}',
+      actions: [
+        PeekAction(
           value: PeekTileAction.pin,
-          child: Text(entry.isPinned ? strings.unpin : strings.pin),
+          label: entry.isPinned ? strings.unpin : strings.pin,
         ),
-        PopupMenuItem(
-          value: PeekTileAction.copyUrl,
-          child: Text(strings.copyUrl),
-        ),
-        PopupMenuItem(
-          value: PeekTileAction.copyCurl,
-          child: Text(strings.copyCurl),
-        ),
+        PeekAction(value: PeekTileAction.copyUrl, label: strings.copyUrl),
+        PeekAction(value: PeekTileAction.copyCurl, label: strings.copyCurl),
         if (showShare)
-          PopupMenuItem(
-            value: PeekTileAction.share,
-            child: Text(strings.share),
-          ),
+          PeekAction(value: PeekTileAction.share, label: strings.share),
       ],
     );
     if (action != null) onAction?.call(action);

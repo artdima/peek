@@ -1,12 +1,14 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../core/query/peek_search_query.dart';
 import '../peek_controller.dart';
 import '../peek_scope.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
+import 'peek_pill.dart';
+import 'peek_search_field.dart';
 
-/// Where a chip lets the search look. Request and response bodies move
+/// Where a pill lets the search look. Request and response bodies move
 /// together: telling them apart matters when reading a call, not when
 /// looking for one.
 enum _Scope {
@@ -31,7 +33,7 @@ enum _Scope {
 ///
 /// Typing goes to [PeekController.searchFor], which waits out a pause
 /// before filtering; the field itself stays responsive meanwhile. The
-/// scope chips appear once there is a search to narrow.
+/// scope pills appear once there is a search to narrow.
 final class PeekSearchBar extends StatefulWidget {
   /// Creates the search field.
   const PeekSearchBar({this.autofocus = false, super.key});
@@ -80,48 +82,25 @@ class _PeekSearchBarState extends State<PeekSearchBar> {
     final controller = PeekScope.of(context);
     final strings = PeekScope.stringsOf(context);
     final theme = PeekTheme.of(context);
-    final muted = theme.secondaryLabel;
-    final hasText = controller.searchText.isNotEmpty;
+    final searching = controller.searchText.isNotEmpty || _focus.hasFocus;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(theme.gutter, 4, theme.gutter, 4),
+      padding: EdgeInsets.fromLTRB(theme.gutter, 0, theme.gutter, 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextField(
+          PeekSearchField(
             controller: _text,
             focusNode: _focus,
             autofocus: widget.autofocus,
-            textInputAction: TextInputAction.search,
-            style: theme.body,
+            placeholder: strings.search,
+            clearLabel: strings.clearSearch,
+            cancelLabel: strings.cancel,
+            onCancel: searching ? () => _cancel(controller) : null,
             onChanged: controller.searchFor,
-            decoration: InputDecoration(
-              isDense: true,
-              filled: true,
-              fillColor: theme.fill,
-              hintText: strings.search,
-              hintStyle: theme.body.copyWith(color: muted),
-              prefixIcon: Icon(Icons.search, size: 18, color: muted),
-              prefixIconConstraints: const BoxConstraints(
-                minWidth: 38,
-                minHeight: 36,
-              ),
-              suffixIcon:
-                  hasText
-                      ? IconButton(
-                        icon: const Icon(Icons.close, size: 18),
-                        tooltip: strings.clearSearch,
-                        onPressed: () => _clear(controller),
-                      )
-                      : null,
-              contentPadding: const EdgeInsets.symmetric(vertical: 10),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(theme.radius),
-                borderSide: BorderSide.none,
-              ),
-            ),
+            onClear: () => _clear(controller),
           ),
-          if (hasText || _focus.hasFocus) _scopes(controller, strings),
+          if (searching) _scopes(controller, strings),
         ],
       ),
     );
@@ -134,38 +113,40 @@ class _PeekSearchBarState extends State<PeekSearchBar> {
             .where((scope) => selected.containsAll(scope.scopes))
             .toList();
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 6),
-      child: Wrap(
-        spacing: 6,
-        runSpacing: 4,
-        children: [
-          for (final scope in _Scope.values)
-            FilterChip(
-              label: Text(scope.label(strings)),
-              labelStyle: const TextStyle(fontSize: 12),
-              selected: active.contains(scope),
-              // The last scope left cannot be turned off: a search with
-              // nowhere to look would quietly match everything.
-              onSelected:
-                  active.length == 1 && active.contains(scope)
-                      ? null
-                      : (value) => _toggle(controller, scope, value: value),
-            ),
-        ],
-      ),
+    return Wrap(
+      spacing: 6,
+      children: [
+        for (final scope in _Scope.values)
+          PeekPill(
+            label: scope.label(strings),
+            selected: active.contains(scope),
+            // The last scope left cannot be turned off: a search with
+            // nowhere to look would quietly match everything.
+            onTap:
+                active.length == 1 && active.contains(scope)
+                    ? null
+                    : () => _toggle(controller, scope),
+          ),
+      ],
     );
   }
 
-  void _toggle(PeekController controller, _Scope scope, {required bool value}) {
+  void _toggle(PeekController controller, _Scope scope) {
     final scopes = {...controller.filter.query.scopes};
-    value ? scopes.addAll(scope.scopes) : scopes.removeAll(scope.scopes);
+    scopes.containsAll(scope.scopes)
+        ? scopes.removeAll(scope.scopes)
+        : scopes.addAll(scope.scopes);
     controller.searchIn(scopes);
   }
 
   void _clear(PeekController controller) {
     _text.clear();
     controller.searchFor('');
+  }
+
+  void _cancel(PeekController controller) {
+    _clear(controller);
+    _focus.unfocus();
   }
 
   void _onFocusChanged() => setState(() {});

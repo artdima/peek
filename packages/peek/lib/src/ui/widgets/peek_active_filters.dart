@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_entry.dart';
 import '../../core/model/peek_status_class.dart';
@@ -7,6 +7,7 @@ import '../peek_controller.dart';
 import '../peek_scope.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
+import 'peek_pill.dart';
 
 /// What the list is filtered by right now, one removable chip per value.
 ///
@@ -115,18 +116,13 @@ class _RemovableChip extends StatelessWidget {
   final VoidCallback onDeleted;
 
   @override
-  Widget build(BuildContext context) => InputChip(
+  Widget build(BuildContext context) => ConstrainedBox(
     // A host or a media type can be long; the row must not grow with it.
-    label: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 180),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontSize: 12),
-      ),
+    constraints: const BoxConstraints(maxWidth: 200),
+    child: PeekPill(
+      label: label,
+      onRemove: onDeleted,
+      removeLabel: PeekScope.stringsOf(context).resetFilters,
     ),
-    onDeleted: onDeleted,
-    deleteIcon: const Icon(Icons.close, size: 16),
   );
 }

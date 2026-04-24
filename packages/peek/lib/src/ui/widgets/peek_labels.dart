@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../peek_scope.dart';
 import '../theme/peek_theme.dart';

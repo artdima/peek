@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../core/export/peek_exporters.dart';
 import '../../core/model/peek_entry.dart';
@@ -84,53 +85,38 @@ class _PeekScaffold extends StatelessWidget {
     final controller = PeekScope.of(context);
     final strings = PeekScope.stringsOf(context);
     final theme = PeekTheme.of(context);
+    // The search has a field of its own, so it is not part of the badge.
+    final filters =
+        controller.filter.copyWith(query: PeekSearchQuery.none).activeCount;
 
-    return Scaffold(
-      backgroundColor: theme.background,
-      appBar: AppBar(
-        backgroundColor: theme.background,
-        surfaceTintColor: Colors.transparent,
-        title: Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            Flexible(
-              child: Text(strings.requests, overflow: TextOverflow.ellipsis),
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                strings.requestCount(
-                  controller.entries.length,
-                  controller.totalCount,
-                ),
-                overflow: TextOverflow.ellipsis,
-                style: theme.footnote.copyWith(
-                  height: 1,
-                  color: theme.secondaryLabel,
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          _FiltersButton(strings: strings),
-          IconButton(
-            onPressed: controller.togglePause,
-            icon: Icon(controller.isPaused ? Icons.play_arrow : Icons.pause),
-            tooltip: controller.isPaused ? strings.resume : strings.pause,
-          ),
-          IconButton(
-            onPressed:
-                controller.totalCount == 0
-                    ? null
-                    : () => _confirmClear(context, controller, strings),
-            icon: const Icon(Icons.delete_outline),
-            tooltip: strings.clear,
-          ),
-        ],
+    return PeekScaffold(
+      title: strings.requests,
+      trailingTitle: Text(
+        strings.requestCount(controller.entries.length, controller.totalCount),
+        style: theme.footnote.copyWith(color: theme.secondaryLabel),
       ),
-      body: LayoutBuilder(
+      actions: [
+        PeekIconButton(
+          icon: Icons.filter_list,
+          tooltip: strings.filters,
+          badgeCount: filters,
+          onPressed: () => unawaited(showPeekFilters(context)),
+        ),
+        PeekIconButton(
+          icon: controller.isPaused ? Icons.play_arrow : Icons.pause,
+          tooltip: controller.isPaused ? strings.resume : strings.pause,
+          onPressed: controller.togglePause,
+        ),
+        PeekIconButton(
+          icon: Icons.delete_outline,
+          tooltip: strings.clear,
+          onPressed:
+              controller.totalCount == 0
+                  ? null
+                  : () => unawaited(_confirmClear(context, controller)),
+        ),
+      ],
+      child: LayoutBuilder(
         builder: (context, constraints) {
           final wide = constraints.maxWidth >= PeekScreen.wideLayout;
           final list = _list(context, controller, strings, wide: wide);
@@ -139,7 +125,13 @@ class _PeekScaffold extends StatelessWidget {
           return Row(
             children: [
               SizedBox(width: _listPaneWidth, child: list),
-              VerticalDivider(width: 1, thickness: 1, color: theme.separator),
+              SizedBox(
+                width: theme.hairline,
+                child: ColoredBox(
+                  color: theme.separator,
+                  child: const SizedBox(height: double.infinity),
+                ),
+              ),
               Expanded(child: _detail(controller, strings)),
             ],
           );
@@ -189,27 +181,15 @@ class _PeekScaffold extends StatelessWidget {
   Future<void> _confirmClear(
     BuildContext context,
     PeekController controller,
-    PeekStrings strings,
   ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text(strings.clearTitle),
-            content: Text(strings.clearMessage),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: Text(strings.cancel),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: Text(strings.confirm),
-              ),
-            ],
-          ),
+    final strings = PeekScope.stringsOf(context);
+    final confirmed = await showPeekAlert(
+      context,
+      title: strings.clearTitle,
+      message: strings.clearMessage,
+      confirmLabel: strings.confirm,
     );
-    if (confirmed ?? false) controller.clear();
+    if (confirmed) controller.clear();
   }
 
   Future<void> _handleAction(
@@ -219,62 +199,28 @@ class _PeekScaffold extends StatelessWidget {
     PeekEntry entry,
     PeekTileAction action,
   ) async {
-    final messenger = ScaffoldMessenger.maybeOf(context);
     switch (action) {
       case PeekTileAction.pin:
         final pinned = controller.togglePin(entry.id);
-        if (!pinned && !entry.isPinned) {
-          messenger?.showSnackBar(
-            SnackBar(content: Text(strings.pinLimitReached)),
-          );
+        if (!pinned && !entry.isPinned && context.mounted) {
+          showPeekToast(context, strings.pinLimitReached);
         }
       case PeekTileAction.copyUrl:
-        await _copy(messenger, strings, PeekExporters.url(entry));
+        await _copy(context, strings, PeekExporters.url(entry));
       case PeekTileAction.copyCurl:
-        await _copy(messenger, strings, PeekExporters.curl.export(entry));
+        await _copy(context, strings, PeekExporters.curl.export(entry));
       case PeekTileAction.share:
         break;
     }
   }
 
   Future<void> _copy(
-    ScaffoldMessengerState? messenger,
+    BuildContext context,
     PeekStrings strings,
     String text,
   ) async {
     await Clipboard.setData(ClipboardData(text: text));
-    messenger?.showSnackBar(
-      SnackBar(
-        content: Text(strings.copied),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-}
-
-class _FiltersButton extends StatelessWidget {
-  const _FiltersButton({required this.strings});
-
-  final PeekStrings strings;
-
-  @override
-  Widget build(BuildContext context) {
-    // The search has a field of its own, so it is not part of the badge.
-    final count =
-        PeekScope.of(
-          context,
-        ).filter.copyWith(query: PeekSearchQuery.none).activeCount;
-
-    return IconButton(
-      onPressed: () => showPeekFilters(context),
-      tooltip: strings.filters,
-      icon: Badge(
-        isLabelVisible: count > 0,
-        label: Text('$count'),
-        child: const Icon(Icons.filter_list),
-      ),
-    );
+    if (context.mounted) showPeekToast(context, strings.copied);
   }
 }
 

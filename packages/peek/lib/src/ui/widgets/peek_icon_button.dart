@@ -16,6 +16,7 @@ final class PeekIconButton extends StatelessWidget {
     this.onPressed,
     this.color,
     this.badgeCount = 0,
+    this.size = 20,
     super.key,
   });
 
@@ -34,6 +35,9 @@ final class PeekIconButton extends StatelessWidget {
   /// A number to show over the icon; hidden when zero.
   final int badgeCount;
 
+  /// How large the glyph is drawn; the tap target does not change.
+  final double size;
+
   @override
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
@@ -51,7 +55,7 @@ final class PeekIconButton extends StatelessWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              Icon(icon, size: 20, color: tint),
+              Icon(icon, size: size, color: tint),
               if (badgeCount > 0)
                 Positioned(
                   top: 6,

@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import '../peek_scope.dart';
 import '../peek_strings.dart';
-import '../theme/peek_theme.dart';
+import 'peek_icon_button.dart';
+import 'peek_toast.dart';
 
 /// Copies text to the clipboard and says so.
 final class PeekCopyButton extends StatelessWidget {
@@ -26,20 +28,14 @@ final class PeekCopyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = PeekTheme.of(context);
     final strings = PeekScope.stringsOf(context);
     final value = text;
 
-    return IconButton(
-      onPressed: value == null ? null : () => _copy(context, value, strings),
-      icon: const Icon(Icons.copy_rounded),
-      iconSize: dense ? 16 : 20,
-      visualDensity: dense ? VisualDensity.compact : null,
-      padding: dense ? const EdgeInsets.all(4) : null,
-      constraints:
-          dense ? const BoxConstraints(minWidth: 32, minHeight: 32) : null,
+    return PeekIconButton(
+      icon: Icons.copy_rounded,
       tooltip: tooltip ?? strings.copy,
-      color: theme.secondaryLabel,
+      size: dense ? 16 : 20,
+      onPressed: value == null ? null : () => _copy(context, value, strings),
     );
   }
 
@@ -48,14 +44,7 @@ final class PeekCopyButton extends StatelessWidget {
     String value,
     PeekStrings strings,
   ) async {
-    final messenger = ScaffoldMessenger.maybeOf(context);
     await Clipboard.setData(ClipboardData(text: value));
-    messenger?.showSnackBar(
-      SnackBar(
-        content: Text(strings.copied),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    if (context.mounted) showPeekToast(context, strings.copied);
   }
 }

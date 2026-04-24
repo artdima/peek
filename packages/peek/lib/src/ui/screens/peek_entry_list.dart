@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' show Icons;
+import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_entry.dart';
 import '../../core/model/peek_id.dart';
@@ -69,9 +70,9 @@ class _PeekEntryListState extends State<PeekEntryList> {
             title: strings.noMatches,
             message: strings.noMatchesHint,
             icon: Icons.search_off_outlined,
-            action: TextButton(
+            action: PeekTextButton(
+              label: strings.resetFilters,
               onPressed: controller.resetFilter,
-              child: Text(strings.resetFilters),
             ),
           )
           : PeekEmptyState(
@@ -160,32 +161,35 @@ class _NewRequestsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = PeekScope.stringsOf(context);
-    return Material(
-      elevation: 3,
-      borderRadius: BorderRadius.circular(20),
-      color: PeekTheme.of(context).accent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.arrow_upward,
-                size: 14,
-                color: Color(0xFFFFFFFF),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                strings.newRequests(count),
-                style: PeekTheme.of(
-                  context,
-                ).footnote.copyWith(color: const Color(0xFFFFFFFF)),
-              ),
-            ],
-          ),
+    final theme = PeekTheme.of(context);
+    const onAccent = Color(0xFFFFFFFF);
+
+    return PeekTappable(
+      onTap: onPressed,
+      fade: true,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: theme.accent,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: theme.label.withValues(alpha: 0.18),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.arrow_upward, size: 14, color: onAccent),
+            const SizedBox(width: 6),
+            Text(
+              strings.newRequests(count),
+              style: theme.footnote.copyWith(color: onAccent),
+            ),
+          ],
         ),
       ),
     );

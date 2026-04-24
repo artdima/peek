@@ -7,6 +7,7 @@ import '../peek_controller.dart';
 import '../peek_scope.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
+import '../widgets/widgets.dart';
 
 /// How long a call took, as the sheet offers it.
 const List<PeekDurationRange> _durations = [
@@ -53,9 +54,9 @@ final class PeekFiltersSheet extends StatelessWidget {
             Row(
               children: [
                 Expanded(child: Text(strings.filters, style: theme.headline)),
-                TextButton(
+                PeekTextButton(
+                  label: strings.resetFilters,
                   onPressed: filter.isEmpty ? null : controller.resetFilter,
-                  child: Text(strings.resetFilters),
                 ),
               ],
             ),

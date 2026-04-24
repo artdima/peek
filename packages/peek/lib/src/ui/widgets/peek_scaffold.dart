@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:flutter/widgets.dart';
 
 import '../theme/peek_theme.dart';
@@ -57,27 +58,32 @@ final class PeekScaffold extends StatelessWidget {
 
     return ColoredBox(
       color: background ?? theme.background,
-      child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(bottom: insets),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              switch (titleStyle) {
-                PeekTitleStyle.large => _LargeTitle(
-                  title: title,
-                  actions: actions,
-                  leading: leading,
-                  trailing: trailingTitle,
-                ),
-                PeekTitleStyle.inline => _InlineTitle(
-                  title: title,
-                  actions: actions,
-                  leading: leading,
-                ),
-              },
-              Expanded(child: child),
-            ],
+      // Text editing and text selection want a Material ancestor to live
+      // in. This one draws nothing: it is a host, not a look.
+      child: Material(
+        type: MaterialType.transparency,
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: insets),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                switch (titleStyle) {
+                  PeekTitleStyle.large => _LargeTitle(
+                    title: title,
+                    actions: actions,
+                    leading: leading,
+                    trailing: trailingTitle,
+                  ),
+                  PeekTitleStyle.inline => _InlineTitle(
+                    title: title,
+                    actions: actions,
+                    leading: leading,
+                  ),
+                },
+                Expanded(child: child),
+              ],
+            ),
           ),
         ),
       ),

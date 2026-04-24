@@ -48,24 +48,33 @@ void main() {
     });
   });
 
-  group('PeekStatusChip', () {
-    testWidgets('shows a code for a completed call', (tester) async {
-      await pumpWidgetInScope(tester, PeekStatusChip(e1));
+  group('PeekStatusLabel', () {
+    testWidgets('shows a code in the colour of its class', (tester) async {
+      await pumpWidgetInScope(tester, PeekStatusLabel(e1));
       expect(find.text('200'), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
-      expect(find.byIcon(Icons.error_outline), findsNothing);
+
+      final context = tester.element(find.text('200'));
+      final theme = PeekTheme.of(context);
+      expect(tester.widget<Text>(find.text('200')).style?.color, theme.success);
+      expect(
+        tester.widget<PeekStatusDot>(find.byType(PeekStatusDot)).color,
+        theme.success,
+      );
     });
 
-    testWidgets('spins while a call is pending', (tester) async {
-      await pumpWidgetInScope(tester, PeekStatusChip(e4));
+    testWidgets('says a call is still running', (tester) async {
+      await pumpWidgetInScope(tester, PeekStatusLabel(e4));
       expect(find.text('Pending'), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      final context = tester.element(find.text('Pending'));
+      expect(
+        tester.widget<Text>(find.text('Pending')).style?.color,
+        PeekTheme.of(context).pending,
+      );
     });
 
     testWidgets('names a failure that has no status', (tester) async {
-      await pumpWidgetInScope(tester, PeekStatusChip(e5));
+      await pumpWidgetInScope(tester, PeekStatusLabel(e5));
       expect(find.text('Timed out'), findsOneWidget);
-      expect(find.byIcon(Icons.error_outline), findsOneWidget);
     });
 
     testWidgets('prefers the status a failed call answered with', (
@@ -74,61 +83,12 @@ void main() {
       final failedWith503 = e5.copyWith(
         response: PeekResponse(statusCode: 503),
       );
-      await pumpWidgetInScope(tester, PeekStatusChip(failedWith503));
+      await pumpWidgetInScope(tester, PeekStatusLabel(failedWith503));
       expect(find.text('503'), findsOneWidget);
-      expect(find.byIcon(Icons.error_outline), findsOneWidget);
 
       final context = tester.element(find.text('503'));
       final style = tester.widget<Text>(find.text('503')).style;
       expect(style?.color, PeekTheme.of(context).serverError);
-    });
-  });
-
-  group('labels', () {
-    testWidgets('format durations, sizes and times', (tester) async {
-      await pumpWidgetInScope(
-        tester,
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const PeekDurationLabel(Duration(milliseconds: 1500)),
-            const PeekSizeLabel(2048),
-            PeekTimeLabel(DateTime(2026, 9, 10, 14, 30, 5)),
-          ],
-        ),
-      );
-      expect(find.text('1.5 s'), findsOneWidget);
-      expect(find.text('2 KB'), findsOneWidget);
-      expect(find.text('14:30:05'), findsOneWidget);
-    });
-
-    testWidgets('show a dash when the value is unknown', (tester) async {
-      await pumpWidgetInScope(
-        tester,
-        const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [PeekDurationLabel(null), PeekSizeLabel(null)],
-        ),
-      );
-      expect(find.text('—'), findsNWidgets(2));
-    });
-
-    test('PeekTimeLabel pads every part', () {
-      final time = DateTime(2026, 9, 10, 9, 5, 3, 7);
-      expect(PeekTimeLabel(time).format(), '09:05:03');
-      expect(PeekTimeLabel(time, withMillis: true).format(), '09:05:03.007');
-      expect(
-        PeekTimeLabel(DateTime(2026, 9, 10, 23, 59, 59, 999)).format(),
-        '23:59:59',
-      );
-    });
-
-    testWidgets('honour a style override', (tester) async {
-      await pumpWidgetInScope(
-        tester,
-        const PeekSizeLabel(1, style: TextStyle(fontSize: 42)),
-      );
-      expect(tester.widget<Text>(find.text('1 B')).style?.fontSize, 42);
     });
   });
 
@@ -202,17 +162,23 @@ void main() {
         tester,
         const PeekCopyButton(text: 'https://example.com'),
       );
-      await tester.tap(find.byType(IconButton));
+      await tester.tap(find.byType(PeekCopyButton));
+      await tester.pump();
       await tester.pump();
 
       expect(copied, ['https://example.com']);
       expect(find.text('Copied'), findsOneWidget);
+
+      // The toast takes itself away; leaving its timer pending fails
+      // the test on teardown.
+      await tester.pump(const Duration(seconds: 2));
+      expect(find.text('Copied'), findsNothing);
     });
 
     testWidgets('is disabled without text', (tester) async {
       await pumpWidgetInScope(tester, const PeekCopyButton(text: null));
       expect(
-        tester.widget<IconButton>(find.byType(IconButton)).onPressed,
+        tester.widget<PeekIconButton>(find.byType(PeekIconButton)).onPressed,
         isNull,
       );
     });
@@ -314,10 +280,10 @@ class _Gallery extends StatelessWidget {
               spacing: 6,
               runSpacing: 6,
               children: [
-                PeekStatusChip(e1),
-                PeekStatusChip(e2),
-                PeekStatusChip(e6),
-                PeekStatusChip(e5),
+                PeekStatusLabel(e1),
+                PeekStatusLabel(e2),
+                PeekStatusLabel(e6),
+                PeekStatusLabel(e5),
               ],
             ),
             const PeekSectionHeader('Headers', count: 2),

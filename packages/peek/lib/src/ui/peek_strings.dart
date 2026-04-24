@@ -64,6 +64,9 @@ class PeekStrings {
   /// Dismisses a dialog.
   String get cancel => 'Cancel';
 
+  /// Names the area that closes a sheet when tapped.
+  String get dismiss => 'Dismiss';
+
   /// Tooltip that pins an entry.
   String get pin => 'Pin';
 
