@@ -35,7 +35,7 @@ void main() {
 
   /// Scrolls [label] into view and taps it.
   Future<void> tapChip(WidgetTester tester, String label) async {
-    final chip = find.widgetWithText(FilterChip, label);
+    final chip = find.widgetWithText(PeekPill, label);
     await tester.ensureVisible(chip);
     await tester.pump();
     await tester.tap(chip);
@@ -99,9 +99,9 @@ void main() {
       controller.filter = PeekFilter(dates: PeekDateRange(from: fixtureStart));
       await tester.pump();
 
-      final chip = find.widgetWithText(FilterChip, 'Since 12:00');
+      final chip = find.widgetWithText(PeekPill, 'Since 12:00');
       expect(chip, findsOneWidget);
-      expect(tester.widget<FilterChip>(chip).selected, isTrue);
+      expect(tester.widget<PeekPill>(chip).selected, isTrue);
 
       await tapChip(tester, 'Since 12:00');
       expect(controller.filter.dates.isUnbounded, isTrue);

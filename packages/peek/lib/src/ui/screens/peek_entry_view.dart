@@ -26,67 +26,152 @@ final class PeekEntryView extends StatelessWidget {
     final request = entry.request;
     final url = request.uri.toString();
 
-    return ListView(
-      padding: EdgeInsets.symmetric(horizontal: theme.gutter),
-      children: [
-        Padding(
-          padding: EdgeInsets.only(top: theme.gutter),
-          child: Row(
+    return ColoredBox(
+      color: theme.groupedBackground,
+      child: ListView(
+        padding: EdgeInsets.only(top: theme.rowSpacing),
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: theme.gutter),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      request.method.toUpperCase(),
+                      style: theme.body.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(width: 10),
+                    Flexible(child: PeekStatusLabel(entry)),
+                    const Spacer(),
+                    PeekIconButton(
+                      icon:
+                          entry.isPinned
+                              ? Icons.push_pin
+                              : Icons.push_pin_outlined,
+                      tooltip: entry.isPinned ? strings.unpin : strings.pin,
+                      size: 18,
+                      onPressed: () => controller.togglePin(entry.id),
+                    ),
+                  ],
+                ),
+                SelectableText(url, style: theme.body),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: PeekCopyButton(text: url),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: theme.rowSpacing),
+          _Transfer(entry: entry, strings: strings),
+          PeekListSection(
+            title: strings.overview,
             children: [
-              PeekMethodBadge(request.method),
-              const SizedBox(width: 8),
-              Flexible(child: PeekStatusLabel(entry)),
-              const Spacer(),
-              PeekIconButton(
-                icon: entry.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
-                tooltip: entry.isPinned ? strings.unpin : strings.pin,
-                size: 18,
-                onPressed: () => controller.togglePin(entry.id),
+              PeekListRow(title: strings.status, value: strings.outcome(entry)),
+              PeekListRow(title: strings.duration, value: _duration(strings)),
+              PeekListRow(
+                title: strings.started,
+                value: strings.timestamp(entry.startedAt),
               ),
+              PeekListRow(title: strings.source, value: entry.source),
             ],
           ),
-        ),
-        SelectableText(url, style: theme.headline),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: PeekCopyButton(text: url),
-        ),
-        PeekSectionHeader(strings.overview),
-        PeekKeyValueRow(name: strings.status, value: _outcome(strings)),
-        PeekKeyValueRow(
-          name: strings.duration,
-          value:
-              entry.duration == null
-                  ? strings.none
-                  : strings.elapsed(entry.duration!),
-        ),
-        PeekKeyValueRow(
-          name: strings.request,
-          value: _size(strings, entry.requestSize),
-        ),
-        PeekKeyValueRow(
-          name: strings.response,
-          value: _size(strings, entry.responseSize),
-        ),
-        PeekKeyValueRow(
-          name: strings.started,
-          value: strings.clockTime(entry.startedAt),
-        ),
-        PeekKeyValueRow(name: strings.source, value: entry.source),
-        SizedBox(height: theme.gutter),
-      ],
+        ],
+      ),
     );
   }
 
-  /// The status code, or what replaced it.
-  String _outcome(PeekStrings strings) {
-    final code = entry.statusCode;
-    if (code != null) return '$code';
-    final failure = entry.failure;
-    if (failure == null) return strings.pending;
-    return strings.failureKind(failure.kind);
+  String _duration(PeekStrings strings) {
+    final elapsed = entry.duration;
+    return elapsed == null ? strings.none : strings.elapsed(elapsed);
   }
+}
 
-  String _size(PeekStrings strings, int? bytes) =>
-      bytes == null ? strings.none : strings.bytes(bytes);
+/// What went out and what came back, side by side.
+class _Transfer extends StatelessWidget {
+  const _Transfer({required this.entry, required this.strings});
+
+  final PeekEntry entry;
+  final PeekStrings strings;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(theme.gutter, 0, theme.gutter, theme.gutter),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Expanded(
+              child: _Amount(
+                icon: Icons.arrow_upward,
+                label: strings.sent,
+                bytes: entry.requestSize,
+                strings: strings,
+              ),
+            ),
+            SizedBox(
+              width: theme.hairline,
+              child: ColoredBox(
+                color: theme.separator,
+                child: const SizedBox(height: double.infinity),
+              ),
+            ),
+            Expanded(
+              child: _Amount(
+                icon: Icons.arrow_downward,
+                label: strings.received,
+                bytes: entry.responseSize,
+                strings: strings,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Amount extends StatelessWidget {
+  const _Amount({
+    required this.icon,
+    required this.label,
+    required this.bytes,
+    required this.strings,
+  });
+
+  final IconData icon;
+  final String label;
+  final int? bytes;
+  final PeekStrings strings;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    final size = bytes;
+
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 13, color: theme.secondaryLabel),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: theme.footnote.copyWith(color: theme.secondaryLabel),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          size == null ? strings.none : strings.bytes(size),
+          style: theme.headline,
+        ),
+      ],
+    );
+  }
 }

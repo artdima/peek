@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' show Icons, MaterialPageRoute;
+import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_id.dart';
 import '../peek_scope.dart';
+import '../theme/peek_theme.dart';
 import '../widgets/widgets.dart';
 import 'peek_entry_view.dart';
 
@@ -20,16 +22,20 @@ final class PeekEntryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = PeekScope.of(context);
     final strings = PeekScope.stringsOf(context);
+    final theme = PeekTheme.of(context);
     final entry = controller.peek.store.find(id);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          entry == null ? strings.request : entry.request.path,
-          overflow: TextOverflow.ellipsis,
-        ),
+    return PeekScaffold(
+      title: entry == null ? strings.request : entry.request.path,
+      titleStyle: PeekTitleStyle.inline,
+      background: theme.groupedBackground,
+      leading: PeekIconButton(
+        icon: Icons.arrow_back_ios_new,
+        tooltip: strings.back,
+        size: 17,
+        onPressed: () => Navigator.of(context).maybePop(),
       ),
-      body:
+      child:
           entry == null
               ? PeekEmptyState(
                 title: strings.removedEntry,

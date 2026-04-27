@@ -66,9 +66,11 @@ void main() {
       await openUsers(tester);
       expect(find.byType(PeekEntryScreen), findsOneWidget);
       expect(find.text('https://api.example.com/users'), findsOneWidget);
-      // The chip carries the code as a colour; the row spells it out.
-      expect(find.widgetWithText(PeekKeyValueRow, '200'), findsOneWidget);
-      expect(find.widgetWithText(PeekKeyValueRow, 'dio'), findsOneWidget);
+      // The label carries the code as a colour; the row spells it out.
+      expect(find.widgetWithText(PeekListRow, '200'), findsOneWidget);
+      expect(find.widgetWithText(PeekListRow, 'dio'), findsOneWidget);
+      expect(find.text('Sent'), findsOneWidget);
+      expect(find.text('Received'), findsOneWidget);
       expect(controller.selectedId, e1.id);
 
       await tester.pageBack();

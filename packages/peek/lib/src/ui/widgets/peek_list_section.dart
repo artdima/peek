@@ -36,13 +36,13 @@ final class PeekListSection extends StatelessWidget {
     final caption = theme.caption.copyWith(color: theme.secondaryLabel);
 
     return Padding(
-      padding: EdgeInsets.only(bottom: theme.gutter),
+      padding: EdgeInsets.fromLTRB(theme.gutter, 0, theme.gutter, theme.gutter),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (title != null || trailing != null)
             Padding(
-              padding: EdgeInsets.fromLTRB(theme.gutter, 0, theme.gutter, 6),
+              padding: const EdgeInsets.only(bottom: 6),
               child: Row(
                 children: [
                   Expanded(
@@ -74,7 +74,7 @@ final class PeekListSection extends StatelessWidget {
           ),
           if (footer != null)
             Padding(
-              padding: EdgeInsets.fromLTRB(theme.gutter, 6, theme.gutter, 0),
+              padding: const EdgeInsets.only(top: 6),
               child: Text(footer, style: caption),
             ),
         ],

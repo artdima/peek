@@ -112,6 +112,15 @@ class PeekStrings {
   /// Section heading for the response half.
   String get response => 'Response';
 
+  /// How much went out.
+  String get sent => 'Sent';
+
+  /// How much came back.
+  String get received => 'Received';
+
+  /// Names the button that goes back a screen.
+  String get back => 'Back';
+
   /// Tab and heading for the summary.
   String get overview => 'Overview';
 

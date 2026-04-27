@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_entry.dart';
 import '../../core/model/peek_status_class.dart';
@@ -43,168 +43,165 @@ final class PeekFiltersSheet extends StatelessWidget {
     final filter = controller.filter;
     final facets = controller.facets;
 
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: theme.gutter),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(child: Text(strings.filters, style: theme.headline)),
-                PeekTextButton(
-                  label: strings.resetFilters,
-                  onPressed: filter.isEmpty ? null : controller.resetFilter,
-                ),
-              ],
-            ),
-            Flexible(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _Section(
-                      children: [
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: theme.gutter),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text(strings.filters, style: theme.headline)),
+              PeekTextButton(
+                label: strings.resetFilters,
+                onPressed: filter.isEmpty ? null : controller.resetFilter,
+              ),
+            ],
+          ),
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _Section(
+                    children: [
+                      _FacetChip(
+                        label: strings.errorsOnly,
+                        count: facets.errors,
+                        selected: filter.onlyErrors,
+                        onSelected:
+                            (value) =>
+                                controller.filter = filter.copyWith(
+                                  onlyErrors: value,
+                                ),
+                      ),
+                      _FacetChip(
+                        label: strings.pinnedOnly,
+                        count: facets.pinned,
+                        selected: filter.onlyPinned,
+                        onSelected:
+                            (value) =>
+                                controller.filter = filter.copyWith(
+                                  onlyPinned: value,
+                                ),
+                      ),
+                    ],
+                  ),
+                  _Section(
+                    title: strings.status,
+                    children: [
+                      ..._chips<PeekStatusClass>(
+                        facet: facets.statusClasses,
+                        selected: filter.statusClasses,
+                        label: strings.statusClassName,
+                        apply:
+                            (values) =>
+                                controller.filter = filter.copyWith(
+                                  statusClasses: values,
+                                ),
+                      ),
+                      ..._chips<int>(
+                        facet: facets.statusCodes,
+                        selected: filter.statusCodes,
+                        label: (code) => '$code',
+                        apply:
+                            (values) =>
+                                controller.filter = filter.copyWith(
+                                  statusCodes: values,
+                                ),
+                      ),
+                    ],
+                  ),
+                  _Section(
+                    title: strings.method,
+                    children: _chips<String>(
+                      facet: facets.methods,
+                      selected: filter.methods,
+                      label: (method) => method,
+                      apply:
+                          (values) =>
+                              controller.filter = filter.copyWith(
+                                methods: values,
+                              ),
+                    ),
+                  ),
+                  _Section(
+                    title: strings.host,
+                    children: _chips<String>(
+                      facet: facets.hosts,
+                      selected: filter.hosts,
+                      label: (host) => host,
+                      apply:
+                          (values) =>
+                              controller.filter = filter.copyWith(
+                                hosts: values,
+                              ),
+                    ),
+                  ),
+                  _Section(
+                    title: strings.contentType,
+                    children: _chips<String>(
+                      facet: facets.contentTypes,
+                      selected: filter.contentTypes,
+                      label: (type) => type,
+                      apply:
+                          (values) =>
+                              controller.filter = filter.copyWith(
+                                contentTypes: values,
+                              ),
+                    ),
+                  ),
+                  _Section(
+                    title: strings.state,
+                    children: _chips<PeekEntryState>(
+                      facet: facets.states,
+                      selected: filter.states,
+                      label: strings.entryState,
+                      apply:
+                          (values) =>
+                              controller.filter = filter.copyWith(
+                                states: values,
+                              ),
+                    ),
+                  ),
+                  _Section(
+                    title: strings.source,
+                    children: _chips<String>(
+                      facet: facets.sources,
+                      selected: filter.sources,
+                      label: (source) => source,
+                      apply:
+                          (values) =>
+                              controller.filter = filter.copyWith(
+                                sources: values,
+                              ),
+                    ),
+                  ),
+                  _Section(
+                    title: strings.duration,
+                    children: [
+                      for (final range in _durations)
                         _FacetChip(
-                          label: strings.errorsOnly,
-                          count: facets.errors,
-                          selected: filter.onlyErrors,
+                          label: strings.durationFilter(range),
+                          selected: filter.duration == range,
                           onSelected:
-                              (value) =>
+                              (_) =>
                                   controller.filter = filter.copyWith(
-                                    onlyErrors: value,
+                                    duration: range,
                                   ),
                         ),
-                        _FacetChip(
-                          label: strings.pinnedOnly,
-                          count: facets.pinned,
-                          selected: filter.onlyPinned,
-                          onSelected:
-                              (value) =>
-                                  controller.filter = filter.copyWith(
-                                    onlyPinned: value,
-                                  ),
-                        ),
-                      ],
-                    ),
-                    _Section(
-                      title: strings.status,
-                      children: [
-                        ..._chips<PeekStatusClass>(
-                          facet: facets.statusClasses,
-                          selected: filter.statusClasses,
-                          label: strings.statusClassName,
-                          apply:
-                              (values) =>
-                                  controller.filter = filter.copyWith(
-                                    statusClasses: values,
-                                  ),
-                        ),
-                        ..._chips<int>(
-                          facet: facets.statusCodes,
-                          selected: filter.statusCodes,
-                          label: (code) => '$code',
-                          apply:
-                              (values) =>
-                                  controller.filter = filter.copyWith(
-                                    statusCodes: values,
-                                  ),
-                        ),
-                      ],
-                    ),
-                    _Section(
-                      title: strings.method,
-                      children: _chips<String>(
-                        facet: facets.methods,
-                        selected: filter.methods,
-                        label: (method) => method,
-                        apply:
-                            (values) =>
-                                controller.filter = filter.copyWith(
-                                  methods: values,
-                                ),
-                      ),
-                    ),
-                    _Section(
-                      title: strings.host,
-                      children: _chips<String>(
-                        facet: facets.hosts,
-                        selected: filter.hosts,
-                        label: (host) => host,
-                        apply:
-                            (values) =>
-                                controller.filter = filter.copyWith(
-                                  hosts: values,
-                                ),
-                      ),
-                    ),
-                    _Section(
-                      title: strings.contentType,
-                      children: _chips<String>(
-                        facet: facets.contentTypes,
-                        selected: filter.contentTypes,
-                        label: (type) => type,
-                        apply:
-                            (values) =>
-                                controller.filter = filter.copyWith(
-                                  contentTypes: values,
-                                ),
-                      ),
-                    ),
-                    _Section(
-                      title: strings.state,
-                      children: _chips<PeekEntryState>(
-                        facet: facets.states,
-                        selected: filter.states,
-                        label: strings.entryState,
-                        apply:
-                            (values) =>
-                                controller.filter = filter.copyWith(
-                                  states: values,
-                                ),
-                      ),
-                    ),
-                    _Section(
-                      title: strings.source,
-                      children: _chips<String>(
-                        facet: facets.sources,
-                        selected: filter.sources,
-                        label: (source) => source,
-                        apply:
-                            (values) =>
-                                controller.filter = filter.copyWith(
-                                  sources: values,
-                                ),
-                      ),
-                    ),
-                    _Section(
-                      title: strings.duration,
-                      children: [
-                        for (final range in _durations)
-                          _FacetChip(
-                            label: strings.durationFilter(range),
-                            selected: filter.duration == range,
-                            onSelected:
-                                (_) =>
-                                    controller.filter = filter.copyWith(
-                                      duration: range,
-                                    ),
-                          ),
-                      ],
-                    ),
-                    _Section(
-                      title: strings.started,
-                      children: _dateChips(controller, strings),
-                    ),
-                    SizedBox(height: theme.gutter),
-                  ],
-                ),
+                    ],
+                  ),
+                  _Section(
+                    title: strings.started,
+                    children: _dateChips(controller, strings),
+                  ),
+                  SizedBox(height: theme.gutter),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -265,24 +262,10 @@ final class PeekFiltersSheet extends StatelessWidget {
 }
 
 /// Opens [PeekFiltersSheet] over [context] as a modal sheet.
-///
-/// The scope is handed over explicitly: a modal route builds beside the
-/// screen, not under it.
-Future<void> showPeekFilters(BuildContext context) {
-  final controller = PeekScope.read(context);
-  final strings = PeekScope.stringsOf(context);
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    showDragHandle: true,
-    builder:
-        (context) => PeekScope(
-          controller: controller,
-          strings: strings,
-          child: const PeekFiltersSheet(),
-        ),
-  );
-}
+Future<void> showPeekFilters(BuildContext context) => showPeekSheet<void>(
+  context,
+  builder: (context) => const PeekFiltersSheet(),
+);
 
 class _Section extends StatelessWidget {
   const _Section({required this.children, this.title});
@@ -327,33 +310,13 @@ class _FacetChip extends StatelessWidget {
   final ValueChanged<bool> onSelected;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = PeekTheme.of(context);
-    final count = this.count;
-
-    return FilterChip(
+  Widget build(BuildContext context) => ConstrainedBox(
+    constraints: const BoxConstraints(maxWidth: 220),
+    child: PeekPill(
+      label: label,
+      count: count,
       selected: selected,
-      onSelected: onSelected,
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12),
-            ),
-          ),
-          if (count != null) ...[
-            const SizedBox(width: 5),
-            Text(
-              '$count',
-              style: theme.caption.copyWith(color: theme.secondaryLabel),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
+      onTap: () => onSelected(!selected),
+    ),
+  );
 }
