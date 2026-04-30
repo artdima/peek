@@ -90,21 +90,9 @@ final class PeekEntryTile extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Row(
-                          children: [
-                            Flexible(child: PeekStatusLabel(entry)),
-                            if (metrics.isNotEmpty)
-                              Flexible(
-                                child: Text(
-                                  ' · $metrics',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.footnote.copyWith(
-                                    color: theme.secondaryLabel,
-                                  ),
-                                ),
-                              ),
-                          ],
+                        child: PeekStatusLabel(
+                          entry,
+                          trailing: metrics.isEmpty ? null : metrics,
                         ),
                       ),
                       const SizedBox(width: 8),

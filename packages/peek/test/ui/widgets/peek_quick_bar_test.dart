@@ -34,6 +34,10 @@ void main() {
     testWidgets('starts on all and switches between the modes', (tester) async {
       await pumpBar(tester);
       expect(isSelected(tester, 'All'), isTrue);
+      expect(
+        tester.widget<PeekPill>(find.widgetWithText(PeekPill, 'All')).count,
+        6,
+      );
 
       await tapMode(tester, 'Errors');
       expect(idsOf(controller.entries), ['e6', 'e5', 'e2']);

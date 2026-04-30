@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_entry.dart';
+import '../../core/query/peek_facets.dart';
 import '../../core/query/peek_filter.dart';
 import '../../core/query/peek_sort.dart';
 import '../peek_controller.dart';
@@ -42,6 +43,13 @@ enum _Mode {
 
   Set<PeekEntryState> get states =>
       this == _Mode.pending ? const {PeekEntryState.pending} : const {};
+
+  int count(PeekFacets facets) => switch (this) {
+    _Mode.all => facets.total,
+    _Mode.errors => facets.errors,
+    _Mode.pending => facets.states[PeekEntryState.pending] ?? 0,
+    _Mode.pinned => facets.pinned,
+  };
 
   bool holds(PeekFilter filter) =>
       filter.onlyErrors == (this == _Mode.errors) &&
@@ -83,7 +91,11 @@ final class PeekQuickBar extends StatelessWidget {
                   (mode) => controller.filter = mode.applyTo(controller.filter),
               segments: [
                 for (final mode in _Mode.values)
-                  PeekSegment(value: mode, label: mode.label(strings)),
+                  PeekSegment(
+                    value: mode,
+                    label: mode.label(strings),
+                    count: mode.count(controller.facets),
+                  ),
               ],
             ),
           ),

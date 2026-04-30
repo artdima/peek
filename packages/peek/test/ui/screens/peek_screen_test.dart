@@ -74,9 +74,18 @@ void main() {
     testWidgets('lists what the store holds and counts it', (tester) async {
       await pumpScreen(tester, entries: fixtures);
       expect(find.text('Requests'), findsOneWidget);
-      expect(find.text('6'), findsOneWidget);
       expect(find.byType(PeekEntryTile), findsNWidgets(6));
       expect(find.text('/users'), findsOneWidget);
+
+      // The count is shown twice: beside the title and on the All pill.
+      expect(
+        find.descendant(
+          of: find.byType(PeekQuickBar),
+          matching: find.text('6'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('6'), findsNWidgets(2));
     });
 
     testWidgets('shows how many of the total are visible when filtered', (

@@ -280,15 +280,20 @@ class _Section extends StatelessWidget {
     final title = this.title;
 
     return Padding(
-      padding: EdgeInsets.only(top: theme.rowSpacing),
+      padding: EdgeInsets.only(top: theme.gutter),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (title != null)
+          if (title != null) ...[
             Text(
-              title,
-              style: theme.caption.copyWith(color: theme.secondaryLabel),
+              title.toUpperCase(),
+              style: theme.caption.copyWith(
+                color: theme.secondaryLabel,
+                letterSpacing: 0.5,
+              ),
             ),
+            const SizedBox(height: 2),
+          ],
           Wrap(spacing: 6, children: children),
         ],
       ),

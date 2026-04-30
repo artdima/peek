@@ -56,10 +56,12 @@ final class PeekEntryView extends StatelessWidget {
                     ),
                   ],
                 ),
-                SelectableText(url, style: theme.body),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: PeekCopyButton(text: url),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: SelectableText(url, style: theme.body)),
+                    PeekCopyButton(text: url),
+                  ],
                 ),
               ],
             ),
