@@ -8,6 +8,7 @@ import '../core/model/peek_status_class.dart';
 import '../core/query/peek_filter.dart';
 import '../core/query/peek_search_query.dart';
 import '../core/query/peek_sort.dart';
+import 'screens/peek_entry_tab.dart';
 
 /// Every word Peek shows, in one place.
 ///
@@ -90,6 +91,12 @@ class PeekStrings {
 
   /// What to do about that.
   String get noMatchesHint => 'Try a different search or clear the filters.';
+
+  /// Shown on the response tab of a call still in flight.
+  String get noResponse => 'No response yet';
+
+  /// What to do about it.
+  String get noResponseHint => 'The call has not come back.';
 
   /// Empty detail pane, before a call is picked.
   String get noSelection => 'Nothing selected';
@@ -366,6 +373,27 @@ class PeekStrings {
     PeekEntryState.pending => pending,
     PeekEntryState.completed => 'Completed',
     PeekEntryState.failed => failed,
+  };
+
+  /// Names a tab of the detail screen.
+  String entryTab(PeekEntryTab tab) => switch (tab) {
+    PeekEntryTab.overview => overview,
+    PeekEntryTab.request => request,
+    PeekEntryTab.response => response,
+    PeekEntryTab.error => error,
+    PeekEntryTab.timing => timing,
+  };
+
+  /// Names a phase of a call, given its HAR name.
+  String phase(String name) => switch (name) {
+    'blocked' => 'Queued',
+    'dns' => 'DNS',
+    'connect' => 'Connect',
+    'ssl' => 'Secure',
+    'send' => 'Request',
+    'wait' => 'Waiting',
+    'receive' => 'Download',
+    _ => name,
   };
 
   /// Names a search scope.
