@@ -39,10 +39,10 @@ void main() {
   group('PeekEntryView', () {
     testWidgets('summarises the call above the tabs', (tester) async {
       await pumpView(tester, e1);
-      expect(find.text('GET'), findsOneWidget);
-      // The code is on the label and again as the overview's status.
+      // The method and the code are in the head and again in the card.
       expect(find.widgetWithText(PeekStatusLabel, '200'), findsOneWidget);
       expect(find.widgetWithText(PeekListRow, '200'), findsOneWidget);
+      expect(find.widgetWithText(PeekListRow, 'GET'), findsOneWidget);
       expect(find.text('https://api.example.com/users'), findsOneWidget);
       expect(find.text('Sent'), findsOneWidget);
       expect(find.text('Received'), findsOneWidget);
@@ -73,13 +73,59 @@ void main() {
       expect(find.widgetWithText(PeekPill, 'Timing'), findsOneWidget);
     });
 
+    testWidgets('lays the overview out in cards', (tester) async {
+      await pumpView(tester, redirected);
+      expect(find.text('GENERAL'), findsOneWidget);
+      expect(find.text('SIZES'), findsOneWidget);
+      expect(find.text('REDIRECTS'), findsOneWidget);
+      expect(find.text('SOURCE'), findsOneWidget);
+      expect(find.widgetWithText(PeekListRow, 'Finished'), findsOneWidget);
+      expect(
+        find.widgetWithText(PeekListRow, 'Response headers'),
+        findsOneWidget,
+      );
+      expect(find.widgetWithText(PeekListRow, '301 GET'), findsOneWidget);
+    });
+
+    testWidgets('leads from the error summary to the error tab', (
+      tester,
+    ) async {
+      await pumpView(tester, e5);
+      expect(find.text('ERROR'), findsOneWidget);
+      expect(find.widgetWithText(PeekListRow, 'slow'), findsOneWidget);
+
+      // The message is on the summary row alone; the kind is also the
+      // status in the general card.
+      await tester.tap(
+        find.ancestor(
+          of: find.text('slow'),
+          matching: find.byType(PeekListRow),
+        ),
+      );
+      await tester.pump();
+      final errorTab = tester.widget<PeekPill>(
+        find.widgetWithText(PeekPill, 'Error'),
+      );
+      expect(errorTab.selected, isTrue);
+    });
+
+    testWidgets('keeps the redirects card away when there are none', (
+      tester,
+    ) async {
+      await pumpView(tester, e1);
+      expect(find.text('REDIRECTS'), findsNothing);
+      expect(find.text('ERROR'), findsNothing);
+    });
+
     testWidgets('moves between the tabs', (tester) async {
       await pumpView(tester, e1);
       expect(find.widgetWithText(PeekListRow, 'Started'), findsOneWidget);
+      expect(find.text('GENERAL'), findsOneWidget);
 
       await openTab(tester, 'Request');
       expect(find.widgetWithText(PeekListRow, 'Method'), findsOneWidget);
       expect(find.widgetWithText(PeekListRow, 'Started'), findsNothing);
+      expect(find.text('GENERAL'), findsNothing);
 
       await openTab(tester, 'Response');
       expect(find.widgetWithText(PeekListRow, 'Content type'), findsOneWidget);

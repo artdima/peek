@@ -152,6 +152,27 @@ class PeekStrings {
   /// Heading for the redirect chain.
   String get redirects => 'Redirects';
 
+  /// Heading for the card that answers "what call was this".
+  String get general => 'General';
+
+  /// Heading for the card of how much moved.
+  String get sizes => 'Sizes';
+
+  /// Label for the request body.
+  String get requestBody => 'Request body';
+
+  /// Label for the response body.
+  String get responseBody => 'Response body';
+
+  /// Label for the request headers.
+  String get requestHeaders => 'Request headers';
+
+  /// Label for the response headers.
+  String get responseHeaders => 'Response headers';
+
+  /// Label for when a call came back.
+  String get finished => 'Finished';
+
   /// Label for the adapter that reported a call.
   String get source => 'Source';
 
@@ -400,8 +421,8 @@ class PeekStrings {
   String searchScope(PeekSearchScope scope) => switch (scope) {
     PeekSearchScope.url => url,
     PeekSearchScope.headers => headers,
-    PeekSearchScope.requestBody => 'Request body',
-    PeekSearchScope.responseBody => 'Response body',
+    PeekSearchScope.requestBody => requestBody,
+    PeekSearchScope.responseBody => responseBody,
     PeekSearchScope.error => error,
   };
 

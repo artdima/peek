@@ -80,6 +80,7 @@ class _PeekEntryViewState extends State<PeekEntryView> {
                   PeekEntryTab.overview => _Overview(
                     entry: widget.entry,
                     strings: strings,
+                    onShowTab: (value) => setState(() => _tab = value),
                   ),
                   PeekEntryTab.request => _Request(
                     entry: widget.entry,
@@ -256,27 +257,101 @@ class _Amount extends StatelessWidget {
 }
 
 class _Overview extends StatelessWidget {
-  const _Overview({required this.entry, required this.strings});
+  const _Overview({
+    required this.entry,
+    required this.strings,
+    required this.onShowTab,
+  });
 
   final PeekEntry entry;
   final PeekStrings strings;
+  final ValueChanged<PeekEntryTab> onShowTab;
 
   @override
   Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
     final elapsed = entry.duration;
-    return PeekListSection(
-      title: strings.overview,
+    final finishedAt = entry.completedAt;
+    final failure = entry.failure;
+    final redirects = entry.response?.redirects ?? const [];
+
+    return Column(
       children: [
-        PeekListRow(title: strings.status, value: strings.outcome(entry)),
-        PeekListRow(
-          title: strings.duration,
-          value: elapsed == null ? strings.none : strings.elapsed(elapsed),
+        PeekListSection(
+          title: strings.general,
+          children: [
+            PeekListRow(title: strings.method, value: entry.request.method),
+            PeekListRow(title: strings.status, value: strings.outcome(entry)),
+            PeekListRow(title: strings.host, value: entry.request.host),
+            PeekListRow(
+              title: strings.duration,
+              value: elapsed == null ? strings.none : strings.elapsed(elapsed),
+            ),
+            PeekListRow(
+              title: strings.started,
+              value: strings.timestamp(entry.startedAt),
+            ),
+            PeekListRow(
+              title: strings.finished,
+              value:
+                  finishedAt == null
+                      ? strings.none
+                      : strings.timestamp(finishedAt),
+            ),
+          ],
         ),
-        PeekListRow(
-          title: strings.started,
-          value: strings.timestamp(entry.startedAt),
+        if (failure != null)
+          PeekListSection(
+            title: strings.error,
+            children: [
+              PeekListRow(
+                leading: PeekStatusDot(theme.colorForEntry(entry)),
+                title: strings.failureKind(failure.kind),
+                subtitle: failure.message.isEmpty ? null : failure.message,
+                chevron: true,
+                onTap: () => onShowTab(PeekEntryTab.error),
+              ),
+            ],
+          ),
+        PeekListSection(
+          title: strings.sizes,
+          children: [
+            PeekListRow(
+              title: strings.requestBody,
+              value: _bodyValue(strings, entry.request.body),
+            ),
+            PeekListRow(
+              title: strings.responseBody,
+              value:
+                  entry.response == null
+                      ? strings.none
+                      : _bodyValue(strings, entry.response!.body),
+            ),
+            PeekListRow(
+              title: strings.requestHeaders,
+              value: '${entry.request.headers.length}',
+            ),
+            PeekListRow(
+              title: strings.responseHeaders,
+              value: '${entry.response?.headers.length ?? 0}',
+            ),
+          ],
         ),
-        PeekListRow(title: strings.source, value: entry.source),
+        if (redirects.isNotEmpty)
+          PeekListSection(
+            title: strings.redirects,
+            children: [
+              for (final hop in redirects)
+                PeekListRow(
+                  title: '${hop.statusCode} ${hop.method}',
+                  subtitle: hop.location.toString(),
+                ),
+            ],
+          ),
+        PeekListSection(
+          title: strings.source,
+          children: [PeekListRow(title: strings.source, value: entry.source)],
+        ),
       ],
     );
   }
