@@ -366,20 +366,29 @@ class _Request extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final request = entry.request;
-    return PeekListSection(
-      title: strings.request,
+    final query = request.queryParameters;
+    final cookies = request.headers.cookies;
+
+    return Column(
       children: [
-        PeekListRow(title: strings.method, value: request.method),
-        PeekListRow(title: strings.host, value: request.host),
-        PeekListRow(
-          title: strings.contentType,
-          value: request.mediaType?.mimeType ?? strings.none,
+        PeekListSection(
+          title: strings.request,
+          children: [
+            PeekListRow(title: strings.method, value: request.method),
+            PeekListRow(title: strings.host, value: request.host),
+            PeekListRow(
+              title: strings.contentType,
+              value: request.mediaType?.mimeType ?? strings.none,
+            ),
+            PeekListRow(
+              title: strings.body,
+              value: _bodyValue(strings, request.body),
+            ),
+          ],
         ),
-        PeekListRow(title: strings.headers, value: '${request.headers.length}'),
-        PeekListRow(
-          title: strings.body,
-          value: _bodyValue(strings, request.body),
-        ),
+        if (query.isNotEmpty) PeekQueryParamsView(query),
+        PeekHeadersView(request.headers),
+        if (cookies.isNotEmpty) PeekCookiesView(cookies),
       ],
     );
   }
@@ -401,23 +410,26 @@ class _Response extends StatelessWidget {
         icon: Icons.hourglass_empty,
       );
     }
+    final cookies = response.headers.setCookies;
 
-    return PeekListSection(
-      title: strings.response,
+    return Column(
       children: [
-        PeekListRow(title: strings.status, value: strings.outcome(entry)),
-        PeekListRow(
-          title: strings.contentType,
-          value: response.mediaType?.mimeType ?? strings.none,
+        PeekListSection(
+          title: strings.response,
+          children: [
+            PeekListRow(title: strings.status, value: strings.outcome(entry)),
+            PeekListRow(
+              title: strings.contentType,
+              value: response.mediaType?.mimeType ?? strings.none,
+            ),
+            PeekListRow(
+              title: strings.body,
+              value: _bodyValue(strings, response.body),
+            ),
+          ],
         ),
-        PeekListRow(
-          title: strings.headers,
-          value: '${response.headers.length}',
-        ),
-        PeekListRow(
-          title: strings.body,
-          value: _bodyValue(strings, response.body),
-        ),
+        PeekHeadersView(response.headers),
+        if (cookies.isNotEmpty) PeekCookiesView(cookies),
       ],
     );
   }

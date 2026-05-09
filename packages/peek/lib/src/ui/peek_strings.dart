@@ -215,6 +215,18 @@ class PeekStrings {
   /// Copies a curl command.
   String get copyCurl => 'Copy as cURL';
 
+  /// Copies every row of a table at once.
+  String get copyAll => 'Copy all';
+
+  /// Orders a table by name.
+  String get sortByName => 'Sort by name';
+
+  /// Restores a table's own order.
+  String get sortByOrder => 'Keep the order sent';
+
+  /// Says a value was masked before Peek kept it.
+  String get redacted => 'Masked';
+
   /// Copies a plain-text summary.
   String get copyText => 'Copy as text';
 

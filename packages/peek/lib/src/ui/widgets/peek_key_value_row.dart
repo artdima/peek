@@ -10,6 +10,7 @@ final class PeekKeyValueRow extends StatelessWidget {
     required this.name,
     required this.value,
     this.trailing,
+    this.subtitle,
     this.emphasised = false,
     super.key,
   });
@@ -22,6 +23,9 @@ final class PeekKeyValueRow extends StatelessWidget {
 
   /// Shown after the value, such as a copy button.
   final Widget? trailing;
+
+  /// A line under the value, such as a cookie's attributes.
+  final String? subtitle;
 
   /// Whether the value stands out, as a masked or notable one might.
   final bool emphasised;
@@ -41,7 +45,19 @@ final class PeekKeyValueRow extends StatelessWidget {
         children: [
           SizedBox(width: 120, child: Text(name, style: nameStyle)),
           const SizedBox(width: 12),
-          Expanded(child: SelectableText(value, style: valueStyle)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SelectableText(value, style: valueStyle),
+                if (subtitle case final line?)
+                  Text(
+                    line,
+                    style: theme.caption.copyWith(color: theme.tertiaryLabel),
+                  ),
+              ],
+            ),
+          ),
           if (trailing case final widget?) ...[
             const SizedBox(width: 8),
             widget,
