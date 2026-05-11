@@ -257,6 +257,18 @@ class PeekStrings {
   /// Toggles line wrapping.
   String get wrapLines => 'Wrap lines';
 
+  /// Stops wrapping lines.
+  String get stopWrapping => 'Stop wrapping';
+
+  /// Goes to the match before this one.
+  String get previousMatch => 'Previous match';
+
+  /// Goes to the match after this one.
+  String get nextMatch => 'Next match';
+
+  /// Where the search is in what it found.
+  String matchCount(int current, int total) => '$current of $total';
+
   /// Quick filter showing everything.
   String get all => 'All';
 
