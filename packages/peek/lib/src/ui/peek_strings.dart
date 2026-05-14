@@ -251,6 +251,18 @@ class PeekStrings {
   /// Expands every node of a tree.
   String get expandAll => 'Expand all';
 
+  /// Says a body would not decode as JSON after all.
+  String get notJson => 'This is not valid JSON';
+
+  /// Copies the value under a node.
+  String get copyValue => 'Copy value';
+
+  /// Copies the path that leads to a node.
+  String get copyPath => 'Copy path';
+
+  /// How many values an object or an array holds.
+  String items(int count) => count == 1 ? '1 item' : '$count items';
+
   /// Collapses every node of a tree.
   String get collapseAll => 'Collapse all';
 

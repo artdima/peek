@@ -5,6 +5,8 @@ export 'peek_empty_state.dart';
 export 'peek_entry_tile.dart';
 export 'peek_highlighted_text.dart';
 export 'peek_icon_button.dart';
+export 'peek_json_node.dart';
+export 'peek_json_tree_view.dart';
 export 'peek_key_value_row.dart';
 export 'peek_key_values_view.dart';
 export 'peek_labels.dart';

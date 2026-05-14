@@ -39,12 +39,13 @@ final class PeekCopyButton extends StatelessWidget {
     );
   }
 
-  Future<void> _copy(
-    BuildContext context,
-    String value,
-    PeekStrings strings,
-  ) async {
-    await Clipboard.setData(ClipboardData(text: value));
-    if (context.mounted) showPeekToast(context, strings.copied);
-  }
+  Future<void> _copy(BuildContext context, String value, PeekStrings strings) =>
+      peekCopy(context, value);
+}
+
+/// Puts [text] on the clipboard and says so where [context] is.
+Future<void> peekCopy(BuildContext context, String text) async {
+  final strings = PeekScope.stringsOf(context);
+  await Clipboard.setData(ClipboardData(text: text));
+  if (context.mounted) showPeekToast(context, strings.copied);
 }
