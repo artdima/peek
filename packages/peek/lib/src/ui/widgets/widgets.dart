@@ -1,5 +1,6 @@
 export 'peek_active_filters.dart';
 export 'peek_alert.dart';
+export 'peek_body_views.dart';
 export 'peek_copy_button.dart';
 export 'peek_empty_state.dart';
 export 'peek_entry_tile.dart';

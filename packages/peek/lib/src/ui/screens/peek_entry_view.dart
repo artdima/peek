@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart' show Icons, SelectableText;
 import 'package:flutter/widgets.dart';
 
@@ -8,6 +10,7 @@ import '../peek_scope.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
 import '../widgets/widgets.dart';
+import 'peek_entry_screen.dart';
 import 'peek_entry_tab.dart';
 
 /// One call in full, without a screen around it.
@@ -380,9 +383,10 @@ class _Request extends StatelessWidget {
               title: strings.contentType,
               value: request.mediaType?.mimeType ?? strings.none,
             ),
-            PeekListRow(
-              title: strings.body,
-              value: _bodyValue(strings, request.body),
+            _BodyRow(
+              body: request.body,
+              title: strings.requestBody,
+              strings: strings,
             ),
           ],
         ),
@@ -422,9 +426,10 @@ class _Response extends StatelessWidget {
               title: strings.contentType,
               value: response.mediaType?.mimeType ?? strings.none,
             ),
-            PeekListRow(
-              title: strings.body,
-              value: _bodyValue(strings, response.body),
+            _BodyRow(
+              body: response.body,
+              title: strings.responseBody,
+              strings: strings,
             ),
           ],
         ),
@@ -479,6 +484,31 @@ class _Timing extends StatelessWidget {
         if (elapsed != null)
           PeekListRow(title: strings.duration, value: strings.elapsed(elapsed)),
       ],
+    );
+  }
+}
+
+/// The row that leads to a body, and says how much of one there is.
+class _BodyRow extends StatelessWidget {
+  const _BodyRow({
+    required this.body,
+    required this.title,
+    required this.strings,
+  });
+
+  final PeekBody body;
+  final String title;
+  final PeekStrings strings;
+
+  @override
+  Widget build(BuildContext context) {
+    final nothing = body is PeekEmptyBody;
+    return PeekListRow(
+      title: title,
+      value: _bodyValue(strings, body),
+      chevron: !nothing,
+      enabled: !nothing,
+      onTap: () => unawaited(showPeekBody(context, body: body, title: title)),
     );
   }
 }

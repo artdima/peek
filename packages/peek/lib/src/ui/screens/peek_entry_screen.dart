@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' show Icons, MaterialPageRoute;
 import 'package:flutter/widgets.dart';
 
+import '../../core/model/peek_body.dart';
 import '../../core/model/peek_id.dart';
 import '../peek_scope.dart';
 import '../theme/peek_theme.dart';
@@ -43,6 +44,52 @@ final class PeekEntryScreen extends StatelessWidget {
                 icon: Icons.delete_outline,
               )
               : PeekEntryView(entry),
+    );
+  }
+}
+
+/// Pushes [body] over [context], titled [title].
+Future<void> showPeekBody(
+  BuildContext context, {
+  required PeekBody body,
+  required String title,
+}) {
+  final controller = PeekScope.read(context);
+  final strings = PeekScope.stringsOf(context);
+  return Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder:
+          (context) => PeekScope(
+            controller: controller,
+            strings: strings,
+            child: _PeekBodyScreen(body: body, title: title),
+          ),
+    ),
+  );
+}
+
+class _PeekBodyScreen extends StatelessWidget {
+  const _PeekBodyScreen({required this.body, required this.title});
+
+  final PeekBody body;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = PeekScope.stringsOf(context);
+    final theme = PeekTheme.of(context);
+
+    return PeekScaffold(
+      title: title,
+      titleStyle: PeekTitleStyle.inline,
+      background: theme.groupedBackground,
+      leading: PeekIconButton(
+        icon: Icons.arrow_back_ios_new,
+        tooltip: strings.back,
+        size: 17,
+        onPressed: () => Navigator.of(context).maybePop(),
+      ),
+      child: PeekBodyView(body),
     );
   }
 }

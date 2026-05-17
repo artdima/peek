@@ -206,6 +206,9 @@ class PeekStrings {
   /// Shown when a section has no rows.
   String get empty => 'Empty';
 
+  /// What to make of a body there is nothing to show for.
+  String get noBodyHint => 'There is nothing to show here.';
+
   /// Copies a value.
   String get copy => 'Copy';
 
@@ -244,6 +247,24 @@ class PeekStrings {
 
   /// Shows a body as it arrived.
   String get raw => 'Raw';
+
+  /// Heading for the fields of a form.
+  String get fields => 'Fields';
+
+  /// Heading for the files of a multipart form.
+  String get files => 'Files';
+
+  /// Label for the name a file was uploaded under.
+  String get filename => 'File name';
+
+  /// Copies bytes as base64 text.
+  String get copyBase64 => 'Copy as base64';
+
+  /// The size of an image in pixels.
+  String pixels(int width, int height) => '$width × $height';
+
+  /// Says how much of a body is shown as hex.
+  String firstBytes(int count) => 'First $count bytes';
 
   /// Shows a JSON body as a tree.
   String get tree => 'Tree';
