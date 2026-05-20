@@ -13,23 +13,79 @@ import 'peek_json_tree_view.dart';
 import 'peek_key_value_row.dart';
 import 'peek_key_values_view.dart';
 import 'peek_list_section.dart';
+import 'peek_segmented.dart';
 import 'peek_text_body_view.dart';
+
+/// How a body that could be read either way is being read.
+enum PeekBodyMode {
+  /// Structured: a JSON body as a tree of branches.
+  tree,
+
+  /// As it arrived: numbered lines of text.
+  raw,
+}
 
 /// A body, shown the way its kind deserves.
 ///
 /// The content type decides: JSON becomes a tree, other text becomes
 /// numbered lines, an image is drawn, a form is a table, and bytes Peek
-/// cannot read are shown as what they are.
-final class PeekBodyView extends StatelessWidget {
-  /// Creates a view over [body].
-  const PeekBodyView(this.body, {super.key});
+/// cannot read are shown as what they are. Only JSON can be read two
+/// ways, so only JSON offers the choice.
+final class PeekBodyView extends StatefulWidget {
+  /// Creates a view over [body], opened in [mode] where that applies.
+  const PeekBodyView(this.body, {this.mode = PeekBodyMode.tree, super.key});
 
   /// What to show.
   final PeekBody body;
 
+  /// How to show a body that can be read either way.
+  final PeekBodyMode mode;
+
+  @override
+  State<PeekBodyView> createState() => _PeekBodyViewState();
+}
+
+class _PeekBodyViewState extends State<PeekBodyView> {
+  late PeekBodyMode _mode = widget.mode;
+
   @override
   Widget build(BuildContext context) {
     final strings = PeekScope.stringsOf(context);
+    final theme = PeekTheme.of(context);
+    final body = widget.body;
+
+    if (body is PeekTextBody && (body.contentType?.isJson ?? false)) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(theme.gutter, 0, theme.gutter, 4),
+            child: PeekSegmented<PeekBodyMode>(
+              selected: _mode,
+              onChanged: (mode) => setState(() => _mode = mode),
+              segments: [
+                PeekSegment(value: PeekBodyMode.tree, label: strings.tree),
+                PeekSegment(value: PeekBodyMode.raw, label: strings.raw),
+              ],
+            ),
+          ),
+          Expanded(
+            child:
+                _mode == PeekBodyMode.tree
+                    ? PeekJsonTreeView(
+                      source: body.text,
+                      capturedSize: body.capturedSize,
+                      totalSize: body.size,
+                    )
+                    : PeekTextBodyView(
+                      text: body.text,
+                      capturedSize: body.capturedSize,
+                      totalSize: body.size,
+                    ),
+          ),
+        ],
+      );
+    }
 
     return switch (body) {
       PeekEmptyBody() => PeekEmptyState(
@@ -41,12 +97,6 @@ final class PeekBodyView extends StatelessWidget {
         message: strings.noBodyHint,
         icon: Icons.visibility_off_outlined,
       ),
-      final PeekTextBody text when text.contentType?.isJson ?? false =>
-        PeekJsonTreeView(
-          source: text.text,
-          capturedSize: text.capturedSize,
-          totalSize: text.size,
-        ),
       final PeekTextBody text => PeekTextBodyView(
         text: text.text,
         capturedSize: text.capturedSize,

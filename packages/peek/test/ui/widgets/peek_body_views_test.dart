@@ -32,13 +32,30 @@ void main() {
   }
 
   group('PeekBodyView', () {
-    testWidgets('shows JSON as a tree', (tester) async {
+    testWidgets('shows JSON as a tree, or as it arrived', (tester) async {
       await pumpBody(
         tester,
         PeekBody.text('{"id": 1}', contentType: PeekMediaType.json),
       );
       expect(find.byType(PeekJsonTreeView), findsOneWidget);
       expect(find.byType(PeekTextBodyView), findsNothing);
+
+      await tester.tap(find.widgetWithText(PeekPill, 'Raw'));
+      await tester.pump();
+      expect(find.byType(PeekTextBodyView), findsOneWidget);
+      expect(find.byType(PeekJsonTreeView), findsNothing);
+
+      await tester.tap(find.widgetWithText(PeekPill, 'Tree'));
+      await tester.pump();
+      expect(find.byType(PeekJsonTreeView), findsOneWidget);
+    });
+
+    testWidgets('offers the choice only where there is one', (tester) async {
+      await pumpBody(
+        tester,
+        PeekBody.text('plain', contentType: PeekMediaType.plainText),
+      );
+      expect(find.byType(PeekPill), findsNothing);
     });
 
     testWidgets('shows other text as numbered lines', (tester) async {
