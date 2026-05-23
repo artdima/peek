@@ -197,6 +197,12 @@ class PeekStrings {
   /// Label for a stack trace.
   String get stackTrace => 'Stack trace';
 
+  /// Heading for whatever the adapter attached to a failure.
+  String get details => 'Details';
+
+  /// Says how many lines are not shown.
+  String moreLines(int count) => '$count more lines';
+
   /// Shown where a value is missing.
   String get none => '—';
 

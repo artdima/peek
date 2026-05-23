@@ -5,7 +5,6 @@ import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_body.dart';
 import '../../core/model/peek_entry.dart';
-import '../../core/model/peek_failure.dart';
 import '../peek_scope.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
@@ -93,9 +92,11 @@ class _PeekEntryViewState extends State<PeekEntryView> {
                     entry: widget.entry,
                     strings: strings,
                   ),
-                  PeekEntryTab.error => _Error(
-                    failure: widget.entry.failure!,
-                    strings: strings,
+                  PeekEntryTab.error => PeekErrorView(
+                    widget.entry.failure!,
+                    hasResponse: widget.entry.response != null,
+                    onShowResponse:
+                        () => setState(() => _tab = PeekEntryTab.response),
                   ),
                   PeekEntryTab.timing => _Timing(
                     entry: widget.entry,
@@ -435,31 +436,6 @@ class _Response extends StatelessWidget {
         ),
         PeekHeadersView(response.headers),
         if (cookies.isNotEmpty) PeekCookiesView(cookies),
-      ],
-    );
-  }
-}
-
-class _Error extends StatelessWidget {
-  const _Error({required this.failure, required this.strings});
-
-  final PeekFailure failure;
-  final PeekStrings strings;
-
-  @override
-  Widget build(BuildContext context) {
-    final details = failure.details;
-    return PeekListSection(
-      title: strings.error,
-      children: [
-        PeekListRow(
-          title: strings.error,
-          value: strings.failureKind(failure.kind),
-        ),
-        if (failure.message.isNotEmpty)
-          PeekListRow(title: strings.body, value: failure.message),
-        if (details != null)
-          PeekListRow(title: strings.source, value: '$details'),
       ],
     );
   }
