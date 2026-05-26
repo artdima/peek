@@ -137,6 +137,9 @@ class PeekStrings {
   /// Tab and heading for the phase timings.
   String get timing => 'Timing';
 
+  /// Heading for the phases a call went through.
+  String get phases => 'Phases';
+
   /// Heading for headers.
   String get headers => 'Headers';
 
@@ -467,6 +470,9 @@ class PeekStrings {
     PeekEntryTab.error => error,
     PeekEntryTab.timing => timing,
   };
+
+  /// Says the adapter gave no phase timings.
+  String get noBreakdown => 'This source does not report where the time went.';
 
   /// Names a phase of a call, given its HAR name.
   String phase(String name) => switch (name) {

@@ -163,9 +163,10 @@ void main() {
         ),
       );
       await openTab(tester, 'Timing');
-      expect(find.widgetWithText(PeekListRow, 'DNS'), findsOneWidget);
-      expect(find.widgetWithText(PeekListRow, 'Waiting'), findsOneWidget);
-      expect(find.widgetWithText(PeekListRow, '60 ms'), findsOneWidget);
+      expect(find.byType(PeekTimingView), findsOneWidget);
+      expect(find.text('DNS'), findsOneWidget);
+      expect(find.text('Waiting'), findsOneWidget);
+      expect(find.text('60 ms'), findsOneWidget);
     });
 
     testWidgets('fills itself in when the call comes back', (tester) async {

@@ -98,10 +98,7 @@ class _PeekEntryViewState extends State<PeekEntryView> {
                     onShowResponse:
                         () => setState(() => _tab = PeekEntryTab.response),
                   ),
-                  PeekEntryTab.timing => _Timing(
-                    entry: widget.entry,
-                    strings: strings,
-                  ),
+                  PeekEntryTab.timing => PeekTimingView(widget.entry),
                 },
               ],
             ),
@@ -436,29 +433,6 @@ class _Response extends StatelessWidget {
         ),
         PeekHeadersView(response.headers),
         if (cookies.isNotEmpty) PeekCookiesView(cookies),
-      ],
-    );
-  }
-}
-
-class _Timing extends StatelessWidget {
-  const _Timing({required this.entry, required this.strings});
-
-  final PeekEntry entry;
-  final PeekStrings strings;
-
-  @override
-  Widget build(BuildContext context) {
-    final phases = entry.timings!.known;
-    final elapsed = entry.duration;
-
-    return PeekListSection(
-      title: strings.timing,
-      children: [
-        for (final MapEntry(:key, :value) in phases.entries)
-          PeekListRow(title: strings.phase(key), value: strings.elapsed(value)),
-        if (elapsed != null)
-          PeekListRow(title: strings.duration, value: strings.elapsed(elapsed)),
       ],
     );
   }
