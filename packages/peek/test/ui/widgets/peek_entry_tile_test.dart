@@ -116,46 +116,33 @@ void main() {
       expect(taps, 1);
     });
 
-    testWidgets('offers a menu on long press', (tester) async {
-      final actions = <PeekTileAction>[];
-      await pumpTile(
-        tester,
-        PeekEntryTile(e1, onAction: actions.add),
-        size: const Size(400, 600),
-      );
+    testWidgets('offers what can be done on a long press', (tester) async {
+      await pumpTile(tester, PeekEntryTile(e1), size: const Size(400, 700));
 
       await tester.longPress(find.byType(PeekEntryTile));
       await tester.pumpAndSettle();
       expect(find.text('Pin'), findsOneWidget);
       expect(find.text('Copy URL'), findsOneWidget);
       expect(find.text('Copy as cURL'), findsOneWidget);
-      expect(find.text('Share'), findsNothing);
-
-      await tester.tap(find.text('Copy URL'));
-      await tester.pumpAndSettle();
-      expect(actions, [PeekTileAction.copyUrl]);
+      expect(find.text('Copy as text'), findsOneWidget);
+      expect(find.text('Export HAR'), findsOneWidget);
+      // No delegate, so nothing that would need one.
+      expect(find.text('Share as HAR'), findsNothing);
     });
 
-    testWidgets('says Unpin for a pinned entry and can offer sharing', (
-      tester,
-    ) async {
+    testWidgets('says Unpin for a pinned entry', (tester) async {
       await pumpTile(
         tester,
-        PeekEntryTile(
-          e1.copyWith(isPinned: true),
-          onAction: (_) {},
-          showShare: true,
-        ),
-        size: const Size(400, 600),
+        PeekEntryTile(e1.copyWith(isPinned: true)),
+        size: const Size(400, 700),
       );
       await tester.longPress(find.byType(PeekEntryTile));
       await tester.pumpAndSettle();
       expect(find.text('Unpin'), findsOneWidget);
-      expect(find.text('Share'), findsOneWidget);
     });
 
-    testWidgets('has no menu without a handler', (tester) async {
-      await pumpTile(tester, PeekEntryTile(e1));
+    testWidgets('has no menu when the row does not offer one', (tester) async {
+      await pumpTile(tester, PeekEntryTile(e1, menu: false));
       await tester.longPress(find.byType(PeekEntryTile));
       await tester.pumpAndSettle();
       expect(find.text('Copy URL'), findsNothing);
@@ -171,6 +158,8 @@ void main() {
           label: 'GET, api.example.com, /users, Status 200, 120 ms',
           isButton: true,
           hasTapAction: true,
+          // The row's menu is part of what it offers, so it is announced.
+          hasLongPressAction: true,
           hasFocusAction: true,
           isFocusable: true,
         ),
@@ -187,6 +176,7 @@ void main() {
           label: 'GET, api.example.com, /users, Status 200, 120 ms',
           isButton: true,
           hasTapAction: true,
+          hasLongPressAction: true,
           hasFocusAction: true,
           isFocusable: true,
           hasSelectedState: true,
@@ -194,12 +184,6 @@ void main() {
         ),
       );
       handle.dispose();
-    });
-
-    testWidgets('exposes what its menu would copy', (tester) async {
-      final tile = PeekEntryTile(e1);
-      expect(tile.url(), 'https://api.example.com/users');
-      expect(tile.curl(), startsWith('curl '));
     });
 
     testWidgets('survives a long URL and large text', (tester) async {

@@ -17,25 +17,13 @@ import '../widgets/widgets.dart';
 /// an entry is not interrupted by the list moving under the finger.
 final class PeekEntryList extends StatefulWidget {
   /// Creates the list.
-  const PeekEntryList({
-    this.onTap,
-    this.onAction,
-    this.selectedId,
-    this.showShare = false,
-    super.key,
-  });
+  const PeekEntryList({this.onTap, this.selectedId, super.key});
 
   /// Called when a row is tapped.
   final void Function(PeekEntry entry)? onTap;
 
-  /// Called when a row's menu picks an action.
-  final void Function(PeekEntry entry, PeekTileAction action)? onAction;
-
   /// Which row is open in the detail pane, if any.
   final PeekId? selectedId;
-
-  /// Whether row menus offer sharing.
-  final bool showShare;
 
   @override
   State<PeekEntryList> createState() => _PeekEntryListState();
@@ -93,13 +81,8 @@ class _PeekEntryListState extends State<PeekEntryList> {
               entry,
               key: ValueKey(entry.id),
               selected: entry.id == widget.selectedId,
-              showShare: widget.showShare,
               highlight: highlight,
               onTap: widget.onTap == null ? null : () => widget.onTap!(entry),
-              onAction:
-                  widget.onAction == null
-                      ? null
-                      : (action) => widget.onAction!(entry, action),
             );
           },
         ),

@@ -8,6 +8,7 @@ library;
 export 'core.dart';
 export 'src/ui/peek_controller.dart';
 export 'src/ui/peek_scope.dart';
+export 'src/ui/peek_share.dart';
 export 'src/ui/peek_strings.dart';
 export 'src/ui/screens/screens.dart';
 export 'src/ui/theme/peek_theme.dart';

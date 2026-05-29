@@ -248,6 +248,12 @@ class PeekStrings {
   /// Exports an HTTP Archive.
   String get exportHar => 'Export HAR';
 
+  /// Shares an HTTP Archive of everything the list shows.
+  String get shareHar => 'Share as HAR';
+
+  /// Names the menu of everything else a screen can do.
+  String get more => 'More';
+
   /// Shares the exported content.
   String get share => 'Share';
 

@@ -1,15 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart' show Icons;
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../core/export/peek_exporters.dart';
-import '../../core/model/peek_entry.dart';
 import '../../core/peek.dart';
 import '../../core/query/peek_search_query.dart';
 import '../peek_controller.dart';
 import '../peek_scope.dart';
+import '../peek_share.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
 import '../widgets/widgets.dart';
@@ -33,6 +31,7 @@ final class PeekScreen extends StatefulWidget {
     this.peek,
     this.strings = const PeekStrings(),
     this.controller,
+    this.share,
     super.key,
   });
 
@@ -44,6 +43,10 @@ final class PeekScreen extends StatefulWidget {
 
   /// A controller to use instead of one created here.
   final PeekController? controller;
+
+  /// What hands an export to the platform; without one, Peek offers
+  /// copying and nothing else.
+  final PeekShareDelegate? share;
 
   /// The width from which the list and the call sit side by side.
   static const double wideLayout = 720;
@@ -70,6 +73,7 @@ class _PeekScreenState extends State<PeekScreen> {
   Widget build(BuildContext context) => PeekScope(
     controller: _controller,
     strings: widget.strings,
+    share: widget.share,
     child: const _PeekScaffold(),
   );
 }
@@ -115,6 +119,14 @@ class _PeekScaffold extends StatelessWidget {
                   ? null
                   : () => unawaited(_confirmClear(context, controller)),
         ),
+        PeekIconButton(
+          icon: Icons.more_horiz,
+          tooltip: strings.more,
+          onPressed:
+              controller.entries.isEmpty
+                  ? null
+                  : () => unawaited(showPeekListActions(context)),
+        ),
       ],
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -158,9 +170,6 @@ class _PeekScaffold extends StatelessWidget {
             controller.select(entry.id);
             if (!wide) unawaited(showPeekEntry(context, entry.id));
           },
-          onAction:
-              (entry, action) =>
-                  _handleAction(context, controller, strings, entry, action),
         ),
       ),
     ],
@@ -190,37 +199,6 @@ class _PeekScaffold extends StatelessWidget {
       confirmLabel: strings.confirm,
     );
     if (confirmed) controller.clear();
-  }
-
-  Future<void> _handleAction(
-    BuildContext context,
-    PeekController controller,
-    PeekStrings strings,
-    PeekEntry entry,
-    PeekTileAction action,
-  ) async {
-    switch (action) {
-      case PeekTileAction.pin:
-        final pinned = controller.togglePin(entry.id);
-        if (!pinned && !entry.isPinned && context.mounted) {
-          showPeekToast(context, strings.pinLimitReached);
-        }
-      case PeekTileAction.copyUrl:
-        await _copy(context, strings, PeekExporters.url(entry));
-      case PeekTileAction.copyCurl:
-        await _copy(context, strings, PeekExporters.curl.export(entry));
-      case PeekTileAction.share:
-        break;
-    }
-  }
-
-  Future<void> _copy(
-    BuildContext context,
-    PeekStrings strings,
-    String text,
-  ) async {
-    await Clipboard.setData(ClipboardData(text: text));
-    if (context.mounted) showPeekToast(context, strings.copied);
   }
 }
 

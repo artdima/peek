@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart' show Icons, MaterialPageRoute;
 import 'package:flutter/widgets.dart';
 
@@ -36,6 +38,14 @@ final class PeekEntryScreen extends StatelessWidget {
         size: 17,
         onPressed: () => Navigator.of(context).maybePop(),
       ),
+      actions: [
+        if (entry != null)
+          PeekIconButton(
+            icon: Icons.more_horiz,
+            tooltip: strings.more,
+            onPressed: () => unawaited(showPeekEntryActions(context, entry)),
+          ),
+      ],
       child:
           entry == null
               ? PeekEmptyState(
@@ -56,12 +66,14 @@ Future<void> showPeekBody(
 }) {
   final controller = PeekScope.read(context);
   final strings = PeekScope.stringsOf(context);
+  final share = PeekScope.shareOf(context);
   return Navigator.of(context).push(
     MaterialPageRoute<void>(
       builder:
           (context) => PeekScope(
             controller: controller,
             strings: strings,
+            share: share,
             child: _PeekBodyScreen(body: body, title: title),
           ),
     ),
@@ -101,12 +113,14 @@ class _PeekBodyScreen extends StatelessWidget {
 Future<void> showPeekEntry(BuildContext context, PeekId id) {
   final controller = PeekScope.read(context);
   final strings = PeekScope.stringsOf(context);
+  final share = PeekScope.shareOf(context);
   return Navigator.of(context).push(
     MaterialPageRoute<void>(
       builder:
           (context) => PeekScope(
             controller: controller,
             strings: strings,
+            share: share,
             child: PeekEntryScreen(id),
           ),
     ),

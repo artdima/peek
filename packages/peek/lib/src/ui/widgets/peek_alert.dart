@@ -17,6 +17,7 @@ Future<bool> showPeekAlert(
 }) async {
   final controller = PeekScope.read(context);
   final strings = PeekScope.stringsOf(context);
+  final share = PeekScope.shareOf(context);
 
   final confirmed = await showGeneralDialog<bool>(
     context: context,
@@ -28,6 +29,7 @@ Future<bool> showPeekAlert(
         (context, animation, secondaryAnimation) => PeekScope(
           controller: controller,
           strings: strings,
+          share: share,
           child: _Alert(
             title: title,
             message: message,

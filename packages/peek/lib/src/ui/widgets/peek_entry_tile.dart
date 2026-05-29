@@ -1,30 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
-import '../../core/export/peek_exporters.dart';
 import '../../core/model/peek_entry.dart';
 import '../peek_scope.dart';
-import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
+import 'peek_entry_actions.dart';
 import 'peek_highlighted_text.dart';
-import 'peek_sheet.dart';
 import 'peek_status_label.dart';
 import 'peek_tappable.dart';
-
-/// What a long press on a tile offers.
-enum PeekTileAction {
-  /// Pin or unpin the entry.
-  pin,
-
-  /// Put the URL on the clipboard.
-  copyUrl,
-
-  /// Put a curl command on the clipboard.
-  copyCurl,
-
-  /// Hand the entry to the share sheet.
-  share,
-}
 
 /// One network call as a row of the list.
 ///
@@ -36,9 +21,8 @@ final class PeekEntryTile extends StatelessWidget {
   const PeekEntryTile(
     this.entry, {
     this.onTap,
-    this.onAction,
     this.selected = false,
-    this.showShare = false,
+    this.menu = true,
     this.highlight = '',
     super.key,
   });
@@ -49,14 +33,11 @@ final class PeekEntryTile extends StatelessWidget {
   /// Called when the row is tapped.
   final VoidCallback? onTap;
 
-  /// Called with the menu item a long press picked.
-  final void Function(PeekTileAction action)? onAction;
-
   /// Whether this row is the one open in the detail pane.
   final bool selected;
 
-  /// Whether the menu offers sharing; hidden without a share delegate.
-  final bool showShare;
+  /// Whether a long press offers what can be done with the call.
+  final bool menu;
 
   /// Text the search matched, marked wherever it appears in the URL.
   final String highlight;
@@ -76,7 +57,9 @@ final class PeekEntryTile extends StatelessWidget {
         child: PeekTappable(
           onTap: onTap,
           onLongPress:
-              onAction == null ? null : () => _showMenu(context, strings),
+              menu
+                  ? () => unawaited(showPeekEntryActions(context, entry))
+                  : null,
           selected: selected,
           child: ExcludeSemantics(
             child: Padding(
@@ -151,28 +134,4 @@ final class PeekEntryTile extends StatelessWidget {
       ),
     );
   }
-
-  Future<void> _showMenu(BuildContext context, PeekStrings strings) async {
-    final action = await showPeekActions<PeekTileAction>(
-      context,
-      title: '${entry.request.method} ${entry.request.path}',
-      actions: [
-        PeekAction(
-          value: PeekTileAction.pin,
-          label: entry.isPinned ? strings.unpin : strings.pin,
-        ),
-        PeekAction(value: PeekTileAction.copyUrl, label: strings.copyUrl),
-        PeekAction(value: PeekTileAction.copyCurl, label: strings.copyCurl),
-        if (showShare)
-          PeekAction(value: PeekTileAction.share, label: strings.share),
-      ],
-    );
-    if (action != null) onAction?.call(action);
-  }
-
-  /// The curl command for [entry], for whoever handles [PeekTileAction].
-  String curl() => PeekExporters.curl.export(entry);
-
-  /// The URL of [entry], for whoever handles [PeekTileAction].
-  String url() => PeekExporters.url(entry);
 }
