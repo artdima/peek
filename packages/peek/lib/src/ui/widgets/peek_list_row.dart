@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' show Icons;
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/widgets.dart';
 
 import '../theme/peek_theme.dart';
@@ -93,7 +93,11 @@ final class PeekListRow extends StatelessWidget {
               if (trailing != null) ...[const SizedBox(width: 8), trailing],
               if (chevron) ...[
                 const SizedBox(width: 4),
-                Icon(Icons.chevron_right, size: 18, color: theme.tertiaryLabel),
+                Icon(
+                  CupertinoIcons.chevron_forward,
+                  size: 18,
+                  color: theme.tertiaryLabel,
+                ),
               ],
             ],
           ),

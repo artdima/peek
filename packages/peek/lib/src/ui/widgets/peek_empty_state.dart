@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' show Icons;
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/widgets.dart';
 
 import '../theme/peek_theme.dart';
@@ -9,7 +9,7 @@ final class PeekEmptyState extends StatelessWidget {
   const PeekEmptyState({
     required this.title,
     required this.message,
-    this.icon = Icons.inbox_outlined,
+    this.icon = CupertinoIcons.tray,
     this.action,
     super.key,
   });

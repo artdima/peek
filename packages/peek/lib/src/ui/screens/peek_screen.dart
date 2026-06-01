@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart' show Icons;
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/widgets.dart';
 
 import '../../core/peek.dart';
@@ -81,99 +81,149 @@ class _PeekScreenState extends State<PeekScreen> {
 /// How much of a wide layout the list keeps for itself.
 const double _listPaneWidth = 360;
 
-class _PeekScaffold extends StatelessWidget {
+class _PeekScaffold extends StatefulWidget {
   const _PeekScaffold();
+
+  @override
+  State<_PeekScaffold> createState() => _PeekScaffoldState();
+}
+
+class _PeekScaffoldState extends State<_PeekScaffold> {
+  final ScrollController _scroll = ScrollController();
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final controller = PeekScope.of(context);
     final strings = PeekScope.stringsOf(context);
     final theme = PeekTheme.of(context);
-    // The search has a field of its own, so it is not part of the badge.
-    final filters =
-        controller.filter.copyWith(query: PeekSearchQuery.none).activeCount;
+    final wide = MediaQuery.sizeOf(context).width >= PeekScreen.wideLayout;
+    final actions = _actions(context, controller, strings);
+
+    if (!wide) {
+      return PeekSliverScaffold(
+        title: strings.requests,
+        actions: actions,
+        controller: _scroll,
+        slivers: [
+          SliverToBoxAdapter(child: _chrome(controller, strings)),
+          PeekEntrySliver(
+            scrollController: _scroll,
+            onTap: (entry) {
+              controller.select(entry.id);
+              unawaited(showPeekEntry(context, entry.id));
+            },
+          ),
+        ],
+      );
+    }
 
     return PeekScaffold(
       title: strings.requests,
-      trailingTitle: Text(
-        strings.requestCount(controller.entries.length, controller.totalCount),
-        style: theme.footnote.copyWith(color: theme.secondaryLabel),
-      ),
-      actions: [
-        PeekIconButton(
-          icon: Icons.filter_list,
-          tooltip: strings.filters,
-          badgeCount: filters,
-          onPressed: () => unawaited(showPeekFilters(context)),
-        ),
-        PeekIconButton(
-          icon: controller.isPaused ? Icons.play_arrow : Icons.pause,
-          tooltip: controller.isPaused ? strings.resume : strings.pause,
-          onPressed: controller.togglePause,
-        ),
-        PeekIconButton(
-          icon: Icons.delete_outline,
-          tooltip: strings.clear,
-          onPressed:
-              controller.totalCount == 0
-                  ? null
-                  : () => unawaited(_confirmClear(context, controller)),
-        ),
-        PeekIconButton(
-          icon: Icons.more_horiz,
-          tooltip: strings.more,
-          onPressed:
-              controller.entries.isEmpty
-                  ? null
-                  : () => unawaited(showPeekListActions(context)),
-        ),
-      ],
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final wide = constraints.maxWidth >= PeekScreen.wideLayout;
-          final list = _list(context, controller, strings, wide: wide);
-          if (!wide) return list;
-
-          return Row(
-            children: [
-              SizedBox(width: _listPaneWidth, child: list),
-              SizedBox(
-                width: theme.hairline,
-                child: ColoredBox(
-                  color: theme.separator,
-                  child: const SizedBox(height: double.infinity),
+      actions: actions,
+      child: Row(
+        children: [
+          SizedBox(
+            width: _listPaneWidth,
+            child: Column(
+              children: [
+                _chrome(controller, strings),
+                Expanded(
+                  child: PeekEntryList(
+                    selectedId: controller.selectedId,
+                    onTap: (entry) => controller.select(entry.id),
+                  ),
                 ),
-              ),
-              Expanded(child: _detail(controller, strings)),
-            ],
-          );
-        },
+              ],
+            ),
+          ),
+          SizedBox(
+            width: theme.hairline,
+            child: ColoredBox(
+              color: theme.separator,
+              child: const SizedBox(height: double.infinity),
+            ),
+          ),
+          Expanded(child: _detail(controller, strings)),
+        ],
       ),
     );
   }
 
-  Widget _list(
+  List<Widget> _actions(
     BuildContext context,
     PeekController controller,
-    PeekStrings strings, {
-    required bool wide,
-  }) => Column(
-    children: [
-      if (controller.isPaused) _PausedBanner(strings: strings),
-      const PeekSearchBar(),
-      const PeekQuickBar(),
-      const PeekActiveFilters(),
-      Expanded(
-        child: PeekEntryList(
-          selectedId: wide ? controller.selectedId : null,
-          onTap: (entry) {
-            controller.select(entry.id);
-            if (!wide) unawaited(showPeekEntry(context, entry.id));
-          },
-        ),
+    PeekStrings strings,
+  ) {
+    // The search has a field of its own, so it is not part of the badge.
+    final filters =
+        controller.filter.copyWith(query: PeekSearchQuery.none).activeCount;
+
+    return [
+      PeekIconButton(
+        icon: CupertinoIcons.slider_horizontal_3,
+        tooltip: strings.filters,
+        badgeCount: filters,
+        onPressed: () => unawaited(showPeekFilters(context)),
       ),
-    ],
-  );
+      PeekIconButton(
+        icon:
+            controller.isPaused
+                ? CupertinoIcons.play_fill
+                : CupertinoIcons.pause_fill,
+        tooltip: controller.isPaused ? strings.resume : strings.pause,
+        onPressed: controller.togglePause,
+      ),
+      PeekIconButton(
+        icon: CupertinoIcons.trash,
+        tooltip: strings.clear,
+        onPressed:
+            controller.totalCount == 0
+                ? null
+                : () => unawaited(_confirmClear(context, controller)),
+      ),
+      PeekIconButton(
+        icon: CupertinoIcons.ellipsis,
+        tooltip: strings.more,
+        onPressed:
+            controller.entries.isEmpty
+                ? null
+                : () => unawaited(showPeekListActions(context)),
+      ),
+    ];
+  }
+
+  /// Everything above the list: what is paused, searched and filtered.
+  /// Everything above the list: what is paused, searched, filtered, and
+  /// how much of the store is left showing.
+  Widget _chrome(PeekController controller, PeekStrings strings) {
+    final theme = PeekTheme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (controller.isPaused) _PausedBanner(strings: strings),
+        const PeekSearchBar(),
+        const PeekQuickBar(),
+        const PeekActiveFilters(),
+        Padding(
+          padding: EdgeInsets.fromLTRB(theme.gutter, 0, theme.gutter, 6),
+          child: Text(
+            strings.requestCount(
+              controller.entries.length,
+              controller.totalCount,
+            ),
+            style: theme.caption.copyWith(color: theme.secondaryLabel),
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget _detail(PeekController controller, PeekStrings strings) {
     final entry = controller.selected;
@@ -181,7 +231,7 @@ class _PeekScaffold extends StatelessWidget {
       return PeekEmptyState(
         title: strings.noSelection,
         message: strings.noSelectionHint,
-        icon: Icons.touch_app_outlined,
+        icon: CupertinoIcons.hand_point_right,
       );
     }
     return PeekEntryView(entry, key: ValueKey(entry.id));
@@ -216,7 +266,7 @@ class _PausedBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Row(
         children: [
-          Icon(Icons.pause_circle_outline, size: 14, color: theme.pending),
+          Icon(CupertinoIcons.pause_circle, size: 14, color: theme.pending),
           const SizedBox(width: 8),
           Text(
             strings.pausedBanner,

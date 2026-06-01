@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,7 +23,7 @@ void main() {
       tester
           .widget<PeekIconButton>(
             find.ancestor(
-              of: find.byIcon(Icons.filter_list),
+              of: find.byIcon(CupertinoIcons.slider_horizontal_3),
               matching: find.byType(PeekIconButton),
             ),
           )
@@ -73,7 +74,9 @@ void main() {
   group('PeekScreen', () {
     testWidgets('lists what the store holds and counts it', (tester) async {
       await pumpScreen(tester, entries: fixtures);
-      expect(find.text('Requests'), findsOneWidget);
+      // The collapsing bar draws the name twice: large, and small for
+      // when it has been scrolled under.
+      expect(find.text('Requests'), findsNWidgets(2));
       expect(find.byType(PeekEntryTile), findsNWidgets(6));
       expect(find.text('/users'), findsOneWidget);
 
@@ -100,7 +103,7 @@ void main() {
 
     testWidgets('filters the list from the search field', (tester) async {
       await pumpScreen(tester, entries: fixtures);
-      await tester.enterText(find.byType(TextField), 'login');
+      await tester.enterText(find.byType(CupertinoSearchTextField), 'login');
       await tester.pump(PeekController.searchDebounce);
       await tester.pump();
 
@@ -110,7 +113,10 @@ void main() {
 
     testWidgets('keeps the search field over an empty result', (tester) async {
       await pumpScreen(tester, entries: fixtures);
-      await tester.enterText(find.byType(TextField), 'nothing-matches-this');
+      await tester.enterText(
+        find.byType(CupertinoSearchTextField),
+        'nothing-matches-this',
+      );
       await tester.pump(PeekController.searchDebounce);
       await tester.pump();
 
@@ -166,7 +172,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.widgetWithText(PeekPill, 'GET'),
-          matching: find.byIcon(Icons.close),
+          matching: find.byIcon(CupertinoIcons.xmark),
         ),
       );
       await tester.pump();
@@ -243,7 +249,7 @@ void main() {
       await pumpScreen(tester);
       final button = tester.widget<PeekIconButton>(
         find.ancestor(
-          of: find.byIcon(Icons.delete_outline),
+          of: find.byIcon(CupertinoIcons.trash),
           matching: find.byType(PeekIconButton),
         ),
       );
@@ -257,7 +263,7 @@ void main() {
       await tester.tap(find.text('Pin'));
       await settle(tester);
       expect(store.find(e1.id)?.isPinned, isTrue);
-      expect(find.byIcon(Icons.push_pin), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.pin_fill), findsOneWidget);
     });
 
     testWidgets('copies a URL from a row menu', (tester) async {
@@ -309,7 +315,7 @@ void main() {
       tester,
     ) async {
       await pumpScreen(tester, entries: uiFixtures, size: const Size(420, 400));
-      await tester.drag(find.byType(ListView), const Offset(0, -300));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -300));
       await tester.pump();
       expect(find.textContaining('new request'), findsNothing);
 

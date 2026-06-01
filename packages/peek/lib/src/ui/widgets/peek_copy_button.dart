@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' show Icons;
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -32,7 +32,7 @@ final class PeekCopyButton extends StatelessWidget {
     final value = text;
 
     return PeekIconButton(
-      icon: Icons.copy_rounded,
+      icon: CupertinoIcons.doc_on_doc,
       tooltip: tooltip ?? strings.copy,
       size: dense ? 16 : 20,
       onPressed: value == null ? null : () => _copy(context, value, strings),

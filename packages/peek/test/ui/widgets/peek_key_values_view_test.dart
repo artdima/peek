@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peek/peek.dart';
@@ -115,7 +115,7 @@ void main() {
       await pumpView(tester, PeekHeadersView(many));
       expect(find.byType(PeekSearchField), findsOneWidget);
 
-      await tester.enterText(find.byType(TextField), 'header-3');
+      await tester.enterText(find.byType(CupertinoSearchTextField), 'header-3');
       await tester.pump();
       expect(_names(tester), ['X-Header-3']);
     });

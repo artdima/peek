@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart' show Icons;
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_entry.dart';
@@ -111,7 +111,7 @@ final class PeekEntryTile extends StatelessWidget {
                       if (entry.isPinned) ...[
                         const SizedBox(width: 6),
                         Icon(
-                          Icons.push_pin,
+                          CupertinoIcons.pin_fill,
                           size: 12,
                           color: theme.tertiaryLabel,
                         ),

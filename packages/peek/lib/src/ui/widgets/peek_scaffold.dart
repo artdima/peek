@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoSliverNavigationBar;
 import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:flutter/widgets.dart';
 
@@ -182,6 +183,95 @@ class _InlineTitle extends StatelessWidget {
           ),
           ...actions,
         ],
+      ),
+    );
+  }
+}
+
+/// A screen whose name is large until the content scrolls under it.
+///
+/// This is the one place Peek borrows a whole chrome widget: the
+/// collapsing large title is a behaviour worth having and a tedious one
+/// to rebuild. Everything inside the scroll view is still Peek's own.
+final class PeekSliverScaffold extends StatelessWidget {
+  /// Creates a screen named [title] over [slivers].
+  const PeekSliverScaffold({
+    required this.title,
+    required this.slivers,
+    this.actions = const [],
+    this.leading,
+    this.controller,
+    this.background,
+    this.overlay,
+    super.key,
+  });
+
+  /// The screen's name.
+  final String title;
+
+  /// What the screen shows, as slivers.
+  final List<Widget> slivers;
+
+  /// The buttons at the top right.
+  final List<Widget> actions;
+
+  /// A button before the name, such as the way back.
+  final Widget? leading;
+
+  /// The scroll position, when the caller keeps one.
+  final ScrollController? controller;
+
+  /// An override for what lies behind everything.
+  final Color? background;
+
+  /// Drawn over the scroll view, such as a floating button.
+  final Widget? overlay;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    final overlay = this.overlay;
+
+    return ColoredBox(
+      color: background ?? theme.background,
+      // Text editing and text selection want a Material ancestor to live
+      // in. This one draws nothing: it is a host, not a look.
+      child: Material(
+        type: MaterialType.transparency,
+        child: Stack(
+          children: [
+            CustomScrollView(
+              controller: controller,
+              slivers: [
+                CupertinoSliverNavigationBar(
+                  largeTitle: Text(title, style: theme.largeTitle),
+                  backgroundColor: theme.background,
+                  automaticallyImplyLeading: false,
+                  leading: leading,
+                  padding: EdgeInsetsDirectional.only(
+                    start: theme.gutter - 10,
+                    end: theme.gutter - 10,
+                  ),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: theme.separator,
+                      width: theme.hairline,
+                    ),
+                  ),
+                  trailing:
+                      actions.isEmpty
+                          ? null
+                          : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: actions,
+                          ),
+                ),
+                ...slivers,
+              ],
+            ),
+            if (overlay != null) overlay,
+          ],
+        ),
       ),
     );
   }

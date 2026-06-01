@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart' show Icons;
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_entry.dart';
@@ -100,7 +100,7 @@ final class PeekQuickBar extends StatelessWidget {
             ),
           ),
           PeekIconButton(
-            icon: Icons.swap_vert,
+            icon: CupertinoIcons.arrow_up_arrow_down,
             tooltip: strings.sort,
             onPressed: () => unawaited(_pickSort(context, controller, strings)),
           ),

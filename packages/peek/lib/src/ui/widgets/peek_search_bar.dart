@@ -94,7 +94,6 @@ class _PeekSearchBarState extends State<PeekSearchBar> {
             focusNode: _focus,
             autofocus: widget.autofocus,
             placeholder: strings.search,
-            clearLabel: strings.clearSearch,
             cancelLabel: strings.cancel,
             onCancel: searching ? () => _cancel(controller) : null,
             onChanged: controller.searchFor,

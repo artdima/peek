@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' show Icons;
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_cookie.dart';
@@ -79,7 +79,6 @@ class _PeekKeyValuesViewState extends State<PeekKeyValuesView> {
             child: PeekSearchField(
               controller: _filter,
               placeholder: strings.search,
-              clearLabel: strings.clearSearch,
               onChanged: (_) => setState(() {}),
               onClear: () => setState(_filter.clear),
             ),
@@ -90,7 +89,10 @@ class _PeekKeyValuesViewState extends State<PeekKeyValuesView> {
             mainAxisSize: MainAxisSize.min,
             children: [
               PeekIconButton(
-                icon: _byName ? Icons.sort_by_alpha : Icons.sort,
+                icon:
+                    _byName
+                        ? CupertinoIcons.arrow_up_arrow_down
+                        : CupertinoIcons.list_bullet,
                 tooltip: _byName ? strings.sortByOrder : strings.sortByName,
                 size: 16,
                 onPressed: () => setState(() => _byName = !_byName),

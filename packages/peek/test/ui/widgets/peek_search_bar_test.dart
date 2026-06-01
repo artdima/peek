@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peek/peek.dart';
 
@@ -29,21 +29,26 @@ void main() {
 
   /// Types [text] and waits out the controller's debounce.
   Future<void> search(WidgetTester tester, String text) async {
-    await tester.enterText(find.byType(TextField), text);
+    await tester.enterText(find.byType(CupertinoSearchTextField), text);
     await tester.pump();
     await tester.pump(PeekController.searchDebounce);
     await tester.pump();
   }
 
   String fieldText(WidgetTester tester) =>
-      tester.widget<TextField>(find.byType(TextField)).controller!.text;
+      tester
+          .widget<CupertinoSearchTextField>(
+            find.byType(CupertinoSearchTextField),
+          )
+          .controller!
+          .text;
 
   group('PeekSearchBar', () {
     testWidgets('filters the list once typing pauses', (tester) async {
       await pumpBar(tester);
       expect(find.byType(PeekEntryTile), findsNWidgets(6));
 
-      await tester.enterText(find.byType(TextField), 'login');
+      await tester.enterText(find.byType(CupertinoSearchTextField), 'login');
       await tester.pump();
       expect(controller.searchText, 'login');
       expect(controller.isSearchPending, isTrue);
@@ -60,7 +65,7 @@ void main() {
       await search(tester, 'users');
       expect(find.byType(PeekEntryTile), findsNWidgets(2));
 
-      await tester.tap(find.byTooltip('Clear search'));
+      await tester.tap(find.byIcon(CupertinoIcons.xmark_circle_fill));
       await tester.pump(PeekController.searchDebounce);
       await tester.pump();
       expect(fieldText(tester), isEmpty);

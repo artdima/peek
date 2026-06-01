@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart' show Icons, Tooltip;
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/widgets.dart';
 
 import '../theme/peek_theme.dart';
@@ -108,7 +109,7 @@ final class PeekPill extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(3),
                         child: Icon(
-                          Icons.close,
+                          CupertinoIcons.xmark,
                           size: 14,
                           color: selected ? onAccent : theme.secondaryLabel,
                         ),

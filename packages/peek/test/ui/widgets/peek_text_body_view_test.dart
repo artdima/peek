@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peek/peek.dart';
@@ -63,7 +63,7 @@ void main() {
       await pumpBody(tester, const PeekTextBodyView(text: json));
       expect(find.textContaining(' of '), findsNothing);
 
-      await tester.enterText(find.byType(TextField), 'peek');
+      await tester.enterText(find.byType(CupertinoSearchTextField), 'peek');
       await tester.pump();
       expect(find.text('1 of 2'), findsOneWidget);
 
@@ -79,7 +79,10 @@ void main() {
 
     testWidgets('says plainly when a search finds nothing', (tester) async {
       await pumpBody(tester, const PeekTextBodyView(text: json));
-      await tester.enterText(find.byType(TextField), 'nothing-here');
+      await tester.enterText(
+        find.byType(CupertinoSearchTextField),
+        'nothing-here',
+      );
       await tester.pump();
 
       expect(find.text('0 of 0'), findsOneWidget);
@@ -158,7 +161,7 @@ void main() {
           ),
           brightness: brightness,
         );
-        await tester.enterText(find.byType(TextField), 'peek');
+        await tester.enterText(find.byType(CupertinoSearchTextField), 'peek');
         await tester.pump();
         expect(tester.takeException(), isNull);
         await expectGolden(

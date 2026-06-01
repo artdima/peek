@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peek/peek.dart';
 
@@ -86,7 +86,7 @@ void main() {
 
       expect(find.text('Response Headers'), findsOneWidget);
       expect(find.text('3'), findsOneWidget);
-      expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.chevron_forward), findsOneWidget);
       expect(
         tester.getSize(find.byType(PeekListRow)).height,
         greaterThanOrEqualTo(44),
@@ -199,7 +199,6 @@ void main() {
         PeekSearchField(
           controller: controller,
           placeholder: 'Search',
-          clearLabel: 'Clear search',
           cancelLabel: 'Cancel',
           onCancel: () => cancelled++,
           onChanged: (value) => typed = value,
@@ -208,17 +207,17 @@ void main() {
       );
 
       expect(find.text('Search'), findsOneWidget);
-      expect(find.byIcon(Icons.cancel), findsNothing);
+      expect(find.byIcon(CupertinoIcons.xmark_circle_fill), findsNothing);
 
-      await tester.enterText(find.byType(TextField), 'users');
+      await tester.enterText(find.byType(CupertinoSearchTextField), 'users');
       await tester.pump();
       expect(typed, 'users');
-      expect(find.byIcon(Icons.cancel), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.xmark_circle_fill), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.cancel));
+      await tester.tap(find.byIcon(CupertinoIcons.xmark_circle_fill));
       await tester.pump();
       expect(controller.text, isEmpty);
-      expect(find.byIcon(Icons.cancel), findsNothing);
+      expect(find.byIcon(CupertinoIcons.xmark_circle_fill), findsNothing);
 
       await tester.tap(find.text('Cancel'));
       expect(cancelled, 1);
@@ -232,11 +231,11 @@ void main() {
         const Row(
           children: [
             PeekIconButton(
-              icon: Icons.filter_list,
+              icon: CupertinoIcons.slider_horizontal_3,
               tooltip: 'Filters',
               badgeCount: 2,
             ),
-            PeekIconButton(icon: Icons.pause, tooltip: 'Pause'),
+            PeekIconButton(icon: CupertinoIcons.pause_fill, tooltip: 'Pause'),
           ],
         ),
       );
@@ -244,14 +243,14 @@ void main() {
       expect(find.byTooltip('Filters'), findsOneWidget);
       expect(find.text('2'), findsOneWidget);
 
-      final context = tester.element(find.byIcon(Icons.pause));
+      final context = tester.element(find.byIcon(CupertinoIcons.pause_fill));
       final theme = PeekTheme.of(context);
       expect(
-        tester.widget<Icon>(find.byIcon(Icons.pause)).color,
+        tester.widget<Icon>(find.byIcon(CupertinoIcons.pause_fill)).color,
         theme.tertiaryLabel,
       );
       expect(
-        tester.getSize(find.byIcon(Icons.pause).first).width,
+        tester.getSize(find.byIcon(CupertinoIcons.pause_fill).first).width,
         lessThanOrEqualTo(44),
       );
     });
@@ -265,7 +264,10 @@ void main() {
           title: 'Requests',
           trailingTitle: Text('6'),
           actions: [
-            PeekIconButton(icon: Icons.filter_list, tooltip: 'Filters'),
+            PeekIconButton(
+              icon: CupertinoIcons.slider_horizontal_3,
+              tooltip: 'Filters',
+            ),
           ],
           child: Center(child: Text('body')),
         ),
@@ -288,7 +290,7 @@ void main() {
         const PeekScaffold(
           title: 'api.example.com',
           titleStyle: PeekTitleStyle.inline,
-          leading: PeekIconButton(icon: Icons.arrow_back, tooltip: 'Back'),
+          leading: PeekIconButton(icon: CupertinoIcons.back, tooltip: 'Back'),
           child: SizedBox.shrink(),
         ),
         size: const Size(400, 200),

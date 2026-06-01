@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peek/peek.dart';
 
@@ -88,10 +88,10 @@ void main() {
 
     testWidgets('marks a pinned entry', (tester) async {
       await pumpTile(tester, PeekEntryTile(e1));
-      expect(find.byIcon(Icons.push_pin), findsNothing);
+      expect(find.byIcon(CupertinoIcons.pin_fill), findsNothing);
 
       await pumpTile(tester, PeekEntryTile(e1.copyWith(isPinned: true)));
-      expect(find.byIcon(Icons.push_pin), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.pin_fill), findsOneWidget);
     });
 
     testWidgets('washes the selected row and nothing else', (tester) async {

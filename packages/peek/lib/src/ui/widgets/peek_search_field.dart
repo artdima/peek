@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart'
-    show Icons, InputDecoration, TextField, Tooltip;
-import 'package:flutter/services.dart' show TextInputAction;
+import 'package:flutter/cupertino.dart' show CupertinoSearchTextField;
 import 'package:flutter/widgets.dart';
 
 import '../theme/peek_theme.dart';
@@ -8,15 +6,15 @@ import 'peek_tappable.dart';
 
 /// The rounded field Peek searches from.
 ///
-/// The field itself is a bare [TextField]: none of Material's decoration
-/// is used, only its text editing, selection handles and IME handling.
+/// This is Flutter's own search field: it already is the field Peek wants,
+/// down to the clear button, and it brings the platform's text editing
+/// with it. Only the colours are ours.
 final class PeekSearchField extends StatelessWidget {
   /// Creates a field over [controller].
   const PeekSearchField({
     required this.controller,
     required this.onChanged,
     required this.placeholder,
-    required this.clearLabel,
     this.focusNode,
     this.onClear,
     this.cancelLabel,
@@ -33,9 +31,6 @@ final class PeekSearchField extends StatelessWidget {
 
   /// Shown while the field is empty.
   final String placeholder;
-
-  /// Names the button that empties the field.
-  final String clearLabel;
 
   /// The field's focus, when the caller keeps one.
   final FocusNode? focusNode;
@@ -61,57 +56,18 @@ final class PeekSearchField extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 36,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            decoration: BoxDecoration(
-              color: theme.fill,
-              borderRadius: BorderRadius.circular(theme.radius),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.search, size: 17, color: theme.secondaryLabel),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: TextField(
-                    controller: controller,
-                    focusNode: focusNode,
-                    autofocus: autofocus,
-                    onChanged: onChanged,
-                    textInputAction: TextInputAction.search,
-                    style: theme.body,
-                    cursorColor: theme.accent,
-                    decoration: InputDecoration.collapsed(
-                      hintText: placeholder,
-                      hintStyle: theme.body.copyWith(
-                        color: theme.secondaryLabel,
-                      ),
-                    ),
-                  ),
-                ),
-                ValueListenableBuilder<TextEditingValue>(
-                  valueListenable: controller,
-                  builder: (context, value, _) {
-                    if (value.text.isEmpty) return const SizedBox.shrink();
-                    return PeekTappable(
-                      onTap: onClear,
-                      fade: true,
-                      child: Tooltip(
-                        message: clearLabel,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 4),
-                          child: Icon(
-                            Icons.cancel,
-                            size: 17,
-                            color: theme.secondaryLabel,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
+          child: CupertinoSearchTextField(
+            controller: controller,
+            focusNode: focusNode,
+            autofocus: autofocus,
+            placeholder: placeholder,
+            onChanged: onChanged,
+            onSuffixTap: onClear,
+            style: theme.body,
+            placeholderStyle: theme.body.copyWith(color: theme.secondaryLabel),
+            itemColor: theme.secondaryLabel,
+            backgroundColor: theme.fill,
+            borderRadius: BorderRadius.circular(theme.radius),
           ),
         ),
         if (onCancel != null && cancelLabel != null)

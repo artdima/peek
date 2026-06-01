@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peek/peek.dart';
@@ -149,7 +149,7 @@ void main() {
       await pumpTree(tester, const PeekJsonTreeView(source: _json));
       expect(inTree, findsNothing);
 
-      await tester.enterText(find.byType(TextField), 'peek_dio');
+      await tester.enterText(find.byType(CupertinoSearchTextField), 'peek_dio');
       await tester.pump();
       expect(inTree, findsOneWidget);
     });

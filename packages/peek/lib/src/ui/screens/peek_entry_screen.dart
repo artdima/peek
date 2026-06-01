@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart' show Icons, MaterialPageRoute;
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/material.dart' show MaterialPageRoute;
 import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_body.dart';
@@ -33,7 +34,7 @@ final class PeekEntryScreen extends StatelessWidget {
       titleStyle: PeekTitleStyle.inline,
       background: theme.groupedBackground,
       leading: PeekIconButton(
-        icon: Icons.arrow_back_ios_new,
+        icon: CupertinoIcons.back,
         tooltip: strings.back,
         size: 17,
         onPressed: () => Navigator.of(context).maybePop(),
@@ -41,7 +42,7 @@ final class PeekEntryScreen extends StatelessWidget {
       actions: [
         if (entry != null)
           PeekIconButton(
-            icon: Icons.more_horiz,
+            icon: CupertinoIcons.ellipsis,
             tooltip: strings.more,
             onPressed: () => unawaited(showPeekEntryActions(context, entry)),
           ),
@@ -51,7 +52,7 @@ final class PeekEntryScreen extends StatelessWidget {
               ? PeekEmptyState(
                 title: strings.removedEntry,
                 message: strings.removedEntryHint,
-                icon: Icons.delete_outline,
+                icon: CupertinoIcons.trash,
               )
               : PeekEntryView(entry),
     );
@@ -96,7 +97,7 @@ class _PeekBodyScreen extends StatelessWidget {
       titleStyle: PeekTitleStyle.inline,
       background: theme.groupedBackground,
       leading: PeekIconButton(
-        icon: Icons.arrow_back_ios_new,
+        icon: CupertinoIcons.back,
         tooltip: strings.back,
         size: 17,
         onPressed: () => Navigator.of(context).maybePop(),

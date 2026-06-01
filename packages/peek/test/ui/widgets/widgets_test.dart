@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -101,12 +102,12 @@ void main() {
         const PeekKeyValueRow(
           name: 'Content-Type',
           value: 'application/json',
-          trailing: Icon(Icons.lock_outline),
+          trailing: Icon(CupertinoIcons.lock),
         ),
       );
       expect(find.text('Content-Type'), findsOneWidget);
       expect(find.byType(SelectableText), findsOneWidget);
-      expect(find.byIcon(Icons.lock_outline), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.lock), findsOneWidget);
     });
 
     testWidgets('emphasises a value when asked', (tester) async {
@@ -222,7 +223,7 @@ void main() {
         size: const Size(400, 400),
       );
       expect(find.text('No requests yet'), findsOneWidget);
-      expect(find.byIcon(Icons.inbox_outlined), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.tray), findsOneWidget);
       expect(find.byType(TextButton), findsOneWidget);
     });
   });
