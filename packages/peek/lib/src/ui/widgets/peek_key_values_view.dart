@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_cookie.dart';
@@ -89,10 +89,7 @@ class _PeekKeyValuesViewState extends State<PeekKeyValuesView> {
             mainAxisSize: MainAxisSize.min,
             children: [
               PeekIconButton(
-                icon:
-                    _byName
-                        ? CupertinoIcons.arrow_up_arrow_down
-                        : CupertinoIcons.list_bullet,
+                icon: _byName ? Icons.swap_vert : Icons.sort,
                 tooltip: _byName ? strings.sortByOrder : strings.sortByName,
                 size: 16,
                 onPressed: () => setState(() => _byName = !_byName),

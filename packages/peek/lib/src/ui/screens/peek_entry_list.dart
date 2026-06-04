@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_entry.dart';
@@ -60,7 +60,7 @@ class _PeekEntrySliverState extends State<PeekEntrySliver> {
                 ? PeekEmptyState(
                   title: strings.noMatches,
                   message: strings.noMatchesHint,
-                  icon: CupertinoIcons.doc_text_search,
+                  icon: Icons.search_off_outlined,
                   action: PeekTextButton(
                     label: strings.resetFilters,
                     onPressed: controller.resetFilter,
@@ -237,7 +237,7 @@ class _NewRequestsButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(CupertinoIcons.arrow_up, size: 14, color: onAccent),
+            const Icon(Icons.arrow_upward, size: 14, color: onAccent),
             const SizedBox(width: 6),
             Text(
               strings.newRequests(count),

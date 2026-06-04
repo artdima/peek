@@ -1,7 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
-import 'package:flutter/material.dart' show SelectableText;
+import 'package:flutter/material.dart' show Icons, SelectableText;
 import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_body.dart';
@@ -96,7 +95,7 @@ class _PeekBodyViewState extends State<PeekBodyView> {
       PeekUnavailableBody(:final reason) => PeekEmptyState(
         title: strings.unavailableBody(reason),
         message: strings.noBodyHint,
-        icon: CupertinoIcons.eye_slash,
+        icon: Icons.visibility_off_outlined,
       ),
       final PeekTextBody text => PeekTextBodyView(
         text: text.text,

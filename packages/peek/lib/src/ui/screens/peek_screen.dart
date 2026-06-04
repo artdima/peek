@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
 import '../../core/peek.dart';
@@ -166,21 +166,18 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
 
     return [
       PeekIconButton(
-        icon: CupertinoIcons.slider_horizontal_3,
+        icon: Icons.filter_list,
         tooltip: strings.filters,
         badgeCount: filters,
         onPressed: () => unawaited(showPeekFilters(context)),
       ),
       PeekIconButton(
-        icon:
-            controller.isPaused
-                ? CupertinoIcons.play_fill
-                : CupertinoIcons.pause_fill,
+        icon: controller.isPaused ? Icons.play_arrow : Icons.pause,
         tooltip: controller.isPaused ? strings.resume : strings.pause,
         onPressed: controller.togglePause,
       ),
       PeekIconButton(
-        icon: CupertinoIcons.trash,
+        icon: Icons.delete_outline,
         tooltip: strings.clear,
         onPressed:
             controller.totalCount == 0
@@ -188,7 +185,7 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
                 : () => unawaited(_confirmClear(context, controller)),
       ),
       PeekIconButton(
-        icon: CupertinoIcons.ellipsis,
+        icon: Icons.more_horiz,
         tooltip: strings.more,
         onPressed:
             controller.entries.isEmpty
@@ -211,16 +208,17 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
         const PeekSearchBar(),
         const PeekQuickBar(),
         const PeekActiveFilters(),
-        Padding(
-          padding: EdgeInsets.fromLTRB(theme.gutter, 0, theme.gutter, 6),
-          child: Text(
-            strings.requestCount(
-              controller.entries.length,
-              controller.totalCount,
+        if (controller.isFiltered)
+          Padding(
+            padding: EdgeInsets.fromLTRB(theme.gutter, 0, theme.gutter, 6),
+            child: Text(
+              strings.requestCount(
+                controller.entries.length,
+                controller.totalCount,
+              ),
+              style: theme.caption.copyWith(color: theme.secondaryLabel),
             ),
-            style: theme.caption.copyWith(color: theme.secondaryLabel),
           ),
-        ),
       ],
     );
   }
@@ -231,7 +229,7 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
       return PeekEmptyState(
         title: strings.noSelection,
         message: strings.noSelectionHint,
-        icon: CupertinoIcons.hand_point_right,
+        icon: Icons.touch_app_outlined,
       );
     }
     return PeekEntryView(entry, key: ValueKey(entry.id));
@@ -266,7 +264,7 @@ class _PausedBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Row(
         children: [
-          Icon(CupertinoIcons.pause_circle, size: 14, color: theme.pending),
+          Icon(Icons.pause_circle_outline, size: 14, color: theme.pending),
           const SizedBox(width: 8),
           Text(
             strings.pausedBanner,

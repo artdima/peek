@@ -23,7 +23,7 @@ void main() {
       tester
           .widget<PeekIconButton>(
             find.ancestor(
-              of: find.byIcon(CupertinoIcons.slider_horizontal_3),
+              of: find.byIcon(Icons.filter_list),
               matching: find.byType(PeekIconButton),
             ),
           )
@@ -80,7 +80,7 @@ void main() {
       expect(find.byType(PeekEntryTile), findsNWidgets(6));
       expect(find.text('/users'), findsOneWidget);
 
-      // The count is shown twice: beside the title and on the All pill.
+      // Unfiltered, the count lives only on the All pill.
       expect(
         find.descendant(
           of: find.byType(PeekQuickBar),
@@ -88,7 +88,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.text('6'), findsNWidgets(2));
+      expect(find.text('6'), findsOneWidget);
     });
 
     testWidgets('shows how many of the total are visible when filtered', (
@@ -172,7 +172,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.widgetWithText(PeekPill, 'GET'),
-          matching: find.byIcon(CupertinoIcons.xmark),
+          matching: find.byIcon(Icons.close),
         ),
       );
       await tester.pump();
@@ -249,7 +249,7 @@ void main() {
       await pumpScreen(tester);
       final button = tester.widget<PeekIconButton>(
         find.ancestor(
-          of: find.byIcon(CupertinoIcons.trash),
+          of: find.byIcon(Icons.delete_outline),
           matching: find.byType(PeekIconButton),
         ),
       );
@@ -263,7 +263,7 @@ void main() {
       await tester.tap(find.text('Pin'));
       await settle(tester);
       expect(store.find(e1.id)?.isPinned, isTrue);
-      expect(find.byIcon(CupertinoIcons.pin_fill), findsOneWidget);
+      expect(find.byIcon(Icons.push_pin), findsOneWidget);
     });
 
     testWidgets('copies a URL from a row menu', (tester) async {

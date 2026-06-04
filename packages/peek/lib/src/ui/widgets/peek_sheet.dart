@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
 import '../peek_scope.dart';
@@ -164,11 +164,7 @@ class _Actions<T> extends StatelessWidget {
               title: action.label,
               trailing:
                   action.selected
-                      ? Icon(
-                        CupertinoIcons.check_mark,
-                        size: 18,
-                        color: theme.accent,
-                      )
+                      ? Icon(Icons.check, size: 18, color: theme.accent)
                       : null,
               onTap: () => Navigator.of(context).pop(action.value),
             ),

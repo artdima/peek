@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
-import 'package:flutter/material.dart' show SelectableText;
+import 'package:flutter/material.dart' show Icons, SelectableText;
 import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_body.dart';
@@ -142,8 +141,8 @@ class _Summary extends StatelessWidget {
                   PeekIconButton(
                     icon:
                         entry.isPinned
-                            ? CupertinoIcons.pin_fill
-                            : CupertinoIcons.pin,
+                            ? Icons.push_pin
+                            : Icons.push_pin_outlined,
                     tooltip: entry.isPinned ? strings.unpin : strings.pin,
                     size: 18,
                     onPressed: () => controller.togglePin(entry.id),
@@ -185,7 +184,7 @@ class _Transfer extends StatelessWidget {
           children: [
             Expanded(
               child: _Amount(
-                icon: CupertinoIcons.arrow_up,
+                icon: Icons.arrow_upward,
                 label: strings.sent,
                 bytes: entry.requestSize,
                 strings: strings,
@@ -200,7 +199,7 @@ class _Transfer extends StatelessWidget {
             ),
             Expanded(
               child: _Amount(
-                icon: CupertinoIcons.arrow_down,
+                icon: Icons.arrow_downward,
                 label: strings.received,
                 bytes: entry.responseSize,
                 strings: strings,
@@ -410,7 +409,7 @@ class _Response extends StatelessWidget {
       return PeekEmptyState(
         title: strings.noResponse,
         message: strings.noResponseHint,
-        icon: CupertinoIcons.clock,
+        icon: Icons.hourglass_empty,
       );
     }
     final cookies = response.headers.setCookies;

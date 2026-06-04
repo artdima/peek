@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
 import '../peek_scope.dart';
@@ -105,10 +105,7 @@ class _PeekTextBodyViewState extends State<PeekTextBodyView> {
                 ),
               ),
               PeekIconButton(
-                icon:
-                    _wrap
-                        ? CupertinoIcons.text_justify
-                        : CupertinoIcons.text_alignleft,
+                icon: _wrap ? Icons.wrap_text : Icons.notes,
                 tooltip: _wrap ? strings.stopWrapping : strings.wrapLines,
                 size: 18,
                 onPressed: () => setState(() => _wrap = !_wrap),
@@ -280,13 +277,13 @@ class _MatchBar extends StatelessWidget {
           ),
           const Spacer(),
           PeekIconButton(
-            icon: CupertinoIcons.chevron_up,
+            icon: Icons.keyboard_arrow_up,
             tooltip: strings.previousMatch,
             size: 18,
             onPressed: onPrevious,
           ),
           PeekIconButton(
-            icon: CupertinoIcons.chevron_down,
+            icon: Icons.expand_more,
             tooltip: strings.nextMatch,
             size: 18,
             onPressed: onNext,

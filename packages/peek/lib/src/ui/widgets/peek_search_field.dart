@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart' show CupertinoSearchTextField;
+import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
 import '../theme/peek_theme.dart';
@@ -68,6 +69,8 @@ final class PeekSearchField extends StatelessWidget {
             itemColor: theme.secondaryLabel,
             backgroundColor: theme.fill,
             borderRadius: BorderRadius.circular(theme.radius),
+            prefixIcon: const Icon(Icons.search, size: 18),
+            suffixIcon: const Icon(Icons.cancel, size: 18),
           ),
         ),
         if (onCancel != null && cancelLabel != null)

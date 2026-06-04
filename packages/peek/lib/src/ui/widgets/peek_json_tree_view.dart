@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/foundation.dart' show compute;
+import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
 import '../peek_scope.dart';
@@ -125,14 +125,14 @@ class _PeekJsonTreeViewState extends State<PeekJsonTreeView> {
                 ),
               ),
               PeekIconButton(
-                icon: CupertinoIcons.plus_square,
+                icon: Icons.unfold_more,
                 tooltip: strings.expandAll,
                 size: 18,
                 onPressed:
                     () => setState(() => _expanded.addAll(root.branchPaths)),
               ),
               PeekIconButton(
-                icon: CupertinoIcons.minus_square,
+                icon: Icons.unfold_less,
                 tooltip: strings.collapseAll,
                 size: 18,
                 onPressed: () => setState(_expanded.clear),
@@ -280,9 +280,7 @@ class _Row extends StatelessWidget {
               child:
                   node.isBranch
                       ? Icon(
-                        open
-                            ? CupertinoIcons.chevron_down
-                            : CupertinoIcons.chevron_forward,
+                        open ? Icons.expand_more : Icons.chevron_right,
                         size: 14,
                         color: theme.secondaryLabel,
                       )

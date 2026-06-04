@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Icons;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peek/peek.dart';
 
@@ -65,7 +66,7 @@ void main() {
       await search(tester, 'users');
       expect(find.byType(PeekEntryTile), findsNWidgets(2));
 
-      await tester.tap(find.byIcon(CupertinoIcons.xmark_circle_fill));
+      await tester.tap(find.byIcon(Icons.cancel));
       await tester.pump(PeekController.searchDebounce);
       await tester.pump();
       expect(fieldText(tester), isEmpty);
