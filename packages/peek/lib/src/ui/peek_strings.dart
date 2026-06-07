@@ -125,6 +125,12 @@ class PeekStrings {
   /// Names the button that goes back a screen.
   String get back => 'Back';
 
+  /// Names the button that closes a screen shown over the app.
+  String get close => 'Close';
+
+  /// Names the floating button that opens Peek.
+  String get openPeek => 'Open Peek';
+
   /// Tab and heading for the summary.
   String get overview => 'Overview';
 

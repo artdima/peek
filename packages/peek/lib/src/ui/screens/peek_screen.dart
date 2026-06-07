@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
@@ -51,6 +52,12 @@ final class PeekScreen extends StatefulWidget {
   /// The width from which the list and the call sit side by side.
   static const double wideLayout = 720;
 
+  /// Whether a screen is showing anywhere; `PeekOverlay` watches this to
+  /// get out of its own way.
+  static ValueListenable<bool> get isOpen => _isOpen;
+
+  static final _OpenScreens _isOpen = _OpenScreens();
+
   @override
   State<PeekScreen> createState() => _PeekScreenState();
 }
@@ -64,7 +71,14 @@ class _PeekScreenState extends State<PeekScreen> {
       _owned ??= PeekController(widget.peek ?? Peek.instance);
 
   @override
+  void initState() {
+    super.initState();
+    PeekScreen._isOpen.enter();
+  }
+
+  @override
   void dispose() {
+    PeekScreen._isOpen.leave();
     _owned?.dispose();
     super.dispose();
   }
@@ -76,6 +90,28 @@ class _PeekScreenState extends State<PeekScreen> {
     share: widget.share,
     child: const _PeekScaffold(),
   );
+}
+
+/// How many [PeekScreen]s are on screen, as something to listen to.
+///
+/// The count is read live, so a listener is right even if it never hears
+/// about a change; notification waits for a microtask because a screen
+/// registers while the tree above it is building.
+class _OpenScreens extends ChangeNotifier implements ValueListenable<bool> {
+  int _count = 0;
+
+  @override
+  bool get value => _count > 0;
+
+  void enter() {
+    _count++;
+    scheduleMicrotask(notifyListeners);
+  }
+
+  void leave() {
+    _count--;
+    scheduleMicrotask(notifyListeners);
+  }
 }
 
 /// How much of a wide layout the list keeps for itself.
@@ -104,11 +140,13 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
     final theme = PeekTheme.of(context);
     final wide = MediaQuery.sizeOf(context).width >= PeekScreen.wideLayout;
     final actions = _actions(context, controller, strings);
+    final leading = _leading(context, strings);
 
     if (!wide) {
       return PeekSliverScaffold(
         title: strings.requests,
         actions: actions,
+        leading: leading,
         controller: _scroll,
         slivers: [
           SliverToBoxAdapter(child: _chrome(controller, strings)),
@@ -126,6 +164,7 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
     return PeekScaffold(
       title: strings.requests,
       actions: actions,
+      leading: leading,
       child: Row(
         children: [
           SizedBox(
@@ -152,6 +191,19 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
           Expanded(child: _detail(controller, strings)),
         ],
       ),
+    );
+  }
+
+  /// The way out, when Peek was pushed over something.
+  Widget? _leading(BuildContext context, PeekStrings strings) {
+    final route = ModalRoute.of(context);
+    if (route == null || !Navigator.of(context).canPop()) return null;
+    final modal = route is PageRoute<Object?> && route.fullscreenDialog;
+    return PeekIconButton(
+      icon: modal ? Icons.close : Icons.arrow_back_ios_new,
+      tooltip: modal ? strings.close : strings.back,
+      size: modal ? 22 : 17,
+      onPressed: () => Navigator.of(context).maybePop(),
     );
   }
 
