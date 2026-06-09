@@ -53,7 +53,7 @@ final class PeekKeyValueRow extends StatelessWidget {
                 if (subtitle case final line?)
                   Text(
                     line,
-                    style: theme.caption.copyWith(color: theme.tertiaryLabel),
+                    style: theme.caption.copyWith(color: theme.secondaryLabel),
                   ),
               ],
             ),

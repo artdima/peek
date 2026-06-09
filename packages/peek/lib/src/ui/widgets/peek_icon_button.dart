@@ -44,25 +44,32 @@ final class PeekIconButton extends StatelessWidget {
     final tint =
         onPressed == null ? theme.tertiaryLabel : color ?? theme.accent;
 
-    return Tooltip(
-      message: tooltip,
-      child: PeekTappable(
-        onTap: onPressed,
-        fade: true,
-        child: SizedBox(
-          width: 44,
-          height: 44,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Icon(icon, size: size, color: tint),
-              if (badgeCount > 0)
-                Positioned(
-                  top: 6,
-                  right: 4,
-                  child: _Badge(count: badgeCount, color: theme.accent),
-                ),
-            ],
+    return MergeSemantics(
+      child: Tooltip(
+        message: tooltip,
+        child: PeekTappable(
+          onTap: onPressed,
+          fade: true,
+          focusRadius: BorderRadius.circular(theme.minTapTarget / 2),
+          child: Semantics(
+            button: true,
+            enabled: onPressed != null,
+            child: SizedBox(
+              width: theme.minTapTarget,
+              height: theme.minTapTarget,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Icon(icon, size: size, color: tint),
+                  if (badgeCount > 0)
+                    Positioned(
+                      top: 8,
+                      right: 4,
+                      child: _Badge(count: badgeCount, color: theme.accent),
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

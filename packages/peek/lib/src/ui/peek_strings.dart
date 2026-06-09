@@ -406,6 +406,9 @@ class PeekStrings {
   /// How many filters are active.
   String activeFilters(int count) => '$count active';
 
+  /// Names the chip that drops one filter.
+  String removeFilter(String label) => 'Remove $label';
+
   /// Announces newly arrived entries above the scroll position.
   String newRequests(int count) =>
       count == 1 ? '1 new request' : '$count new requests';

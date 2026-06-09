@@ -116,7 +116,7 @@ class _Block extends StatelessWidget {
                 SizedBox(height: theme.rowSpacing),
                 Text(
                   strings.moreLines(hidden),
-                  style: theme.caption.copyWith(color: theme.tertiaryLabel),
+                  style: theme.caption.copyWith(color: theme.secondaryLabel),
                 ),
               ],
             ],

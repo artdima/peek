@@ -46,6 +46,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     required this.radius,
     required this.hairline,
     required this.minRowHeight,
+    required this.minTapTarget,
   });
 
   /// The light theme: ink on paper, with the status hues carrying meaning.
@@ -56,29 +57,30 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     fill: const Color(0xFFEFEFF0),
     separator: const Color(0xFFD3D3D7),
     label: const Color(0xFF000000),
-    secondaryLabel: const Color(0xFF6E6E73),
+    secondaryLabel: const Color(0xFF6A6A6F),
     tertiaryLabel: const Color(0xFF9A9AA0),
     accent: const Color(0xFF007AFF),
     success: const Color(0xFF0F9D58),
     redirect: const Color(0xFF0A6FD8),
     clientError: const Color(0xFFB26A00),
     serverError: const Color(0xFFD70015),
-    pending: const Color(0xFF6E6E73),
-    cancelled: const Color(0xFF6E6E73),
+    pending: const Color(0xFF6A6A6F),
+    cancelled: const Color(0xFF6A6A6F),
     failure: const Color(0xFFD70015),
     highlight: const Color(0xFFFFE9A8),
     methodColors: _methodColors(dark: false),
     largeTitle: _largeTitle.copyWith(color: const Color(0xFF000000)),
     headline: _headline.copyWith(color: const Color(0xFF000000)),
     body: _body.copyWith(color: const Color(0xFF000000)),
-    footnote: _footnote.copyWith(color: const Color(0xFF6E6E73)),
-    caption: _caption.copyWith(color: const Color(0xFF6E6E73)),
+    footnote: _footnote.copyWith(color: const Color(0xFF6A6A6F)),
+    caption: _caption.copyWith(color: const Color(0xFF6A6A6F)),
     mono: _mono.copyWith(color: const Color(0xFF000000)),
     gutter: 16,
     rowSpacing: 8,
     radius: 10,
     hairline: 0.5,
     minRowHeight: 44,
+    minTapTarget: 48,
   );
 
   /// The dark theme: the same structure on black, hues lifted to match.
@@ -112,6 +114,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     radius: 10,
     hairline: 0.5,
     minRowHeight: 44,
+    minTapTarget: 48,
   );
 
   /// The theme registered on [context], or Peek's own at that brightness.
@@ -148,10 +151,18 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
   /// Text that supports the primary: hosts, values, counts.
   final Color secondaryLabel;
 
-  /// Text that is barely there: placeholders, disabled rows.
+  /// Dimmer still, and only for marks: chevrons, dots, disabled glyphs.
+  /// Text never uses it — a grey light enough to read as a third level
+  /// cannot also clear the contrast a reader needs.
   final Color tertiaryLabel;
 
   /// What the eye is drawn to: the chosen segment, a link, an active icon.
+  /// Apple's system blue, as Pulse wears it.
+  ///
+  /// White on it is 4.0:1 — under what WCAG asks of small text, and a
+  /// deliberate exception the rest of the palette does not take. Badges,
+  /// chosen pills and the arrivals button carry it knowingly; ordinary
+  /// text never sits on the accent.
   final Color accent;
 
   /// 2xx.
@@ -212,8 +223,13 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
   /// The thickness of a separator.
   final double hairline;
 
-  /// The least a tappable row may be tall.
+  /// The least a row may be tall.
   final double minRowHeight;
+
+  /// The least a control that answers a tap may be, either way. Android's
+  /// accessibility guideline asks for 48, and it wins over the 44 an iOS
+  /// row would use.
+  final double minTapTarget;
 
   /// The colour standing for [statusClass].
   Color colorForStatusClass(PeekStatusClass statusClass) =>
@@ -271,6 +287,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     double? radius,
     double? hairline,
     double? minRowHeight,
+    double? minTapTarget,
   }) => PeekTheme(
     background: background ?? this.background,
     groupedBackground: groupedBackground ?? this.groupedBackground,
@@ -301,6 +318,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     radius: radius ?? this.radius,
     hairline: hairline ?? this.hairline,
     minRowHeight: minRowHeight ?? this.minRowHeight,
+    minTapTarget: minTapTarget ?? this.minTapTarget,
   );
 
   @override
@@ -346,6 +364,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
       radius: size(radius, other.radius),
       hairline: size(hairline, other.hairline),
       minRowHeight: size(minRowHeight, other.minRowHeight),
+      minTapTarget: size(minTapTarget, other.minTapTarget),
     );
   }
 
@@ -381,7 +400,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     'PUT': dark ? const Color(0xFFFFD60A) : const Color(0xFFB26A00),
     'PATCH': dark ? const Color(0xFFFFD60A) : const Color(0xFFB26A00),
     'DELETE': dark ? const Color(0xFFFF6B5E) : const Color(0xFFD70015),
-    'HEAD': dark ? const Color(0xFF98989D) : const Color(0xFF6E6E73),
-    'OPTIONS': dark ? const Color(0xFF98989D) : const Color(0xFF6E6E73),
+    'HEAD': dark ? const Color(0xFF98989D) : const Color(0xFF6A6A6F),
+    'OPTIONS': dark ? const Color(0xFF98989D) : const Color(0xFF6A6A6F),
   };
 }

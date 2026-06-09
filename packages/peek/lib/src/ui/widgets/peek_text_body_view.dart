@@ -326,7 +326,7 @@ class _Line extends StatelessWidget {
           child: Text(
             '$number',
             textAlign: TextAlign.right,
-            style: style.copyWith(color: theme.tertiaryLabel),
+            style: style.copyWith(color: theme.secondaryLabel),
           ),
         ),
         const SizedBox(width: 10),

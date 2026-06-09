@@ -117,7 +117,7 @@ void main() {
       final context = tester.element(find.text('Request Body'));
       final theme = PeekTheme.of(context);
       final style = tester.widget<Text>(find.text('Request Body')).style;
-      expect(style?.color, theme.tertiaryLabel);
+      expect(style?.color, theme.secondaryLabel);
     });
   });
 

@@ -122,7 +122,7 @@ class _RemovableChip extends StatelessWidget {
     child: PeekPill(
       label: label,
       onRemove: onDeleted,
-      removeLabel: PeekScope.stringsOf(context).resetFilters,
+      removeLabel: PeekScope.stringsOf(context).removeFilter(label),
     ),
   );
 }

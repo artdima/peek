@@ -14,6 +14,7 @@ final class PeekTappable extends StatefulWidget {
     this.onLongPress,
     this.selected = false,
     this.fade = false,
+    this.focusRadius,
     super.key,
   });
 
@@ -32,12 +33,16 @@ final class PeekTappable extends StatefulWidget {
   /// Whether pressing fades the child instead of washing it.
   final bool fade;
 
+  /// The shape the focus ring follows; square when omitted.
+  final BorderRadius? focusRadius;
+
   @override
   State<PeekTappable> createState() => _PeekTappableState();
 }
 
 class _PeekTappableState extends State<PeekTappable> {
   bool _pressed = false;
+  bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
@@ -53,17 +58,37 @@ class _PeekTappableState extends State<PeekTappable> {
     }
 
     if (inert) return child;
+    if (_focused) {
+      child = DecoratedBox(
+        position: DecorationPosition.foreground,
+        decoration: BoxDecoration(
+          border: Border.all(color: theme.accent, width: 2),
+          borderRadius: widget.focusRadius,
+        ),
+        child: child,
+      );
+    }
+
     final tap = widget.onTap;
     return FocusableActionDetector(
       mouseCursor: SystemMouseCursors.click,
+      onShowFocusHighlight: _setFocused,
       actions: {
-        if (tap != null)
+        if (tap != null) ...{
           ActivateIntent: CallbackAction<ActivateIntent>(
             onInvoke: (_) {
               tap();
               return null;
             },
           ),
+          // Enter arrives as this one on the web.
+          ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(
+            onInvoke: (_) {
+              tap();
+              return null;
+            },
+          ),
+        },
       },
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -80,5 +105,10 @@ class _PeekTappableState extends State<PeekTappable> {
   void _setPressed(bool value) {
     if (_pressed == value) return;
     setState(() => _pressed = value);
+  }
+
+  void _setFocused(bool value) {
+    if (_focused == value) return;
+    setState(() => _focused = value);
   }
 }

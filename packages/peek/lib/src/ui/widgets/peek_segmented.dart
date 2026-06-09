@@ -49,6 +49,7 @@ final class PeekSegmented<T> extends StatelessWidget {
           label: segment.label,
           count: segment.count,
           selected: segment.value == selected,
+          group: true,
           onTap: () => onChanged(segment.value),
         ),
     ],

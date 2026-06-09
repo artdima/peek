@@ -50,13 +50,17 @@ final class PeekListRow extends StatelessWidget {
     final value = this.value;
     final leading = this.leading;
     final trailing = this.trailing;
-    final titleColor = enabled ? theme.label : theme.tertiaryLabel;
-    final valueColor = enabled ? theme.secondaryLabel : theme.tertiaryLabel;
+    final titleColor = enabled ? theme.label : theme.secondaryLabel;
+    final valueColor = theme.secondaryLabel;
+
+    final tap = enabled ? onTap : null;
 
     return PeekTappable(
-      onTap: enabled ? onTap : null,
+      onTap: tap,
       child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: theme.minRowHeight),
+        constraints: BoxConstraints(
+          minHeight: tap == null ? theme.minRowHeight : theme.minTapTarget,
+        ),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: theme.gutter, vertical: 8),
           child: Row(

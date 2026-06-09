@@ -165,7 +165,8 @@ class _InlineTitle extends StatelessWidget {
     final leading = this.leading;
 
     return SizedBox(
-      height: theme.minRowHeight,
+      // The bar is as tall as the buttons in it, not as a row of text.
+      height: theme.minTapTarget,
       child: Row(
         children: [
           if (leading != null) leading,

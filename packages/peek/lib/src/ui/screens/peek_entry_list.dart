@@ -181,10 +181,10 @@ class _ArrivalsHeader extends SliverPersistentHeaderDelegate {
   final VoidCallback onPressed;
 
   @override
-  double get minExtent => 44;
+  double get minExtent => 56;
 
   @override
-  double get maxExtent => 44;
+  double get maxExtent => 56;
 
   @override
   Widget build(
@@ -221,29 +221,36 @@ class _NewRequestsButton extends StatelessWidget {
     return PeekTappable(
       onTap: onPressed,
       fade: true,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: theme.accent,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: theme.label.withValues(alpha: 0.18),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+      focusRadius: BorderRadius.circular(20),
+      child: SizedBox(
+        height: theme.minTapTarget,
+        child: Align(
+          widthFactor: 1,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: theme.accent,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.label.withValues(alpha: 0.18),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.arrow_upward, size: 14, color: onAccent),
-            const SizedBox(width: 6),
-            Text(
-              strings.newRequests(count),
-              style: theme.footnote.copyWith(color: onAccent),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.arrow_upward, size: 14, color: onAccent),
+                const SizedBox(width: 6),
+                Text(
+                  strings.newRequests(count),
+                  style: theme.footnote.copyWith(color: onAccent),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

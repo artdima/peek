@@ -27,24 +27,30 @@ final class PeekTextButton extends StatelessWidget {
     final theme = PeekTheme.of(context);
     final color =
         onPressed == null
-            ? theme.tertiaryLabel
+            ? theme.secondaryLabel
             : destructive
             ? theme.failure
             : theme.accent;
 
-    return PeekTappable(
-      onTap: onPressed,
-      fade: true,
-      child: Semantics(
-        button: true,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: theme.minRowHeight),
-          child: Align(
-            widthFactor: 1,
-            heightFactor: 1,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Text(label, style: theme.body.copyWith(color: color)),
+    return MergeSemantics(
+      child: PeekTappable(
+        onTap: onPressed,
+        fade: true,
+        child: Semantics(
+          button: true,
+          enabled: onPressed != null,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: theme.minTapTarget,
+              minHeight: theme.minTapTarget,
+            ),
+            child: Align(
+              widthFactor: 1,
+              heightFactor: 1,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Text(label, style: theme.body.copyWith(color: color)),
+              ),
             ),
           ),
         ),

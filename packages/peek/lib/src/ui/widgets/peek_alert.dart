@@ -159,7 +159,7 @@ class _AlertButton extends StatelessWidget {
       child: Semantics(
         button: true,
         child: SizedBox(
-          height: theme.minRowHeight,
+          height: theme.minTapTarget,
           child: Center(
             child: Text(
               label,

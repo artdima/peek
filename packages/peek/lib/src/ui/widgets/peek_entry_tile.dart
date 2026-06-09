@@ -85,7 +85,7 @@ final class PeekEntryTile extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.caption.copyWith(
-                            color: theme.tertiaryLabel,
+                            color: theme.secondaryLabel,
                           ),
                         ),
                       ),

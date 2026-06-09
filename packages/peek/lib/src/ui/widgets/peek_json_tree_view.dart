@@ -261,10 +261,14 @@ class _Row extends StatelessWidget {
     final node = row.node;
     final style = theme.mono;
 
+    // A tree is read by scanning, so its rows stay denser than the 48 a
+    // tap target asks for: every value here is also reachable from the
+    // row's menu, and the text view shows the same body without a tree.
     return PeekTappable(
       onTap: onTap,
       onLongPress: onHold,
       child: Container(
+        constraints: const BoxConstraints(minHeight: 28),
         color: highlighted ? theme.highlight : null,
         padding: EdgeInsets.fromLTRB(
           theme.gutter + row.depth * 14,
@@ -298,7 +302,7 @@ class _Row extends StatelessWidget {
                     if (node.index case final index?)
                       TextSpan(
                         text: '$index: ',
-                        style: style.copyWith(color: theme.tertiaryLabel),
+                        style: style.copyWith(color: theme.secondaryLabel),
                       ),
                     TextSpan(
                       text: node.text,
@@ -308,7 +312,7 @@ class _Row extends StatelessWidget {
                       TextSpan(
                         text: '  ${strings.items(node.count)}',
                         style: theme.caption.copyWith(
-                          color: theme.tertiaryLabel,
+                          color: theme.secondaryLabel,
                         ),
                       ),
                   ],
@@ -329,7 +333,7 @@ class _Row extends StatelessWidget {
     PeekJsonKind.string => theme.success,
     PeekJsonKind.number => theme.redirect,
     PeekJsonKind.boolean => theme.clientError,
-    PeekJsonKind.nothing => theme.tertiaryLabel,
+    PeekJsonKind.nothing => theme.secondaryLabel,
     PeekJsonKind.object || PeekJsonKind.array => theme.secondaryLabel,
   };
 }

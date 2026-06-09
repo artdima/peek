@@ -3,7 +3,7 @@ import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
 import '../theme/peek_theme.dart';
-import 'peek_tappable.dart';
+import 'peek_text_button.dart';
 
 /// The rounded field Peek searches from.
 ///
@@ -71,20 +71,15 @@ final class PeekSearchField extends StatelessWidget {
             borderRadius: BorderRadius.circular(theme.radius),
             prefixIcon: const Icon(Icons.search, size: 18),
             suffixIcon: const Icon(Icons.cancel, size: 18),
+            // Enough room around the text and the clear button for the
+            // 48 an accessible tap target asks for; a line of body text is
+            // never tall enough on its own.
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 16),
+            suffixInsets: EdgeInsets.all((theme.minTapTarget - 18) / 2),
           ),
         ),
         if (onCancel != null && cancelLabel != null)
-          PeekTappable(
-            onTap: onCancel,
-            fade: true,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 10),
-              child: Text(
-                cancelLabel,
-                style: theme.body.copyWith(color: theme.accent),
-              ),
-            ),
-          ),
+          PeekTextButton(label: cancelLabel, onPressed: onCancel),
       ],
     );
   }
