@@ -12,7 +12,6 @@ export 'peek_json_node.dart';
 export 'peek_json_tree_view.dart';
 export 'peek_key_value_row.dart';
 export 'peek_key_values_view.dart';
-export 'peek_labels.dart';
 export 'peek_list_row.dart';
 export 'peek_list_section.dart';
 export 'peek_method_badge.dart';

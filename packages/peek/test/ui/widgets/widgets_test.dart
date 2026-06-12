@@ -297,16 +297,6 @@ class _Gallery extends StatelessWidget {
               emphasised: true,
               trailing: PeekCopyButton(text: '*****'),
             ),
-            SizedBox(height: theme.rowSpacing),
-            const Row(
-              children: [
-                PeekDurationLabel(Duration(milliseconds: 250)),
-                SizedBox(width: 12),
-                PeekSizeLabel(2048),
-                SizedBox(width: 12),
-                PeekDurationLabel(null),
-              ],
-            ),
           ],
         ),
       ),
