@@ -253,12 +253,9 @@ final class PeekSliverScaffold extends StatelessWidget {
                     start: theme.gutter - 10,
                     end: theme.gutter - 10,
                   ),
-                  border: Border(
-                    bottom: BorderSide(
-                      color: theme.separator,
-                      width: theme.hairline,
-                    ),
-                  ),
+                  // No hairline under the name: the chrome under it draws
+                  // its own lines, and two in a row read as a mistake.
+                  border: null,
                   trailing:
                       actions.isEmpty
                           ? null

@@ -9,13 +9,21 @@ import 'peek_status_dot.dart';
 /// outcome: `200 OK`, `Timed out`, `Pending`.
 final class PeekStatusLabel extends StatelessWidget {
   /// Creates a label describing [entry].
-  const PeekStatusLabel(this.entry, {this.trailing, super.key});
+  const PeekStatusLabel(
+    this.entry, {
+    this.trailing,
+    this.dot = true,
+    super.key,
+  });
 
   /// The call to describe.
   final PeekEntry entry;
 
   /// Follows the outcome in the secondary colour, after a separator.
   final String? trailing;
+
+  /// Whether the dot opens the label; a row that draws its own turns it off.
+  final bool dot;
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +40,7 @@ final class PeekStatusLabel extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        PeekStatusDot(color),
-        const SizedBox(width: 7),
+        if (dot) ...[PeekStatusDot(color), const SizedBox(width: 7)],
         Flexible(
           child:
               trailing == null

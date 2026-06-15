@@ -85,7 +85,11 @@ class _PeekEntrySliverState extends State<PeekEntrySliver> {
           ),
         SliverList.separated(
           itemCount: entries.length,
-          separatorBuilder: (context, index) => const PeekSeparator(),
+          separatorBuilder:
+              (context, index) => PeekSeparator(
+                indent: PeekEntryTile.textInset,
+                endIndent: PeekTheme.of(context).gutter,
+              ),
           itemBuilder: (context, index) {
             final entry = entries[index];
             return PeekEntryTile(

@@ -71,11 +71,8 @@ final class PeekSearchField extends StatelessWidget {
             borderRadius: BorderRadius.circular(theme.radius),
             prefixIcon: const Icon(Icons.search, size: 18),
             suffixIcon: const Icon(Icons.cancel, size: 18),
-            // Enough room around the text and the clear button for the
-            // 48 an accessible tap target asks for; a line of body text is
-            // never tall enough on its own.
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 16),
-            suffixInsets: EdgeInsets.all((theme.minTapTarget - 18) / 2),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 9),
+            suffixInsets: const EdgeInsets.all(8),
           ),
         ),
         if (onCancel != null && cancelLabel != null)

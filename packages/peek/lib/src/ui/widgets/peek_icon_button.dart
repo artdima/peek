@@ -6,6 +6,10 @@ import 'peek_tappable.dart';
 
 /// One of the icons at the top of a screen.
 ///
+/// The tap target is [width] across — Apple's minimum, and what keeps a
+/// row of them from drifting apart — by the full height a tap target
+/// asks for, or the bar's height when that is shorter.
+///
 /// [Tooltip] is the single Material widget Peek keeps: it is what names the
 /// button for assistive tech, and it draws nothing until asked.
 final class PeekIconButton extends StatelessWidget {
@@ -16,9 +20,12 @@ final class PeekIconButton extends StatelessWidget {
     this.onPressed,
     this.color,
     this.badgeCount = 0,
-    this.size = 20,
+    this.size = 22,
     super.key,
   });
+
+  /// How wide the tap target is.
+  static const double width = 44;
 
   /// The glyph to show.
   final IconData icon;
@@ -50,12 +57,12 @@ final class PeekIconButton extends StatelessWidget {
         child: PeekTappable(
           onTap: onPressed,
           fade: true,
-          focusRadius: BorderRadius.circular(theme.minTapTarget / 2),
+          focusRadius: BorderRadius.circular(PeekIconButton.width / 2),
           child: Semantics(
             button: true,
             enabled: onPressed != null,
             child: SizedBox(
-              width: theme.minTapTarget,
+              width: PeekIconButton.width,
               height: theme.minTapTarget,
               child: Stack(
                 alignment: Alignment.center,

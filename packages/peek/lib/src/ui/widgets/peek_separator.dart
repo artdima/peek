@@ -4,17 +4,21 @@ import '../theme/peek_theme.dart';
 
 /// The hairline between rows.
 final class PeekSeparator extends StatelessWidget {
-  /// Creates a separator, starting [indent] from the left.
-  const PeekSeparator({this.indent = 0, super.key});
+  /// Creates a separator, holding [indent] off the left edge and [endIndent]
+  /// off the right.
+  const PeekSeparator({this.indent = 0, this.endIndent = 0, super.key});
 
   /// How far in from the left edge the line starts.
   final double indent;
+
+  /// How far short of the right edge it stops.
+  final double endIndent;
 
   @override
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
     return Padding(
-      padding: EdgeInsets.only(left: indent),
+      padding: EdgeInsets.only(left: indent, right: endIndent),
       child: SizedBox(
         height: theme.hairline,
         child: ColoredBox(
