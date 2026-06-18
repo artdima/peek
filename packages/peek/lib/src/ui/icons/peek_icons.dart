@@ -1,0 +1,133 @@
+// Outline data, generated from the source icons; a path does not wrap.
+// ignore_for_file: lines_longer_than_80_chars
+
+import 'peek_icon_data.dart';
+
+/// Every glyph Peek draws, as outlines rather than a font.
+///
+/// A font would be a dependency or an asset; an outline is neither. Each
+/// glyph is the shape of one icon in a 24 by 24 space, stroked two units
+/// thick, and `PeekIcon` scales it to whatever size it is asked for.
+///
+/// The shapes come from Lucide (ISC); see NOTICE beside the licence.
+abstract final class PeekIcons {
+  /// What went out: a request and its body.
+  static const PeekIconData sent = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M2 12C2 6.477 6.477 2 12 2C17.523 2 22 6.477 22 12C22 17.523 17.523 22 12 22C6.477 22 2 17.523 2 12Z',
+      'M16 12L12 8L8 12',
+      'M12 16L12 8',
+    ],
+  );
+
+  /// What came back: a response and its body.
+  static const PeekIconData received = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M2 12C2 6.477 6.477 2 12 2C17.523 2 22 6.477 22 12C22 17.523 17.523 22 12 22C6.477 22 2 17.523 2 12Z',
+      'M12 8L12 16',
+      'M8 12L12 16L16 12',
+    ],
+  );
+
+  /// A call that came back as asked: a solid disc with the mark cut out.
+  static const PeekIconData ok = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    filled: 1,
+    paths: [
+      'M2 12C2 6.477 6.477 2 12 2C17.523 2 22 6.477 22 12C22 17.523 17.523 22 12 22C6.477 22 2 17.523 2 12Z',
+      'M16 9L10.5 14.5L8 12',
+    ],
+  );
+
+  /// How long the call took, phase by phase.
+  static const PeekIconData timing = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M2 12C2 6.477 6.477 2 12 2C17.523 2 22 6.477 22 12C22 17.523 17.523 22 12 22C6.477 22 2 17.523 2 12Z',
+      'M12 6L12 12L16 14',
+    ],
+  );
+
+  /// Cookies, which travel in headers but read as secrets.
+  static const PeekIconData cookies = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M3 11L21 11L21 22L3 22Z',
+      'M7 11L7 7C7 4.239 9.239 2 12 2C14.761 2 17 4.239 17 7L17 11',
+    ],
+  );
+
+  /// A list of header names and values.
+  static const PeekIconData headers = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M3 5L3.01 5',
+      'M3 12L3.01 12',
+      'M3 19L3.01 19',
+      'M8 5L21 5',
+      'M8 12L21 12',
+      'M8 19L21 19',
+    ],
+  );
+
+  /// The call written out as a shell command.
+  static const PeekIconData curl = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: ['M12 19L20 19', 'M4 17L10 11L4 5'],
+  );
+
+  /// Which logger reported the call.
+  static const PeekIconData source = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M12 20L12.01 20',
+      'M2 8.82C7.694 3.727 16.306 3.727 22 8.82',
+      'M5 12.859C8.888 9.048 15.112 9.048 19 12.859',
+      'M8.5 16.429C10.444 14.523 13.556 14.523 15.5 16.429',
+    ],
+  );
+
+  /// Hands the call to the platform.
+  static const PeekIconData share = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M15 5C15 3.343 16.343 2 18 2C19.657 2 21 3.343 21 5C21 6.657 19.657 8 18 8C16.343 8 15 6.657 15 5Z',
+      'M3 12C3 10.343 4.343 9 6 9C7.657 9 9 10.343 9 12C9 13.657 7.657 15 6 15C4.343 15 3 13.657 3 12Z',
+      'M15 19C15 17.343 16.343 16 18 16C19.657 16 21 17.343 21 19C21 20.657 19.657 22 18 22C16.343 22 15 20.657 15 19Z',
+      'M8.59 13.51L15.42 17.49',
+      'M15.41 6.51L8.59 10.49',
+    ],
+  );
+
+  /// Everything else that can be done with a call.
+  static const PeekIconData more = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M11 12C11 11.448 11.448 11 12 11C12.552 11 13 11.448 13 12C13 12.552 12.552 13 12 13C11.448 13 11 12.552 11 12Z',
+      'M18 12C18 11.448 18.448 11 19 11C19.552 11 20 11.448 20 12C20 12.552 19.552 13 19 13C18.448 13 18 12.552 18 12Z',
+      'M4 12C4 11.448 4.448 11 5 11C5.552 11 6 11.448 6 12C6 12.552 5.552 13 5 13C4.448 13 4 12.552 4 12Z',
+    ],
+  );
+}

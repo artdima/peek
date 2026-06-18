@@ -54,33 +54,33 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     background: const Color(0xFFFFFFFF),
     groupedBackground: const Color(0xFFF2F2F7),
     card: const Color(0xFFFFFFFF),
-    fill: const Color(0xFFEFEFF0),
+    fill: const Color(0xFFE5E5EA),
     separator: const Color(0xFFD3D3D7),
     label: const Color(0xFF000000),
-    secondaryLabel: const Color(0xFF6A6A6F),
+    secondaryLabel: const Color(0xFF646469),
     tertiaryLabel: const Color(0xFF9A9AA0),
     accent: const Color(0xFF007AFF),
-    success: const Color(0xFF0F9D58),
+    success: const Color(0xFF34C759),
     redirect: const Color(0xFF0A6FD8),
     clientError: const Color(0xFFB26A00),
     serverError: const Color(0xFFD70015),
-    pending: const Color(0xFF6A6A6F),
-    cancelled: const Color(0xFF6A6A6F),
+    pending: const Color(0xFF646469),
+    cancelled: const Color(0xFF646469),
     failure: const Color(0xFFD70015),
     highlight: const Color(0xFFFFE9A8),
     methodColors: _methodColors(dark: false),
     largeTitle: _largeTitle.copyWith(color: const Color(0xFF000000)),
     headline: _headline.copyWith(color: const Color(0xFF000000)),
     body: _body.copyWith(color: const Color(0xFF000000)),
-    footnote: _footnote.copyWith(color: const Color(0xFF6A6A6F)),
-    caption: _caption.copyWith(color: const Color(0xFF6A6A6F)),
+    footnote: _footnote.copyWith(color: const Color(0xFF646469)),
+    caption: _caption.copyWith(color: const Color(0xFF646469)),
     mono: _mono.copyWith(color: const Color(0xFF000000)),
     gutter: 16,
     rowSpacing: 8,
     radius: 10,
     hairline: 0.5,
-    minRowHeight: 44,
-    minTapTarget: 48,
+    minRowHeight: 40,
+    minTapTarget: 44,
   );
 
   /// The dark theme: the same structure on black, hues lifted to match.
@@ -113,8 +113,8 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     rowSpacing: 8,
     radius: 10,
     hairline: 0.5,
-    minRowHeight: 44,
-    minTapTarget: 48,
+    minRowHeight: 40,
+    minTapTarget: 44,
   );
 
   /// The theme registered on [context], or Peek's own at that brightness.
@@ -165,7 +165,12 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
   /// text never sits on the accent.
   final Color accent;
 
-  /// 2xx.
+  /// 2xx: Apple's system green, as Pulse wears it.
+  ///
+  /// On white it is 2.2:1 — the second deliberate exception after
+  /// [accent], and the reason the palette's contrast test names it. A
+  /// call that went fine is also the one outcome a reader never has to
+  /// read closely; everything that went wrong keeps its contrast.
   final Color success;
 
   /// 3xx.
@@ -226,9 +231,11 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
   /// The least a row may be tall.
   final double minRowHeight;
 
-  /// The least a control that answers a tap may be, either way. Android's
-  /// accessibility guideline asks for 48, and it wins over the 44 an iOS
-  /// row would use.
+  /// The least a control that answers a tap may be, either way.
+  ///
+  /// 44 is Apple's minimum, and the height of the navigation bar every
+  /// screen wears — nothing inside that bar can be taller, so holding the
+  /// rest of Peek to Android's 48 would only make the two disagree.
   final double minTapTarget;
 
   /// The colour standing for [statusClass].
@@ -400,7 +407,7 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     'PUT': dark ? const Color(0xFFFFD60A) : const Color(0xFFB26A00),
     'PATCH': dark ? const Color(0xFFFFD60A) : const Color(0xFFB26A00),
     'DELETE': dark ? const Color(0xFFFF6B5E) : const Color(0xFFD70015),
-    'HEAD': dark ? const Color(0xFF98989D) : const Color(0xFF6A6A6F),
-    'OPTIONS': dark ? const Color(0xFF98989D) : const Color(0xFF6A6A6F),
+    'HEAD': dark ? const Color(0xFF98989D) : const Color(0xFF646469),
+    'OPTIONS': dark ? const Color(0xFF98989D) : const Color(0xFF646469),
   };
 }

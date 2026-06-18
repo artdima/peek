@@ -39,13 +39,14 @@ void main() {
   group('PeekEntryView', () {
     testWidgets('summarises the call above the tabs', (tester) async {
       await pumpView(tester, e1);
-      // The method and the code are in the head and again in the card.
-      expect(find.widgetWithText(PeekStatusLabel, '200'), findsOneWidget);
       expect(find.widgetWithText(PeekListRow, '200'), findsOneWidget);
-      expect(find.widgetWithText(PeekListRow, 'GET'), findsOneWidget);
-      expect(find.text('https://api.example.com/users'), findsOneWidget);
+      expect(
+        find.text('GET https://api.example.com/users', findRichText: true),
+        findsOneWidget,
+      );
       expect(find.text('Sent'), findsOneWidget);
       expect(find.text('Received'), findsOneWidget);
+      expect(find.text('Headers: 1'), findsOneWidget);
       expect(find.widgetWithText(PeekListRow, 'dio'), findsOneWidget);
     });
 
@@ -76,12 +77,17 @@ void main() {
     testWidgets('lays the overview out in cards', (tester) async {
       await pumpView(tester, redirected);
       expect(find.text('GENERAL'), findsOneWidget);
-      expect(find.text('SIZES'), findsOneWidget);
+      expect(find.text('REQUEST'), findsOneWidget);
+      expect(find.text('RESPONSE'), findsOneWidget);
       expect(find.text('REDIRECTS'), findsOneWidget);
-      expect(find.text('SOURCE'), findsOneWidget);
+      expect(find.text('DETAILS'), findsOneWidget);
       expect(find.widgetWithText(PeekListRow, 'Finished'), findsOneWidget);
       expect(
         find.widgetWithText(PeekListRow, 'Response headers'),
+        findsOneWidget,
+      );
+      expect(
+        find.widgetWithText(PeekListRow, 'Request cookies'),
         findsOneWidget,
       );
       expect(find.widgetWithText(PeekListRow, '301 GET'), findsOneWidget);
@@ -148,7 +154,8 @@ void main() {
     testWidgets('names what stopped the call', (tester) async {
       await pumpView(tester, e5);
       await openTab(tester, 'Error');
-      expect(find.widgetWithText(PeekListRow, 'Timed out'), findsOneWidget);
+      // Once in the head, once as the error the tab opens on.
+      expect(find.widgetWithText(PeekListRow, 'Timed out'), findsNWidgets(2));
       expect(find.widgetWithText(PeekListRow, 'slow'), findsOneWidget);
     });
 
@@ -171,7 +178,7 @@ void main() {
 
     testWidgets('fills itself in when the call comes back', (tester) async {
       await pumpView(tester, e4);
-      expect(find.widgetWithText(PeekStatusLabel, 'Pending'), findsOneWidget);
+      expect(find.widgetWithText(PeekListRow, 'Pending'), findsOneWidget);
       expect(find.widgetWithText(PeekPill, 'Error'), findsNothing);
 
       // A finish is a new entry, not a copy: completedAt travels with the
@@ -189,8 +196,8 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      expect(find.widgetWithText(PeekStatusLabel, '200 OK'), findsOneWidget);
-      expect(find.widgetWithText(PeekListRow, '250 ms'), findsOneWidget);
+      expect(find.widgetWithText(PeekListRow, '200 OK'), findsOneWidget);
+      expect(find.widgetWithText(PeekListRow, '250 ms'), findsNWidgets(2));
     });
 
     testWidgets('survives large text', (tester) async {

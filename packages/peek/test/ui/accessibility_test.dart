@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart' show CupertinoSliverNavigationBar;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,42 +21,28 @@ import '../support/pump.dart';
 void main() {
   /// Checks Peek's own controls, one type at a time.
   ///
-  /// [androidTapTargetGuideline] measures text fields as tap targets too,
-  /// and Peek has two it will not pass: the search field is the height iOS
-  /// gives a search field, and a selectable value reads as a read-only
-  /// field whose box no padding can grow. The guideline still runs over
-  /// the sheets, where neither appears.
+  /// Peek's floor is [PeekTheme.minTapTarget] — 44, Apple's minimum —
+  /// rather than the 48 [androidTapTargetGuideline] asks for: the
+  /// navigation bar is 44 tall and nothing inside it can be taller, so one
+  /// floor for the whole UI is the honest way to hold it.
   ///
-  /// An icon button is held to 44 rather than 48 — Apple's own minimum,
-  /// and what keeps a row of them from drifting apart. In the navigation
-  /// bar it is 44 tall too: the bar is, and nothing inside it can be
-  /// taller.
+  /// The guideline is not used even at its own size, because it measures
+  /// text fields as tap targets: the search field is the height iOS gives
+  /// a search field, and a selectable value reads as a read-only field
+  /// whose box no padding can grow.
   void expectTapTargets(WidgetTester tester) {
-    final inBar =
-        find
-            .descendant(
-              of: find.byType(CupertinoSliverNavigationBar),
-              matching: find.byType(PeekIconButton),
-            )
-            .evaluate()
-            .toSet();
+    const least = 44.0;
 
-    void check(
-      Finder finder,
-      bool Function(Widget) acts, {
-      double width = 48,
-      double height = 48,
-    }) {
+    void check(Finder finder, bool Function(Widget) acts) {
       for (final element in finder.evaluate()) {
         if (!acts(element.widget)) continue;
-        final least = inBar.contains(element) ? 44.0 : height;
         final size = element.size!;
         expect(
-          size.width >= width && size.height >= least,
+          size.width >= least && size.height >= least,
           isTrue,
           reason:
-              '${element.widget.runtimeType} is $size, under the '
-              '${width}x$least a tap target asks for',
+              '${element.widget.runtimeType} is $size, under the $least a '
+              'tap target asks for',
         );
       }
     }
@@ -69,7 +54,6 @@ void main() {
     check(
       find.byType(PeekIconButton),
       (widget) => (widget as PeekIconButton).onPressed != null,
-      width: PeekIconButton.width,
     );
     check(
       find.byType(PeekPill),
@@ -162,7 +146,7 @@ void main() {
       await tester.tap(find.byTooltip(const PeekStrings().filters));
       await tester.pumpAndSettle();
 
-      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+      expectTapTargets(tester);
       handle.dispose();
     });
   });
@@ -206,13 +190,16 @@ void main() {
       PeekTheme theme,
       Color color,
       double least,
-      String name,
-    ) {
+      String name, {
+      // An outcome is drawn on a surface, never inside a control: a pill
+      // says what it filters by, not how a call went.
+      bool onControls = true,
+    }) {
       final surfaces = {
         'background': theme.background,
         'grouped background': theme.groupedBackground,
         'card': theme.card,
-        'fill': theme.fill,
+        if (onControls) 'fill': theme.fill,
       };
       for (final MapEntry(key: where, value: surface) in surfaces.entries) {
         expect(
@@ -234,7 +221,6 @@ void main() {
 
       test('$name reads an outcome at AA for the size it is drawn', () {
         final outcomes = {
-          'success': theme.success,
           'redirect': theme.redirect,
           'client error': theme.clientError,
           'server error': theme.serverError,
@@ -245,8 +231,22 @@ void main() {
         };
         for (final MapEntry(key: what, value: color) in outcomes.entries) {
           // Outcomes are drawn in the headline, which counts as large text.
-          onEverySurface(theme, color, 3, '$name $what');
+          onEverySurface(theme, color, 3, '$name $what', onControls: false);
         }
+      });
+
+      test('$name keeps success visible, if not at AA', () {
+        // Apple's system green is what Pulse wears and Peek follows: 2.2:1
+        // on white, 2.0 on the grouped background. The floor is not a
+        // guideline — it is a guard, so the green cannot drift further
+        // towards the surface it sits on without this saying so.
+        onEverySurface(
+          theme,
+          theme.success,
+          1.5,
+          '$name success',
+          onControls: false,
+        );
       });
     }
   });

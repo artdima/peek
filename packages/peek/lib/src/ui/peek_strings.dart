@@ -149,6 +149,18 @@ class PeekStrings {
   /// Heading for cookies.
   String get cookies => 'Cookies';
 
+  /// How many headers a direction carried.
+  String headerCount(int count) => 'Headers: $count';
+
+  /// How many cookies it carried.
+  String cookieCount(int count) => 'Cookies: $count';
+
+  /// Names the cookies a request carried.
+  String get requestCookies => 'Request cookies';
+
+  /// Names the cookies a response set.
+  String get responseCookies => 'Response cookies';
+
   /// Heading for query parameters.
   String get queryParameters => 'Query';
 
@@ -160,9 +172,6 @@ class PeekStrings {
 
   /// Heading for the card that answers "what call was this".
   String get general => 'General';
-
-  /// Heading for the card of how much moved.
-  String get sizes => 'Sizes';
 
   /// Label for the request body.
   String get requestBody => 'Request body';

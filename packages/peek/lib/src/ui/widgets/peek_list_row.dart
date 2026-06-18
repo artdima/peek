@@ -16,6 +16,7 @@ final class PeekListRow extends StatelessWidget {
     this.onTap,
     this.chevron = false,
     this.enabled = true,
+    this.titleStyle,
     super.key,
   });
 
@@ -43,6 +44,9 @@ final class PeekListRow extends StatelessWidget {
   /// Whether the row means anything; a disabled row is greyed and inert.
   final bool enabled;
 
+  /// Merged over the name's style, such as an outcome's colour and weight.
+  final TextStyle? titleStyle;
+
   @override
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
@@ -62,16 +66,21 @@ final class PeekListRow extends StatelessWidget {
           minHeight: tap == null ? theme.minRowHeight : theme.minTapTarget,
         ),
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: theme.gutter, vertical: 8),
+          padding: EdgeInsets.symmetric(horizontal: theme.gutter, vertical: 6),
           child: Row(
             children: [
-              if (leading != null) ...[leading, const SizedBox(width: 10)],
+              if (leading != null) ...[leading, const SizedBox(width: 6)],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(title, style: theme.body.copyWith(color: titleColor)),
+                    Text(
+                      title,
+                      style: theme.body
+                          .copyWith(color: titleColor)
+                          .merge(titleStyle),
+                    ),
                     if (subtitle != null)
                       Text(
                         subtitle,
@@ -84,7 +93,10 @@ final class PeekListRow extends StatelessWidget {
               ),
               if (value != null) ...[
                 const SizedBox(width: 10),
-                Flexible(
+                // Expanded, not Flexible: a loose child keeps its whole
+                // share of the row and leaves what it does not use empty
+                // to its right, which is what held the values off the edge.
+                Expanded(
                   child: Text(
                     value,
                     maxLines: 1,

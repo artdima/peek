@@ -1,10 +1,12 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart' show Icons, SelectableText;
+import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_body.dart';
 import '../../core/model/peek_entry.dart';
+import '../../core/model/peek_status_class.dart';
+import '../icons/icons.dart';
 import '../peek_scope.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
@@ -59,8 +61,7 @@ class _PeekEntryViewState extends State<PeekEntryView> {
 
     return ColoredBox(
       color: theme.groupedBackground,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: ListView(
         children: [
           _Summary(entry: widget.entry, strings: strings),
           Padding(
@@ -75,41 +76,38 @@ class _PeekEntryViewState extends State<PeekEntryView> {
             ),
           ),
           SizedBox(height: theme.rowSpacing),
-          Expanded(
-            child: ListView(
-              children: [
-                switch (tab) {
-                  PeekEntryTab.overview => _Overview(
-                    entry: widget.entry,
-                    strings: strings,
-                    onShowTab: (value) => setState(() => _tab = value),
-                  ),
-                  PeekEntryTab.request => _Request(
-                    entry: widget.entry,
-                    strings: strings,
-                  ),
-                  PeekEntryTab.response => _Response(
-                    entry: widget.entry,
-                    strings: strings,
-                  ),
-                  PeekEntryTab.error => PeekErrorView(
-                    widget.entry.failure!,
-                    hasResponse: widget.entry.response != null,
-                    onShowResponse:
-                        () => setState(() => _tab = PeekEntryTab.response),
-                  ),
-                  PeekEntryTab.timing => PeekTimingView(widget.entry),
-                },
-              ],
+          switch (tab) {
+            PeekEntryTab.overview => _Overview(
+              entry: widget.entry,
+              strings: strings,
+              onShowTab: (value) => setState(() => _tab = value),
             ),
-          ),
+            PeekEntryTab.request => _Request(
+              entry: widget.entry,
+              strings: strings,
+            ),
+            PeekEntryTab.response => _Response(
+              entry: widget.entry,
+              strings: strings,
+            ),
+            PeekEntryTab.error => PeekErrorView(
+              widget.entry.failure!,
+              hasResponse: widget.entry.response != null,
+              onShowResponse:
+                  () => setState(() => _tab = PeekEntryTab.response),
+            ),
+            PeekEntryTab.timing => PeekTimingView(widget.entry),
+          },
         ],
       ),
     );
   }
 }
 
-/// The head of the screen: what was asked, how it went, how much moved.
+/// The head of the screen: how much moved, how it went, what was asked.
+///
+/// The amounts lead, the way Pulse leads with them: a reader glances at a
+/// call's weight before reading its address.
 class _Summary extends StatelessWidget {
   const _Summary({required this.entry, required this.strings});
 
@@ -118,49 +116,37 @@ class _Summary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = PeekScope.of(context);
     final theme = PeekTheme.of(context);
-    final url = entry.request.uri.toString();
+    final elapsed = entry.duration;
+    final outcome = theme.colorForEntry(entry);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: theme.gutter),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    entry.request.method.toUpperCase(),
-                    style: theme.body.copyWith(fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(child: PeekStatusLabel(entry)),
-                  PeekIconButton(
-                    icon:
-                        entry.isPinned
-                            ? Icons.push_pin
-                            : Icons.push_pin_outlined,
-                    tooltip: entry.isPinned ? strings.unpin : strings.pin,
-                    size: 18,
-                    onPressed: () => controller.togglePin(entry.id),
-                  ),
-                ],
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: SelectableText(url, style: theme.body)),
-                  PeekCopyButton(text: url),
-                ],
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: theme.rowSpacing),
         _Transfer(entry: entry, strings: strings),
+        PeekListSection(
+          children: [
+            PeekListRow(
+              // A tick means it came back as asked; anything else keeps the
+              // dot the list uses, since a tick would be a lie.
+              leading:
+                  entry.statusClass == PeekStatusClass.success
+                      ? PeekIcon(
+                        PeekIcons.ok,
+                        color: outcome,
+                        knockout: theme.card,
+                      )
+                      : PeekStatusDot(outcome),
+              title: strings.outcome(entry),
+              titleStyle: TextStyle(
+                color: outcome,
+                fontWeight: FontWeight.w600,
+              ),
+              value: elapsed == null ? null : strings.elapsed(elapsed),
+            ),
+            _Address(entry: entry),
+          ],
+        ),
       ],
     );
   }
@@ -176,17 +162,21 @@ class _Transfer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
+    final response = entry.response;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(theme.gutter, 0, theme.gutter, theme.gutter),
+      padding: EdgeInsets.fromLTRB(theme.gutter, 6, theme.gutter, theme.gutter),
       child: IntrinsicHeight(
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
               child: _Amount(
-                icon: Icons.arrow_upward,
+                icon: PeekIcons.sent,
                 label: strings.sent,
                 bytes: entry.requestSize,
+                headers: entry.request.headers.length,
+                cookies: entry.request.headers.cookies.length,
                 strings: strings,
               ),
             ),
@@ -199,9 +189,11 @@ class _Transfer extends StatelessWidget {
             ),
             Expanded(
               child: _Amount(
-                icon: Icons.arrow_downward,
+                icon: PeekIcons.received,
                 label: strings.received,
                 bytes: entry.responseSize,
+                headers: response?.headers.length ?? 0,
+                cookies: response?.headers.setCookies.length ?? 0,
                 strings: strings,
               ),
             ),
@@ -212,47 +204,105 @@ class _Transfer extends StatelessWidget {
   }
 }
 
+/// One direction: its arrow, its weight, and what carried it.
 class _Amount extends StatelessWidget {
   const _Amount({
     required this.icon,
     required this.label,
     required this.bytes,
+    required this.headers,
+    required this.cookies,
     required this.strings,
   });
 
-  final IconData icon;
+  final PeekIconData icon;
   final String label;
   final int? bytes;
+  final int headers;
+  final int cookies;
   final PeekStrings strings;
 
   @override
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
     final size = bytes;
+    final quiet = theme.caption.copyWith(color: theme.secondaryLabel);
 
     return Column(
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 13, color: theme.secondaryLabel),
-            const SizedBox(width: 5),
+            PeekIcon(icon, size: 28, color: theme.label),
+            const SizedBox(width: 10),
             Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.footnote.copyWith(color: theme.secondaryLabel),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.headline,
+                  ),
+                  Text(
+                    size == null ? strings.none : strings.bytes(size),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.headline.copyWith(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 8),
         Text(
-          size == null ? strings.none : strings.bytes(size),
-          style: theme.headline,
+          strings.headerCount(headers),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: quiet,
+        ),
+        Text(
+          strings.cookieCount(cookies),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: quiet,
         ),
       ],
+    );
+  }
+}
+
+/// The method and the address, as one line to read and one to copy.
+class _Address extends StatelessWidget {
+  const _Address({required this.entry});
+
+  final PeekEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    final url = entry.request.uri.toString();
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: theme.gutter, vertical: 14),
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: '${entry.request.method.toUpperCase()} ',
+              style: theme.body.copyWith(fontWeight: FontWeight.w700),
+            ),
+            TextSpan(text: url),
+          ],
+        ),
+        style: theme.body,
+      ),
     );
   }
 }
@@ -274,20 +324,16 @@ class _Overview extends StatelessWidget {
     final elapsed = entry.duration;
     final finishedAt = entry.completedAt;
     final failure = entry.failure;
-    final redirects = entry.response?.redirects ?? const [];
+    final request = entry.request;
+    final response = entry.response;
+    final redirects = response?.redirects ?? const [];
 
     return Column(
       children: [
         PeekListSection(
           title: strings.general,
           children: [
-            PeekListRow(title: strings.method, value: entry.request.method),
-            PeekListRow(title: strings.status, value: strings.outcome(entry)),
             PeekListRow(title: strings.host, value: entry.request.host),
-            PeekListRow(
-              title: strings.duration,
-              value: elapsed == null ? strings.none : strings.elapsed(elapsed),
-            ),
             PeekListRow(
               title: strings.started,
               value: strings.timestamp(entry.startedAt),
@@ -315,26 +361,81 @@ class _Overview extends StatelessWidget {
             ],
           ),
         PeekListSection(
-          title: strings.sizes,
+          title: strings.request,
           children: [
-            PeekListRow(
+            _Holds(
+              icon: PeekIcons.sent,
               title: strings.requestBody,
-              value: _bodyValue(strings, entry.request.body),
+              value: _bodyValue(strings, request.body),
+              onTap:
+                  request.body is PeekEmptyBody
+                      ? null
+                      : () => unawaited(
+                        showPeekBody(
+                          context,
+                          body: request.body,
+                          title: strings.requestBody,
+                        ),
+                      ),
             ),
-            PeekListRow(
+            _Holds(
+              icon: PeekIcons.headers,
+              title: strings.requestHeaders,
+              value: '${request.headers.length}',
+              onTap:
+                  request.headers.length == 0
+                      ? null
+                      : () => onShowTab(PeekEntryTab.request),
+            ),
+            _Holds(
+              icon: PeekIcons.cookies,
+              title: strings.requestCookies,
+              value: '${request.headers.cookies.length}',
+              onTap:
+                  request.headers.cookies.isEmpty
+                      ? null
+                      : () => onShowTab(PeekEntryTab.request),
+            ),
+          ],
+        ),
+        PeekListSection(
+          title: strings.response,
+          children: [
+            _Holds(
+              icon: PeekIcons.received,
               title: strings.responseBody,
               value:
-                  entry.response == null
+                  response == null
                       ? strings.none
-                      : _bodyValue(strings, entry.response!.body),
+                      : _bodyValue(strings, response.body),
+              onTap:
+                  response == null || response.body is PeekEmptyBody
+                      ? null
+                      : () => unawaited(
+                        showPeekBody(
+                          context,
+                          body: response.body,
+                          title: strings.responseBody,
+                        ),
+                      ),
             ),
-            PeekListRow(
-              title: strings.requestHeaders,
-              value: '${entry.request.headers.length}',
-            ),
-            PeekListRow(
+            _Holds(
+              icon: PeekIcons.headers,
               title: strings.responseHeaders,
-              value: '${entry.response?.headers.length ?? 0}',
+              value: '${response?.headers.length ?? 0}',
+              onTap:
+                  response == null || response.headers.length == 0
+                      ? null
+                      : () => onShowTab(PeekEntryTab.response),
+            ),
+            _Holds(
+              icon: PeekIcons.cookies,
+              title: strings.responseCookies,
+              value: '${response?.headers.setCookies.length ?? 0}',
+              onTap:
+                  response == null || response.headers.setCookies.isEmpty
+                      ? null
+                      : () => onShowTab(PeekEntryTab.response),
             ),
           ],
         ),
@@ -350,10 +451,74 @@ class _Overview extends StatelessWidget {
             ],
           ),
         PeekListSection(
-          title: strings.source,
-          children: [PeekListRow(title: strings.source, value: entry.source)],
+          title: strings.details,
+          children: [
+            _Holds(
+              icon: PeekIcons.timing,
+              title: strings.timing,
+              value: elapsed == null ? strings.none : strings.elapsed(elapsed),
+              onTap: () => onShowTab(PeekEntryTab.timing),
+            ),
+            _Holds(
+              icon: PeekIcons.source,
+              title: strings.source,
+              value: entry.source,
+            ),
+          ],
         ),
       ],
+    );
+  }
+}
+
+/// One plain fact of a call, marked the way the rows around it are.
+class _Fact extends StatelessWidget {
+  const _Fact({required this.icon, required this.title, required this.value});
+
+  final PeekIconData icon;
+  final String title;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => PeekListRow(
+    leading: PeekIcon(icon, color: PeekTheme.of(context).accent),
+    title: title,
+    value: value,
+  );
+}
+
+/// One thing a call holds: what it is, how much of it there is, and the way
+/// to it when there is anything to see.
+class _Holds extends StatelessWidget {
+  const _Holds({
+    required this.icon,
+    required this.title,
+    required this.value,
+    this.onTap,
+  });
+
+  final PeekIconData icon;
+  final String title;
+  final String value;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    final leads = onTap != null;
+
+    return PeekListRow(
+      leading: PeekIcon(
+        icon,
+        color: leads ? theme.accent : theme.tertiaryLabel,
+      ),
+      title: title,
+      value: value,
+      // Kept even where the row leads nowhere: without it the values of a
+      // card would not line up.
+      chevron: true,
+      enabled: leads,
+      onTap: onTap,
     );
   }
 }
@@ -375,15 +540,25 @@ class _Request extends StatelessWidget {
         PeekListSection(
           title: strings.request,
           children: [
-            PeekListRow(title: strings.method, value: request.method),
-            PeekListRow(title: strings.host, value: request.host),
-            PeekListRow(
+            _Fact(
+              icon: PeekIcons.curl,
+              title: strings.method,
+              value: request.method,
+            ),
+            _Fact(
+              icon: PeekIcons.source,
+              title: strings.host,
+              value: request.host,
+            ),
+            _Fact(
+              icon: PeekIcons.headers,
               title: strings.contentType,
               value: request.mediaType?.mimeType ?? strings.none,
             ),
             _BodyRow(
               body: request.body,
               title: strings.requestBody,
+              icon: PeekIcons.sent,
               strings: strings,
             ),
           ],
@@ -419,14 +594,15 @@ class _Response extends StatelessWidget {
         PeekListSection(
           title: strings.response,
           children: [
-            PeekListRow(title: strings.status, value: strings.outcome(entry)),
-            PeekListRow(
+            _Fact(
+              icon: PeekIcons.headers,
               title: strings.contentType,
               value: response.mediaType?.mimeType ?? strings.none,
             ),
             _BodyRow(
               body: response.body,
               title: strings.responseBody,
+              icon: PeekIcons.received,
               strings: strings,
             ),
           ],
@@ -443,20 +619,28 @@ class _BodyRow extends StatelessWidget {
   const _BodyRow({
     required this.body,
     required this.title,
+    required this.icon,
     required this.strings,
   });
 
   final PeekBody body;
   final String title;
+  final PeekIconData icon;
   final PeekStrings strings;
 
   @override
   Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
     final nothing = body is PeekEmptyBody;
+
     return PeekListRow(
+      leading: PeekIcon(
+        icon,
+        color: nothing ? theme.tertiaryLabel : theme.accent,
+      ),
       title: title,
       value: _bodyValue(strings, body),
-      chevron: !nothing,
+      chevron: true,
       enabled: !nothing,
       onTap: () => unawaited(showPeekBody(context, body: body, title: title)),
     );

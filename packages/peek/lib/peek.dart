@@ -6,6 +6,7 @@
 library;
 
 export 'core.dart';
+export 'src/ui/icons/icons.dart';
 export 'src/ui/peek_controller.dart';
 export 'src/ui/peek_navigation.dart';
 export 'src/ui/peek_overlay.dart';

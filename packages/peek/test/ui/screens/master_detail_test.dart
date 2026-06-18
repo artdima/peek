@@ -65,8 +65,10 @@ void main() {
 
       await openUsers(tester);
       expect(find.byType(PeekEntryScreen), findsOneWidget);
-      expect(find.text('https://api.example.com/users'), findsOneWidget);
-      // The label carries the code as a colour; the row spells it out.
+      expect(
+        find.text('GET https://api.example.com/users', findRichText: true),
+        findsOneWidget,
+      );
       expect(find.widgetWithText(PeekListRow, '200'), findsOneWidget);
       expect(find.widgetWithText(PeekListRow, 'dio'), findsOneWidget);
       expect(find.text('Sent'), findsOneWidget);
@@ -104,7 +106,10 @@ void main() {
 
       expect(find.byType(PeekEntryScreen), findsNothing);
       expect(find.byType(PeekEntryView), findsOneWidget);
-      expect(find.text('https://api.example.com/users'), findsOneWidget);
+      expect(
+        find.text('GET https://api.example.com/users', findRichText: true),
+        findsOneWidget,
+      );
 
       final tile = tester.widget<PeekEntryTile>(
         find.ancestor(
@@ -128,7 +133,10 @@ void main() {
 
       await resize(tester, const Size(960, 720));
       expect(find.byType(PeekEntryView), findsOneWidget);
-      expect(find.text('https://api.example.com/users'), findsOneWidget);
+      expect(
+        find.text('GET https://api.example.com/users', findRichText: true),
+        findsOneWidget,
+      );
     });
   });
 

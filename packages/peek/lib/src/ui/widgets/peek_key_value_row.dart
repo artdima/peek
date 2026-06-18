@@ -3,7 +3,10 @@ import 'package:flutter/widgets.dart';
 
 import '../theme/peek_theme.dart';
 
-/// One `name: value` line, with the value free to be selected and copied.
+/// One `name: value` pair, the name over the value.
+///
+/// A header's value is often longer than a phone is wide, so it gets the
+/// whole row rather than a column beside the name.
 final class PeekKeyValueRow extends StatelessWidget {
   /// Creates a row showing [value] under [name].
   const PeekKeyValueRow({
@@ -39,16 +42,21 @@ final class PeekKeyValueRow extends StatelessWidget {
     );
 
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: theme.rowSpacing / 2),
+      padding: EdgeInsets.fromLTRB(
+        theme.gutter,
+        8,
+        trailing == null ? theme.gutter : theme.gutter - 12,
+        8,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 120, child: Text(name, style: nameStyle)),
-          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(name, style: nameStyle),
+                const SizedBox(height: 1),
                 SelectableText(value, style: valueStyle),
                 if (subtitle case final line?)
                   Text(
@@ -59,7 +67,7 @@ final class PeekKeyValueRow extends StatelessWidget {
             ),
           ),
           if (trailing case final widget?) ...[
-            const SizedBox(width: 8),
+            const SizedBox(width: 4),
             widget,
           ],
         ],

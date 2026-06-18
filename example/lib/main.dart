@@ -36,25 +36,14 @@ class _PeekExampleAppState extends State<PeekExampleApp> {
     debugShowCheckedModeBanner: false,
     themeMode: _mode,
     theme: ThemeData(colorSchemeSeed: const Color(0xFF3DDC84)),
-    darkTheme: ThemeData(
-      colorSchemeSeed: const Color(0xFF3DDC84),
-      brightness: Brightness.dark,
-    ),
+    darkTheme: ThemeData(colorSchemeSeed: const Color(0xFF3DDC84), brightness: Brightness.dark),
     builder: (context, child) => PeekOverlay(peek: _peek, child: child!),
-    home: _Home(
-      peek: _peek,
-      mode: _mode,
-      onModeChanged: (mode) => setState(() => _mode = mode),
-    ),
+    home: _Home(peek: _peek, mode: _mode, onModeChanged: (mode) => setState(() => _mode = mode)),
   );
 }
 
 class _Home extends StatelessWidget {
-  const _Home({
-    required this.peek,
-    required this.mode,
-    required this.onModeChanged,
-  });
+  const _Home({required this.peek, required this.mode, required this.onModeChanged});
 
   final Peek peek;
   final ThemeMode mode;
@@ -67,13 +56,8 @@ class _Home extends StatelessWidget {
       actions: [
         IconButton(
           tooltip: 'Toggle theme',
-          onPressed:
-              () => onModeChanged(
-                mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark,
-              ),
-          icon: Icon(
-            mode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
-          ),
+          onPressed: () => onModeChanged(mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark),
+          icon: Icon(mode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode),
         ),
       ],
     ),
@@ -89,10 +73,7 @@ class _Home extends StatelessWidget {
             label: const Text('Open Peek'),
           ),
           const SizedBox(height: 8),
-          TextButton(
-            onPressed: () => fillWithDemoData(peek),
-            child: const Text('Add more demo data'),
-          ),
+          TextButton(onPressed: () => fillWithDemoData(peek), child: const Text('Add more demo data')),
         ],
       ),
     ),
