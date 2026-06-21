@@ -73,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        package: [peek]
+        package: [peek, peek_dio]
     steps:
       - uses: actions/checkout@v7
 
@@ -91,6 +91,14 @@ jobs:
           cd "$RUNNER_TEMP/floor"
           sed -i '/^resolution: workspace$/d' pubspec.yaml
           rm -f analysis_options.yaml test/analysis_options.yaml
+          # An adapter's peek dependency has nowhere to resolve from until
+          # peek is published, so point it at the copy in this checkout.
+          if [ "${{ matrix.package }}" != peek ]; then
+            cp -r "$GITHUB_WORKSPACE/packages/peek" "$RUNNER_TEMP/peek"
+            sed -i '/^resolution: workspace$/d' "$RUNNER_TEMP/peek/pubspec.yaml"
+            printf '\ndependency_overrides:\n  peek:\n    path: %s\n' \
+              "$RUNNER_TEMP/peek" >> pubspec.yaml
+          fi
 
       - run: flutter pub get
         working-directory: ${{ runner.temp }}/floor
@@ -106,7 +114,7 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        package: [peek]
+        package: [peek, peek_dio]
     steps:
       - uses: actions/checkout@v7
 
@@ -117,6 +125,9 @@ jobs:
           cache: true
 
       - run: dart pub global activate pana
+      # The workspace resolves an adapter's peek dependency from this
+      # checkout; pana scores the package as pub.dev would see it, so an
+      # unpublished dependency costs points until peek is up.
       - run: >-
           dart pub global run pana
           --no-warning --exit-code-threshold 0
