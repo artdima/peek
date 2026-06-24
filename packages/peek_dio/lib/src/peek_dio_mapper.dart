@@ -23,7 +23,7 @@ abstract final class PeekDioMapper {
     uri: options.uri,
     headers: headers(options.headers),
     body: requestBody(options),
-    extra: {'client': client},
+    extra: const {'client': client},
   );
 
   /// Maps a response onto Peek's, by the type Dio was asked to decode it as.
@@ -54,7 +54,8 @@ abstract final class PeekDioMapper {
   static PeekFailureKind failureKind(DioExceptionType type) => switch (type) {
     DioExceptionType.connectionTimeout ||
     DioExceptionType.sendTimeout ||
-    DioExceptionType.receiveTimeout => PeekFailureKind.timeout,
+    DioExceptionType.receiveTimeout ||
+    DioExceptionType.transformTimeout => PeekFailureKind.timeout,
     DioExceptionType.badCertificate => PeekFailureKind.badCertificate,
     DioExceptionType.badResponse => PeekFailureKind.badResponse,
     DioExceptionType.cancel => PeekFailureKind.cancelled,
@@ -87,7 +88,10 @@ abstract final class PeekDioMapper {
         PeekBodyUnavailableReason.streamed,
         contentType: type,
       ),
-      final List<int> bytes => PeekBody.bytes(
+      // A plain list of numbers is ambiguous: Dio sends it as JSON unless
+      // the call declares a type that is not text, which is the only sign
+      // the caller meant it as bytes.
+      final List<int> bytes when _isBinary(type) => PeekBody.bytes(
         Uint8List.fromList(bytes),
         contentType: type,
       ),
@@ -131,6 +135,9 @@ abstract final class PeekDioMapper {
       },
     };
   }
+
+  static bool _isBinary(PeekMediaType? type) =>
+      type != null && !type.isText && !type.isJson;
 
   static PeekBody _form(FormData form, PeekMediaType? contentType) =>
       PeekBody.form(

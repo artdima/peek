@@ -65,7 +65,7 @@ void main() {
 
       expect(mapped.headers['Accept'], 'application/json');
       expect(mapped.headers['X-Retry'], '3');
-      expect(mapped.headers.all('X-Tag'), ['a', 'b']);
+      expect(mapped.headers.valuesOf('X-Tag'), ['a', 'b']);
     });
   });
 
@@ -95,14 +95,22 @@ void main() {
       expect(body.contentType, PeekMediaType.formUrlEncoded);
     });
 
-    test('keeps bytes as bytes, however they were typed', () {
-      final typed = PeekDioMapper.requestBody(
+    test('keeps bytes as bytes', () {
+      final body = PeekDioMapper.requestBody(
         options(data: Uint8List.fromList([1, 2, 3])),
       );
-      final plain = PeekDioMapper.requestBody(options(data: <int>[4, 5]));
 
-      expect((typed as PeekBytesBody).bytes, [1, 2, 3]);
-      expect((plain as PeekBytesBody).bytes, [4, 5]);
+      expect((body as PeekBytesBody).bytes, [1, 2, 3]);
+    });
+
+    test('reads a list of numbers as Dio would send it', () {
+      final json = PeekDioMapper.requestBody(options(data: <int>[4, 5]));
+      final binary = PeekDioMapper.requestBody(
+        options(data: <int>[4, 5], contentType: 'application/octet-stream'),
+      );
+
+      expect((json as PeekTextBody).text, '[4,5]');
+      expect((binary as PeekBytesBody).bytes, [4, 5]);
     });
 
     test('describes a form without reading a file', () {
@@ -163,7 +171,7 @@ void main() {
 
       expect(mapped.statusCode, 200);
       expect(mapped.statusMessage, 'OK');
-      expect(mapped.headers.all('Set-Cookie'), ['a=1', 'b=2']);
+      expect(mapped.headers.valuesOf('Set-Cookie'), ['a=1', 'b=2']);
       expect(mapped.redirects.single.statusCode, 301);
       expect(mapped.redirects.single.location.path, '/new');
     });
@@ -229,10 +237,7 @@ void main() {
     });
 
     test('is empty when nothing came back', () {
-      expect(
-        PeekDioMapper.responseBody(response(data: null)),
-        isA<PeekEmptyBody>(),
-      );
+      expect(PeekDioMapper.responseBody(response()), isA<PeekEmptyBody>());
     });
 
     test('says so when what came back will not encode', () {
@@ -256,6 +261,7 @@ void main() {
           DioExceptionType.connectionTimeout: PeekFailureKind.timeout,
           DioExceptionType.sendTimeout: PeekFailureKind.timeout,
           DioExceptionType.receiveTimeout: PeekFailureKind.timeout,
+          DioExceptionType.transformTimeout: PeekFailureKind.timeout,
           DioExceptionType.badCertificate: PeekFailureKind.badCertificate,
           DioExceptionType.badResponse: PeekFailureKind.badResponse,
           DioExceptionType.cancel: PeekFailureKind.cancelled,
@@ -287,7 +293,6 @@ void main() {
       final cause = PeekDioMapper.failure(
         DioException(
           requestOptions: options(),
-          type: DioExceptionType.unknown,
           message: '   ',
           error: const SocketMessage('broken pipe'),
         ),
