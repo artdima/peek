@@ -8,4 +8,5 @@
 /// so an adapter never drags the user interface — or Flutter — in with it.
 library;
 
+export 'src/peek_dio_interceptor.dart';
 export 'src/peek_dio_mapper.dart';
