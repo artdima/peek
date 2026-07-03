@@ -1,0 +1,27 @@
+name: peek_talker
+description: >-
+  Reports the calls Talker logs to Peek, so they can be read in the app.
+version: 0.1.0
+resolution: workspace
+
+environment:
+  sdk: ^3.7.0
+  flutter: '>=3.29.0'
+
+dependencies:
+  peek: ^0.1.0
+  peek_dio: ^0.1.0
+  talker: ^5.0.0
+  talker_dio_logger: ^5.0.0
+
+dev_dependencies:
+  dio: ^5.7.0
+  flutter_test:
+    sdk: flutter
+
+topics:
+  - debugging
+  - http
+  - logging
+  - network
+  - talker

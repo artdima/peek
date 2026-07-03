@@ -9,6 +9,7 @@ workspace:
   - example
   - packages/peek
   - packages/peek_dio
+  - packages/peek_talker
 
 dev_dependencies:
   flutter_lints: ^6.0.0

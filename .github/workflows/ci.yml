@@ -73,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        package: [peek, peek_dio]
+        package: [peek, peek_dio, peek_talker]
     steps:
       - uses: actions/checkout@v7
 
@@ -91,13 +91,22 @@ jobs:
           cd "$RUNNER_TEMP/floor"
           sed -i '/^resolution: workspace$/d' pubspec.yaml
           rm -f analysis_options.yaml test/analysis_options.yaml
-          # An adapter's peek dependency has nowhere to resolve from until
-          # peek is published, so point it at the copy in this checkout.
-          if [ "${{ matrix.package }}" != peek ]; then
-            cp -r "$GITHUB_WORKSPACE/packages/peek" "$RUNNER_TEMP/peek"
-            sed -i '/^resolution: workspace$/d' "$RUNNER_TEMP/peek/pubspec.yaml"
-            printf '\ndependency_overrides:\n  peek:\n    path: %s\n' \
-              "$RUNNER_TEMP/peek" >> pubspec.yaml
+          # An adapter depends on packages that are not published yet, so
+          # the copies in this checkout stand in for them.
+          case "${{ matrix.package }}" in
+            peek) siblings="" ;;
+            peek_dio) siblings="peek" ;;
+            peek_talker) siblings="peek peek_dio" ;;
+          esac
+          if [ -n "$siblings" ]; then
+            printf '\ndependency_overrides:\n' >> pubspec.yaml
+            for sibling in $siblings; do
+              cp -r "$GITHUB_WORKSPACE/packages/$sibling" "$RUNNER_TEMP/$sibling"
+              sed -i '/^resolution: workspace$/d' \
+                "$RUNNER_TEMP/$sibling/pubspec.yaml"
+              printf '  %s:\n    path: %s\n' "$sibling" \
+                "$RUNNER_TEMP/$sibling" >> pubspec.yaml
+            done
           fi
 
       - run: flutter pub get
@@ -114,7 +123,7 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        package: [peek, peek_dio]
+        package: [peek, peek_dio, peek_talker]
     steps:
       - uses: actions/checkout@v7
 
