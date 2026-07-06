@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:peek/core.dart';
 import 'package:talker/talker.dart';
 
+import 'dio_talker_log_mapper.dart';
 import 'peek_talker_log_mapper.dart';
 
 /// Reports what Talker already logged to Peek.
@@ -40,7 +41,9 @@ final class PeekTalkerAdapter implements PeekAdapter {
   static const String source = 'talker';
 
   /// The mappers an adapter uses when it is not told otherwise.
-  static const List<PeekTalkerLogMapper> defaultMappers = [];
+  static const List<PeekTalkerLogMapper> defaultMappers = [
+    DioTalkerLogMapper(),
+  ];
 
   /// Where the calls are reported.
   final PeekSink sink;

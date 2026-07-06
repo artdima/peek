@@ -8,5 +8,6 @@
 /// so an adapter never drags the user interface — or Flutter — in with it.
 library;
 
+export 'src/dio_talker_log_mapper.dart';
 export 'src/peek_talker_adapter.dart';
 export 'src/peek_talker_log_mapper.dart';
