@@ -14,6 +14,9 @@ dependencies:
     sdk: flutter
   peek: ^0.1.0
   peek_dio: ^0.1.0
+  peek_talker: ^0.1.0
+  talker: ^5.0.0
+  talker_dio_logger: ^5.0.0
 
 dev_dependencies:
   flutter_test:
