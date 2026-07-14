@@ -55,6 +55,15 @@ melos:
       packageFilters:
         dirExists: test
 
+    test:integration:
+      description: >-
+        Drive the example on a connected device. Needs one, so it is not
+        part of `ci`; run it by hand, adding `-d <device>` to choose.
+      exec:
+        command: flutter test integration_test
+      packageFilters:
+        scope: peek_example
+
     update:goldens:
       description: Rewrite the golden files; Linux only, as CI compares them.
       exec:

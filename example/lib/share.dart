@@ -8,13 +8,13 @@ import 'package:share_plus/share_plus.dart';
 ///
 /// Peek depends on no sharing package: the app wires up whichever one it
 /// already uses. This is what that wiring looks like with `share_plus`.
-PeekShareDelegate buildShareDelegate() =>
-    PeekShareDelegate.from((content) async {
-      await Share.shareXFiles([
-        XFile.fromData(
-          Uint8List.fromList(utf8.encode(content.text)),
-          mimeType: content.mimeType,
-          name: content.filename,
-        ),
-      ], subject: content.subject);
-    });
+PeekShareDelegate buildShareDelegate() {
+  return PeekShareDelegate.from((content) async {
+    final file = XFile.fromData(
+      Uint8List.fromList(utf8.encode(content.text)),
+      mimeType: content.mimeType,
+      name: content.filename,
+    );
+    await Share.shareXFiles([file], subject: content.subject);
+  });
+}
