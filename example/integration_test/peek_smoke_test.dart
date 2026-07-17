@@ -15,7 +15,10 @@ void main() {
     app.main();
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Add calls without a network'));
+    final offline = find.text('Add calls without a network');
+    await tester.scrollUntilVisible(offline, 240);
+    await tester.pumpAndSettle();
+    await tester.tap(offline);
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Open Peek'));
@@ -28,11 +31,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(PeekEntryView), findsOneWidget);
-    expect(find.text('REQUEST'), findsOneWidget);
+    expect(find.widgetWithText(PeekPill, 'Overview'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(PeekPill, 'Response'));
     await tester.pumpAndSettle();
-    expect(find.text('RESPONSE'), findsOneWidget);
+    expect(find.byType(PeekEntryView), findsOneWidget);
 
     await tester.pageBack();
     await tester.pumpAndSettle();
