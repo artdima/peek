@@ -12,6 +12,7 @@ import 'peek_share.dart';
 import 'peek_strings.dart';
 import 'screens/peek_screen.dart';
 import 'theme/peek_theme.dart';
+import 'widgets/peek_surface.dart';
 
 /// A draggable button floating over the app that opens Peek.
 ///
@@ -198,50 +199,52 @@ class _PeekOverlayState extends State<PeekOverlay> {
     final badge = _errors > 0 ? _errors : _pending;
     final badgeColor = _errors > 0 ? theme.serverError : theme.pending;
 
-    return GestureDetector(
-      onTap: _open,
-      onPanUpdate:
-          (details) =>
-              setState(() => _position = _resolve(area) + details.delta),
-      child: Semantics(
-        button: true,
-        label: widget.strings.openPeek,
-        child: SizedBox(
-          width: PeekOverlay.buttonSize,
-          height: PeekOverlay.buttonSize,
-          child: Stack(
-            children: [
-              Positioned(
-                left: 0,
-                bottom: 0,
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: theme.accent,
-                    shape: BoxShape.circle,
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x33000000),
-                        blurRadius: 8,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.visibility,
-                    size: 22,
-                    color: Color(0xFFFFFFFF),
-                  ),
-                ),
-              ),
-              if (badge > 0)
+    return PeekSurface(
+      child: GestureDetector(
+        onTap: _open,
+        onPanUpdate:
+            (details) =>
+                setState(() => _position = _resolve(area) + details.delta),
+        child: Semantics(
+          button: true,
+          label: widget.strings.openPeek,
+          child: SizedBox(
+            width: PeekOverlay.buttonSize,
+            height: PeekOverlay.buttonSize,
+            child: Stack(
+              children: [
                 Positioned(
-                  right: 0,
-                  top: 0,
-                  child: _OverlayBadge(count: badge, color: badgeColor),
+                  left: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: theme.accent,
+                      shape: BoxShape.circle,
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x33000000),
+                          blurRadius: 8,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.visibility,
+                      size: 22,
+                      color: Color(0xFFFFFFFF),
+                    ),
+                  ),
                 ),
-            ],
+                if (badge > 0)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: _OverlayBadge(count: badge, color: badgeColor),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

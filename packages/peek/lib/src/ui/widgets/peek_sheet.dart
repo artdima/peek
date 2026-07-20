@@ -6,6 +6,7 @@ import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
 import 'peek_list_row.dart';
 import 'peek_separator.dart';
+import 'peek_surface.dart';
 
 /// One option of a [showPeekActions] sheet.
 @immutable
@@ -92,37 +93,39 @@ class _SheetFrame extends StatelessWidget {
     final theme = PeekTheme.of(context);
     final size = MediaQuery.sizeOf(context);
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: EdgeInsets.all(theme.rowSpacing),
-        child: SafeArea(
-          top: false,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: size.height * 0.85,
-              maxWidth: 560,
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(theme.radius * 1.4),
-              child: ColoredBox(
-                color: theme.card,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 4),
-                      child: Container(
-                        width: 36,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: theme.separator,
-                          borderRadius: BorderRadius.circular(2),
+    return PeekSurface(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: EdgeInsets.all(theme.rowSpacing),
+          child: SafeArea(
+            top: false,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: size.height * 0.85,
+                maxWidth: 560,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(theme.radius * 1.4),
+                child: ColoredBox(
+                  color: theme.card,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8, bottom: 4),
+                        child: Container(
+                          width: 36,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: theme.separator,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
                         ),
                       ),
-                    ),
-                    Flexible(child: builder(context)),
-                  ],
+                      Flexible(child: builder(context)),
+                    ],
+                  ),
                 ),
               ),
             ),

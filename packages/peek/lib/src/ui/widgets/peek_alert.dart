@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../peek_scope.dart';
 import '../theme/peek_theme.dart';
 import 'peek_separator.dart';
+import 'peek_surface.dart';
 import 'peek_tappable.dart';
 
 /// Asks before doing something that cannot be taken back.
@@ -71,65 +72,67 @@ class _Alert extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
 
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 280),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(theme.radius * 1.4),
-          child: ColoredBox(
-            color: theme.card,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(theme.gutter),
-                  child: Column(
-                    children: [
-                      Text(
-                        title,
-                        textAlign: TextAlign.center,
-                        style: theme.headline,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        message,
-                        textAlign: TextAlign.center,
-                        style: theme.footnote.copyWith(
-                          color: theme.secondaryLabel,
+    return PeekSurface(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 280),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(theme.radius * 1.4),
+            child: ColoredBox(
+              color: theme.card,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(theme.gutter),
+                    child: Column(
+                      children: [
+                        Text(
+                          title,
+                          textAlign: TextAlign.center,
+                          style: theme.headline,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 6),
+                        Text(
+                          message,
+                          textAlign: TextAlign.center,
+                          style: theme.footnote.copyWith(
+                            color: theme.secondaryLabel,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const PeekSeparator(),
-                IntrinsicHeight(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _AlertButton(
-                          label: cancelLabel,
-                          onTap: () => Navigator.of(context).pop(false),
+                  const PeekSeparator(),
+                  IntrinsicHeight(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _AlertButton(
+                            label: cancelLabel,
+                            onTap: () => Navigator.of(context).pop(false),
+                          ),
                         ),
-                      ),
-                      SizedBox(
-                        width: theme.hairline,
-                        child: ColoredBox(
-                          color: theme.separator,
-                          child: const SizedBox(height: double.infinity),
+                        SizedBox(
+                          width: theme.hairline,
+                          child: ColoredBox(
+                            color: theme.separator,
+                            child: const SizedBox(height: double.infinity),
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child: _AlertButton(
-                          label: confirmLabel,
-                          emphasised: true,
-                          destructive: destructive,
-                          onTap: () => Navigator.of(context).pop(true),
+                        Expanded(
+                          child: _AlertButton(
+                            label: confirmLabel,
+                            emphasised: true,
+                            destructive: destructive,
+                            onTap: () => Navigator.of(context).pop(true),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

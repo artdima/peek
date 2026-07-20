@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../theme/peek_theme.dart';
+import 'peek_surface.dart';
 
 /// Says something happened, briefly, near the bottom of the screen.
 ///
@@ -35,20 +36,24 @@ class _Toast extends StatelessWidget {
   final PeekTheme theme;
 
   @override
-  Widget build(BuildContext context) => Center(
-    child: TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 140),
-      builder: (context, value, child) => Opacity(opacity: value, child: child),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-        decoration: BoxDecoration(
-          color: theme.label,
-          borderRadius: BorderRadius.circular(theme.radius * 2),
-        ),
-        child: Text(
-          message,
-          style: theme.footnote.copyWith(color: theme.background),
+  Widget build(BuildContext context) => PeekSurface(
+    theme: theme,
+    child: Center(
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 140),
+        builder:
+            (context, value, child) => Opacity(opacity: value, child: child),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          decoration: BoxDecoration(
+            color: theme.label,
+            borderRadius: BorderRadius.circular(theme.radius * 2),
+          ),
+          child: Text(
+            message,
+            style: theme.footnote.copyWith(color: theme.background),
+          ),
         ),
       ),
     ),

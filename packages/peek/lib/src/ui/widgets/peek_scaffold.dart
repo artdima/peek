@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart' show CupertinoSliverNavigationBar;
-import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:flutter/widgets.dart';
 
 import '../theme/peek_theme.dart';
+import 'peek_surface.dart';
 
 /// How a screen wears its name.
 enum PeekTitleStyle {
@@ -59,10 +59,7 @@ final class PeekScaffold extends StatelessWidget {
 
     return ColoredBox(
       color: background ?? theme.background,
-      // Text editing and text selection want a Material ancestor to live
-      // in. This one draws nothing: it is a host, not a look.
-      child: Material(
-        type: MaterialType.transparency,
+      child: PeekSurface(
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.only(bottom: insets),
@@ -235,10 +232,7 @@ final class PeekSliverScaffold extends StatelessWidget {
 
     return ColoredBox(
       color: background ?? theme.background,
-      // Text editing and text selection want a Material ancestor to live
-      // in. This one draws nothing: it is a host, not a look.
-      child: Material(
-        type: MaterialType.transparency,
+      child: PeekSurface(
         child: Stack(
           children: [
             CustomScrollView(

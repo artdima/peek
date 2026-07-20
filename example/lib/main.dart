@@ -36,14 +36,18 @@ class _PeekExampleAppState extends State<PeekExampleApp> {
     title: 'Peek example',
     debugShowCheckedModeBanner: false,
     themeMode: _mode,
-    theme: ThemeData(colorSchemeSeed: const Color(0xFF3DDC84)),
+    theme: ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xFF3DDC84),
+        surface: const Color(0xFFFFFFFF),
+        onSurface: const Color(0xFF000000),
+      ),
+      scaffoldBackgroundColor: const Color(0xFFFFFFFF),
+    ),
     darkTheme: ThemeData(
       colorSchemeSeed: const Color(0xFF3DDC84),
       brightness: Brightness.dark,
     ),
-    builder:
-        (context, child) =>
-            PeekOverlay(peek: _peek, share: _share, child: child!),
     home: _Home(
       peek: _peek,
       clients: _clients,
@@ -165,7 +169,6 @@ class _HomeState extends State<_Home> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed:
             () => showPeek(context, peek: widget.peek, share: widget.share),
-        icon: const Icon(Icons.travel_explore),
         label: const Text('Open Peek'),
       ),
     );

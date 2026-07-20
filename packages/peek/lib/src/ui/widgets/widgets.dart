@@ -25,6 +25,7 @@ export 'peek_separator.dart';
 export 'peek_sheet.dart';
 export 'peek_status_dot.dart';
 export 'peek_status_label.dart';
+export 'peek_surface.dart';
 export 'peek_tappable.dart';
 export 'peek_text_body_view.dart';
 export 'peek_text_button.dart';
