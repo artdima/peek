@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:ui' show Rect;
 
 import 'package:peek/peek.dart';
 import 'package:share_plus/share_plus.dart';
@@ -15,6 +16,14 @@ PeekShareDelegate buildShareDelegate() {
       mimeType: content.mimeType,
       name: content.filename,
     );
-    await Share.shareXFiles([file], subject: content.subject);
+    await Share.shareXFiles(
+      [file],
+      subject: content.subject,
+      sharePositionOrigin: content.origin ?? _anywhere,
+    );
   });
 }
+
+/// iPadOS anchors the share sheet to a rectangle and refuses a zero one,
+/// so a share triggered from nowhere in particular still needs somewhere.
+const Rect _anywhere = Rect.fromLTWH(0, 0, 1, 1);

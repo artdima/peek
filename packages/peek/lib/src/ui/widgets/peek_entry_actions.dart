@@ -45,6 +45,9 @@ Future<void> showPeekEntryActions(
   final strings = PeekScope.stringsOf(context);
   final share = PeekScope.shareOf(context);
   final request = entry.request;
+  // Measured before the sheet opens: by the time it closes, the widget
+  // that was tapped may have scrolled or gone.
+  final origin = peekShareOrigin(context);
 
   final action = await showPeekActions<PeekEntryAction>(
     context,
@@ -86,7 +89,9 @@ Future<void> showPeekEntryActions(
     case PeekEntryAction.copyHar:
       await peekCopy(context, PeekExporters.har.export([entry], pretty: true));
     case PeekEntryAction.shareHar:
-      await share?.share(peekHarContent([entry], entry.request.host));
+      await share?.share(
+        peekHarContent([entry], entry.request.host, origin: origin),
+      );
   }
 }
 
@@ -96,6 +101,7 @@ Future<void> showPeekListActions(BuildContext context) async {
   final strings = PeekScope.stringsOf(context);
   final share = PeekScope.shareOf(context);
   final entries = controller.entries;
+  final origin = peekShareOrigin(context);
 
   final action = await showPeekActions<PeekEntryAction>(
     context,
@@ -112,17 +118,22 @@ Future<void> showPeekListActions(BuildContext context) async {
   // question being asked.
   switch (action) {
     case PeekEntryAction.shareHar:
-      await share?.share(peekHarContent(entries, 'peek'));
+      await share?.share(peekHarContent(entries, 'peek', origin: origin));
     case _:
       await peekCopy(context, PeekExporters.har.export(entries, pretty: true));
   }
 }
 
-/// An HTTP Archive of [entries], named after [subject].
-PeekShareContent peekHarContent(List<PeekEntry> entries, String subject) =>
-    PeekShareContent(
-      filename: '$subject.har',
-      mimeType: 'application/json',
-      subject: subject,
-      text: PeekExporters.har.export(entries, pretty: true),
-    );
+/// An HTTP Archive of [entries], named after [subject], shared from
+/// [origin] where the platform wants to know.
+PeekShareContent peekHarContent(
+  List<PeekEntry> entries,
+  String subject, {
+  Rect? origin,
+}) => PeekShareContent(
+  filename: '$subject.har',
+  mimeType: 'application/json',
+  subject: subject,
+  origin: origin,
+  text: PeekExporters.har.export(entries, pretty: true),
+);

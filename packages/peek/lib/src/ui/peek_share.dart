@@ -1,4 +1,4 @@
-import 'package:meta/meta.dart';
+import 'package:flutter/widgets.dart';
 
 /// Something Peek would like handed to the rest of the system.
 @immutable
@@ -9,6 +9,7 @@ final class PeekShareContent {
     required this.mimeType,
     required this.text,
     this.subject,
+    this.origin,
   });
 
   /// What the file should be called when it is saved or sent.
@@ -23,6 +24,13 @@ final class PeekShareContent {
   /// A line for whatever asks for one, such as an email subject.
   final String? subject;
 
+  /// Where on the screen the sharing was asked for, in global coordinates.
+  ///
+  /// iPadOS anchors its share sheet to a rectangle and refuses to show one
+  /// without: pass this through as `sharePositionOrigin`, falling back to
+  /// any rectangle on screen rather than to none.
+  final Rect? origin;
+
   @override
   String toString() => 'PeekShareContent($filename, ${text.length} chars)';
 }
@@ -35,7 +43,10 @@ final class PeekShareContent {
 /// ```dart
 /// PeekScreen(
 ///   share: PeekShareDelegate.from((content) async {
-///     await Share.shareXFiles([XFile.fromData(utf8.encode(content.text))]);
+///     await Share.shareXFiles(
+///       [XFile.fromData(utf8.encode(content.text))],
+///       sharePositionOrigin: content.origin,
+///     );
 ///   }),
 /// )
 /// ```
@@ -59,4 +70,14 @@ final class _CallbackShareDelegate implements PeekShareDelegate {
 
   @override
   Future<void> share(PeekShareContent content) => _share(content);
+}
+
+/// Where the widget at [context] sits on screen, in global coordinates.
+///
+/// For [PeekShareContent.origin]. Returns null when the widget has not been
+/// laid out — a share sheet anchored nowhere is better than none at all.
+Rect? peekShareOrigin(BuildContext context) {
+  final box = context.findRenderObject();
+  if (box is! RenderBox || !box.hasSize) return null;
+  return box.localToGlobal(Offset.zero) & box.size;
 }

@@ -101,6 +101,11 @@ void main() {
       expect(shared.single.filename, endsWith('.har'));
       expect(shared.single.mimeType, 'application/json');
       expect(shared.single.text, contains('api.example.com/users'));
+      // iPadOS anchors its share sheet to this, and shows none without it.
+      expect(
+        shared.single.origin,
+        tester.getRect(find.byType(PeekEntryTile).first),
+      );
     });
 
     testWidgets('pins from the menu', (tester) async {
