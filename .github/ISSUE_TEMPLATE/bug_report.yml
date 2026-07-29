@@ -1,0 +1,55 @@
+name: Bug report
+description: Something in Peek does not work as documented.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Peek only shows what a logger already recorded. If a call is missing
+        entirely, check first that your logger sees it — the adapter reports
+        what it is given and nothing more.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you saw, and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: >-
+        The shortest path to it. A snippet of how Peek is set up — the
+        adapter, the options, the screen — helps more than a description.
+      render: dart
+    validations:
+      required: true
+
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Peek and adapter versions, and the output of `flutter --version`.
+      placeholder: peek 1.0.0, peek_dio 1.0.0, Flutter 3.29.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Platforms
+      multiple: true
+      options: [Android, iOS, macOS, Windows, Linux, Web]
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: >-
+        Screenshots, a stack trace, whatever reached `PeekOptions.onError`.
+        Please redact anything real before pasting a log.
