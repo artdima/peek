@@ -63,6 +63,10 @@ final class PeekListSection extends StatelessWidget {
             child: ColoredBox(
               color: theme.card,
               child: Column(
+                // A row narrower than the card is still a row of the card:
+                // it starts at the left edge, it does not float in the
+                // middle.
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   for (final (index, child) in children.indexed) ...[
                     if (index > 0) PeekSeparator(indent: theme.gutter),

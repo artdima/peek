@@ -144,7 +144,7 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
 
     if (!wide) {
       return PeekSliverScaffold(
-        title: strings.requests,
+        title: strings.console,
         actions: actions,
         leading: leading,
         controller: _scroll,
@@ -162,7 +162,7 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
     }
 
     return PeekScaffold(
-      title: strings.requests,
+      title: strings.console,
       actions: actions,
       leading: leading,
       child: Row(
@@ -224,11 +224,6 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
         onPressed: () => unawaited(showPeekFilters(context)),
       ),
       PeekIconButton(
-        icon: controller.isPaused ? Icons.play_arrow : Icons.pause,
-        tooltip: controller.isPaused ? strings.resume : strings.pause,
-        onPressed: controller.togglePause,
-      ),
-      PeekIconButton(
         icon: Icons.delete_outline,
         tooltip: strings.clear,
         onPressed:
@@ -247,19 +242,22 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
     ];
   }
 
-  /// Everything above the list: what is paused, searched and filtered.
-  /// Everything above the list: what is paused, searched, filtered, and
-  /// how much of the store is left showing.
+  /// Everything above the list: what is paused, what is searched, and how
+  /// much of the store is left showing.
+  ///
+  /// What is filtered is not repeated here — the filter button carries the
+  /// count, and the sheet is where it is changed.
   Widget _chrome(PeekController controller, PeekStrings strings) {
     final theme = PeekTheme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Peek's own screen offers no pause button; this says so when the
+        // app around it has paused recording itself.
         if (controller.isPaused) _PausedBanner(strings: strings),
         const PeekSearchBar(),
         const PeekQuickBar(),
-        const PeekActiveFilters(),
         if (controller.isFiltered)
           Padding(
             padding: EdgeInsets.fromLTRB(theme.gutter, 0, theme.gutter, 6),

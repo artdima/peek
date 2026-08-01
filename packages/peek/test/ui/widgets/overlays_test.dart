@@ -53,11 +53,16 @@ void main() {
     final picked = showPeekActions<String>(
       context,
       title: 'Entry',
-      actions: const [PeekAction(value: 'har', label: 'Export HAR')],
+      actions: const [
+        PeekAction(value: 'har', label: 'Export HAR', icon: PeekIcons.har),
+      ],
     );
     await tester.pumpAndSettle();
 
     expect(find.text('Export HAR'), findsOneWidget);
+    // One for the option, one for Cancel: a row of icons with a gap in it
+    // reads as a mistake.
+    expect(find.byType(PeekIcon), findsNWidgets(2));
     expectOwnStyle(tester);
 
     await tester.tap(find.text('Export HAR'));

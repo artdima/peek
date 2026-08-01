@@ -148,8 +148,8 @@ void main() {
 
     test('can be translated by subclassing', () {
       const translated = _Translated();
-      expect(translated.requests, 'Requêtes');
-      expect(translated.search, const PeekStrings().search);
+      expect(translated.search, 'Rechercher');
+      expect(translated.console, const PeekStrings().console);
       expect(translated.entrySemantics(e1), startsWith('GET'));
     });
 
@@ -165,11 +165,11 @@ void main() {
           controller: controller,
           strings: const _Translated(),
           child: Builder(
-            builder: (context) => Text(PeekScope.stringsOf(context).requests),
+            builder: (context) => Text(PeekScope.stringsOf(context).search),
           ),
         ),
       );
-      expect(find.text('Requêtes'), findsOneWidget);
+      expect(find.text('Rechercher'), findsOneWidget);
     });
 
     testWidgets('defaults to English when none is given', (tester) async {
@@ -183,11 +183,11 @@ void main() {
         PeekScope(
           controller: controller,
           child: Builder(
-            builder: (context) => Text(PeekScope.stringsOf(context).requests),
+            builder: (context) => Text(PeekScope.stringsOf(context).console),
           ),
         ),
       );
-      expect(find.text('Requests'), findsOneWidget);
+      expect(find.text('Console'), findsOneWidget);
     });
   });
 
@@ -222,7 +222,7 @@ void main() {
           "const Text('Hello'),",
           "Tooltip(message: 'Pin this'),",
           "Semantics(semanticsLabel: 'Loading'),",
-          'Text(strings.requests),',
+          'Text(strings.console),',
           "Text('\$count'),",
         ].join('\n'),
       );
@@ -231,7 +231,7 @@ void main() {
       expect(found[0], endsWith("const Text('Hello'),"));
       expect(found[1], endsWith("Tooltip(message: 'Pin this'),"));
       expect(found[2], endsWith("Semantics(semanticsLabel: 'Loading'),"));
-      expect(found.join(), isNot(contains('strings.requests')));
+      expect(found.join(), isNot(contains('strings.console')));
       expect(found.join(), isNot(contains('monospace')));
       expect(found.join(), isNot(contains(r'$count')));
     });
@@ -242,5 +242,5 @@ final class _Translated extends PeekStrings {
   const _Translated();
 
   @override
-  String get requests => 'Requêtes';
+  String get search => 'Rechercher';
 }

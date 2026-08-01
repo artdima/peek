@@ -39,6 +39,7 @@ void main() {
     Brightness brightness = Brightness.light,
     Size size = const Size(420, 700),
     double textScale = 1,
+    EdgeInsets padding = EdgeInsets.zero,
   }) async {
     final wired = fakePeek(entries: entries);
     peek = wired.peek;
@@ -62,6 +63,8 @@ void main() {
         home: MediaQuery(
           data: MediaQueryData(
             size: size,
+            padding: padding,
+            viewPadding: padding,
             textScaler: TextScaler.linear(textScale),
           ),
           child: PeekScreen(peek: peek, controller: controller),
@@ -76,7 +79,7 @@ void main() {
       await pumpScreen(tester, entries: fixtures);
       // The collapsing bar draws the name twice: large, and small for
       // when it has been scrolled under.
-      expect(find.text('Requests'), findsNWidgets(2));
+      expect(find.text('Console'), findsNWidgets(2));
       expect(find.byType(PeekEntryTile), findsNWidgets(6));
       expect(find.text('/users'), findsOneWidget);
 
@@ -154,30 +157,21 @@ void main() {
       expect(find.text('2'), findsOneWidget);
     });
 
-    testWidgets('shows what is filtered as removable chips', (tester) async {
-      // The quick modes are pills too, so look only at the row of what is
-      // in force.
-      final active = find.descendant(
-        of: find.byType(PeekActiveFilters),
-        matching: find.byType(PeekPill),
+    testWidgets('leaves the last row clear of the home indicator', (
+      tester,
+    ) async {
+      await pumpScreen(
+        tester,
+        entries: uiFixtures,
+        size: const Size(420, 400),
+        padding: const EdgeInsets.only(bottom: 34),
       );
 
-      await pumpScreen(tester, entries: fixtures);
-      expect(active, findsNothing);
-
-      controller.filter = const PeekFilter(onlyErrors: true, methods: {'GET'});
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -4000));
       await tester.pump();
-      expect(active, findsNWidgets(2));
 
-      await tester.tap(
-        find.descendant(
-          of: find.widgetWithText(PeekPill, 'GET'),
-          matching: find.byIcon(Icons.close),
-        ),
-      );
-      await tester.pump();
-      expect(controller.filter.methods, isEmpty);
-      expect(controller.filter.onlyErrors, isTrue);
+      final last = tester.getRect(find.byType(PeekEntryTile).last);
+      expect(last.bottom, lessThanOrEqualTo(400 - 34));
     });
 
     testWidgets('offers an empty state before anything arrives', (
@@ -210,18 +204,17 @@ void main() {
       expect(find.text('/users'), findsOneWidget);
     });
 
-    testWidgets('pauses and resumes recording', (tester) async {
+    testWidgets('says so while the app has recording paused', (tester) async {
       await pumpScreen(tester, entries: fixtures);
       expect(find.text('Recording is paused'), findsNothing);
 
-      await tester.tap(find.byTooltip('Pause recording'));
+      controller.togglePause();
       await tester.pump();
       expect(peek.isPaused, isTrue);
       expect(find.text('Recording is paused'), findsOneWidget);
 
-      await tester.tap(find.byTooltip('Resume recording'));
+      controller.togglePause();
       await tester.pump();
-      expect(peek.isPaused, isFalse);
       expect(find.text('Recording is paused'), findsNothing);
     });
 

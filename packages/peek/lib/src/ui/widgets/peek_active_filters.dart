@@ -13,6 +13,10 @@ import 'peek_pill.dart';
 ///
 /// The search has its own field, so it is not repeated here. Nothing is
 /// shown while nothing is filtered.
+///
+/// Peek's own screen does not show this: its filter button carries a count,
+/// and the sheet behind it is where a filter is changed. It is here for an
+/// app that builds a screen of Peek's pieces and wants the chips on it.
 final class PeekActiveFilters extends StatelessWidget {
   /// Creates the row.
   const PeekActiveFilters({super.key});

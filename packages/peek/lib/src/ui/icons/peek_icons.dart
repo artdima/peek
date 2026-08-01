@@ -119,6 +119,69 @@ abstract final class PeekIcons {
     ],
   );
 
+  /// Keeps a call where eviction cannot reach it.
+  static const PeekIconData pin = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M12 17L12 22',
+      'M9 10.76C9 11.519 8.57 12.212 7.89 12.55L6.11 13.45C5.43 13.788 5 14.481 5 15.24L5 16C5 16.552 5.448 17 6 17L18 17C18.552 17 19 16.552 19 16L19 15.24C19 14.481 18.57 13.788 17.89 13.45L16.11 12.55C15.43 12.212 15 11.519 15 10.76L15 7C15 6.448 15.448 6 16 6C17.105 6 18 5.105 18 4C18 2.895 17.105 2 16 2L8 2C6.895 2 6 2.895 6 4C6 5.105 6.895 6 8 6C8.552 6 9 6.448 9 7Z',
+    ],
+  );
+
+  /// Where the call went: its address.
+  static const PeekIconData link = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M10 13C10.869 14.162 12.2 14.889 13.647 14.992C15.094 15.096 16.514 14.566 17.54 13.54L20.54 10.54C22.435 8.578 22.408 5.46 20.479 3.531C18.55 1.602 15.432 1.575 13.47 3.47L11.75 5.18',
+      'M14 11C13.131 9.838 11.8 9.111 10.353 9.008C8.906 8.904 7.486 9.434 6.46 10.46L3.46 13.46C1.565 15.422 1.592 18.54 3.521 20.469C5.45 22.398 8.568 22.425 10.53 20.53L12.24 18.82',
+    ],
+  );
+
+  /// The call written out as plain text.
+  static const PeekIconData text = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M6 22C4.895 22 4 21.105 4 20L4 4C4 2.895 4.895 2 6 2L14 2C14.639 1.999 15.253 2.253 15.704 2.706L19.292 6.294C19.746 6.745 20.001 7.36 20 8L20 20C20 21.105 19.105 22 18 22Z',
+      'M14 2L14 7C14 7.552 14.448 8 15 8L20 8',
+      'M10 9L8 9',
+      'M16 13L8 13',
+      'M16 17L8 17',
+    ],
+  );
+
+  /// The call written out as Markdown.
+  static const PeekIconData markdown = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: ['M4 9L20 9', 'M4 15L20 15', 'M10 3L8 21', 'M16 3L14 21'],
+  );
+
+  /// The call as an HTTP Archive: JSON, and so a pair of braces.
+  static const PeekIconData har = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M8 3L7 3C5.895 3 5 3.895 5 5L5 10C5 11.105 4.105 12 3 12C4.105 12 5 12.895 5 14L5 19C5 20.1 5.9 21 7 21L8 21',
+      'M16 21L17 21C18.105 21 19 20.105 19 19L19 14C19 12.9 19.9 12 21 12C19.895 12 19 11.105 19 10L19 5C19 3.895 18.105 3 17 3L16 3',
+    ],
+  );
+
+  /// Leaves without doing anything.
+  static const PeekIconData close = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: ['M18 6L6 18', 'M6 6L18 18'],
+  );
+
   /// Everything else that can be done with a call.
   static const PeekIconData more = PeekIconData(
     width: 24,

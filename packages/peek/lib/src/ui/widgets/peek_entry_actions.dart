@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../core/export/peek_exporters.dart';
 import '../../core/model/peek_entry.dart';
+import '../icons/peek_icons.dart';
 import '../peek_scope.dart';
 import '../peek_share.dart';
 import 'peek_copy_button.dart';
@@ -57,17 +58,39 @@ Future<void> showPeekEntryActions(
         PeekAction(
           value: PeekEntryAction.pin,
           label: entry.isPinned ? strings.unpin : strings.pin,
+          icon: PeekIcons.pin,
         ),
-      PeekAction(value: PeekEntryAction.copyUrl, label: strings.copyUrl),
-      PeekAction(value: PeekEntryAction.copyCurl, label: strings.copyCurl),
-      PeekAction(value: PeekEntryAction.copyText, label: strings.copyText),
+      PeekAction(
+        value: PeekEntryAction.copyUrl,
+        label: strings.copyUrl,
+        icon: PeekIcons.link,
+      ),
+      PeekAction(
+        value: PeekEntryAction.copyCurl,
+        label: strings.copyCurl,
+        icon: PeekIcons.curl,
+      ),
+      PeekAction(
+        value: PeekEntryAction.copyText,
+        label: strings.copyText,
+        icon: PeekIcons.text,
+      ),
       PeekAction(
         value: PeekEntryAction.copyMarkdown,
         label: strings.copyMarkdown,
+        icon: PeekIcons.markdown,
       ),
-      PeekAction(value: PeekEntryAction.copyHar, label: strings.exportHar),
+      PeekAction(
+        value: PeekEntryAction.copyHar,
+        label: strings.exportHar,
+        icon: PeekIcons.har,
+      ),
       if (share != null)
-        PeekAction(value: PeekEntryAction.shareHar, label: strings.shareHar),
+        PeekAction(
+          value: PeekEntryAction.shareHar,
+          label: strings.shareHar,
+          icon: PeekIcons.share,
+        ),
     ],
   );
   if (action == null || !context.mounted) return;
@@ -107,9 +130,17 @@ Future<void> showPeekListActions(BuildContext context) async {
     context,
     title: strings.requestCount(entries.length, controller.totalCount),
     actions: [
-      PeekAction(value: PeekEntryAction.copyHar, label: strings.exportHar),
+      PeekAction(
+        value: PeekEntryAction.copyHar,
+        label: strings.exportHar,
+        icon: PeekIcons.har,
+      ),
       if (share != null)
-        PeekAction(value: PeekEntryAction.shareHar, label: strings.shareHar),
+        PeekAction(
+          value: PeekEntryAction.shareHar,
+          label: strings.shareHar,
+          icon: PeekIcons.share,
+        ),
     ],
   );
   if (action == null || !context.mounted) return;

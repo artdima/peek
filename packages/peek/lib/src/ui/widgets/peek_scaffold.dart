@@ -229,6 +229,7 @@ final class PeekSliverScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
     final overlay = this.overlay;
+    final insets = MediaQuery.paddingOf(context).bottom;
 
     return ColoredBox(
       color: background ?? theme.background,
@@ -259,6 +260,10 @@ final class PeekSliverScaffold extends StatelessWidget {
                           ),
                 ),
                 ...slivers,
+                // The last row ends above the home indicator, not under it.
+                SliverToBoxAdapter(
+                  child: SizedBox(height: insets + theme.rowSpacing),
+                ),
               ],
             ),
             if (overlay != null) overlay,

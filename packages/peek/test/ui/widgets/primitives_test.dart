@@ -143,6 +143,17 @@ void main() {
       expect(find.byType(PeekSeparator), findsNWidgets(2));
     });
 
+    testWidgets('a narrow row still starts at the left edge', (tester) async {
+      await pumpInScope(
+        tester,
+        const PeekListSection(children: [Text('GET https://example.com')]),
+      );
+
+      final card = tester.getRect(find.byType(ClipRRect).first);
+      final text = tester.getRect(find.text('GET https://example.com'));
+      expect(text.left, card.left);
+    });
+
     testWidgets('shows nothing without rows', (tester) async {
       await pumpInScope(
         tester,

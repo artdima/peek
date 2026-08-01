@@ -19,7 +19,7 @@ import 'screens/peek_entry_tab.dart';
 /// final class PeekStringsFr extends PeekStrings {
 ///   const PeekStringsFr();
 ///   @override
-///   String get requests => 'Requêtes';
+///   String get search => 'Rechercher';
 /// }
 /// ```
 @immutable
@@ -28,7 +28,7 @@ class PeekStrings {
   const PeekStrings();
 
   /// Title of the list screen.
-  String get requests => 'Requests';
+  String get console => 'Console';
 
   /// Label of the search field.
   String get search => 'Search';
@@ -38,12 +38,6 @@ class PeekStrings {
 
   /// Tooltip of the sort button.
   String get sort => 'Sort';
-
-  /// Tooltip that stops recording.
-  String get pause => 'Pause recording';
-
-  /// Tooltip that resumes recording.
-  String get resume => 'Resume recording';
 
   /// Tooltip of the button that empties the list.
   String get clear => 'Clear';

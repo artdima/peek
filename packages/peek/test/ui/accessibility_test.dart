@@ -286,12 +286,12 @@ void main() {
       expect(
         tester.getSemantics(
           find.ancestor(
-            of: find.byTooltip(const PeekStrings().pause),
+            of: find.byTooltip(const PeekStrings().filters),
             matching: find.byType(PeekIconButton),
           ),
         ),
         matchesSemantics(
-          tooltip: const PeekStrings().pause,
+          tooltip: const PeekStrings().filters,
           isButton: true,
           isEnabled: true,
           hasEnabledState: true,
@@ -305,8 +305,17 @@ void main() {
 
     testWidgets('a chip says what letting it go does', (tester) async {
       final handle = tester.ensureSemantics();
-      await pumpScreen(tester);
       controller.filter = const PeekFilter(methods: {'GET'});
+      await pumpPeek(
+        tester,
+        PeekScope(
+          controller: controller,
+          child: const Align(
+            alignment: Alignment.topCenter,
+            child: PeekActiveFilters(),
+          ),
+        ),
+      );
       await tester.pump();
 
       expect(

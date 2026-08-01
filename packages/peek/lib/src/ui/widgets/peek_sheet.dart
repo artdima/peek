@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
+import '../icons/peek_icon.dart';
+import '../icons/peek_icon_data.dart';
+import '../icons/peek_icons.dart';
 import '../peek_scope.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
@@ -15,6 +18,7 @@ final class PeekAction<T> {
   const PeekAction({
     required this.value,
     required this.label,
+    this.icon,
     this.selected = false,
     this.destructive = false,
   });
@@ -24,6 +28,9 @@ final class PeekAction<T> {
 
   /// What it reads.
   final String label;
+
+  /// The glyph before the label, when the option has one.
+  final PeekIconData? icon;
 
   /// Whether it is what is already in force.
   final bool selected;
@@ -163,22 +170,47 @@ class _Actions<T> extends StatelessWidget {
             ),
           for (final action in actions) ...[
             const PeekSeparator(),
-            PeekListRow(
-              title: action.label,
-              trailing:
-                  action.selected
-                      ? Icon(Icons.check, size: 18, color: theme.accent)
-                      : null,
+            _ActionRow(
+              action: action,
               onTap: () => Navigator.of(context).pop(action.value),
             ),
           ],
           const PeekSeparator(),
-          PeekListRow(
-            title: strings.cancel,
+          _ActionRow(
+            action: PeekAction<void>(
+              value: null,
+              label: strings.cancel,
+              icon: PeekIcons.close,
+            ),
             onTap: () => Navigator.of(context).pop(),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ActionRow extends StatelessWidget {
+  const _ActionRow({required this.action, required this.onTap});
+
+  final PeekAction<Object?> action;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    final icon = action.icon;
+    final color = action.destructive ? theme.failure : theme.label;
+
+    return PeekListRow(
+      title: action.label,
+      titleStyle: TextStyle(color: color),
+      leading: icon == null ? null : PeekIcon(icon, color: color),
+      trailing:
+          action.selected
+              ? Icon(Icons.check, size: 18, color: theme.accent)
+              : null,
+      onTap: onTap,
     );
   }
 }
