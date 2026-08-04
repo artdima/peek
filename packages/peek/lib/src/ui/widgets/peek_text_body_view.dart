@@ -33,7 +33,7 @@ final class PeekTextBodyView extends StatefulWidget {
     required this.text,
     this.capturedSize,
     this.totalSize,
-    this.wrap = false,
+    this.wrap = true,
     super.key,
   });
 
@@ -47,6 +47,9 @@ final class PeekTextBodyView extends StatefulWidget {
   final int? totalSize;
 
   /// Whether long lines wrap rather than run off the side.
+  ///
+  /// On by default: a body is read, and reading it should not mean
+  /// dragging it sideways. The viewer offers the other way in a button.
   final bool wrap;
 
   @override
@@ -166,7 +169,12 @@ class _PeekTextBodyViewState extends State<PeekTextBodyView> {
       controller: _scroll,
       itemCount: _lines.length,
       itemExtent: itemExtent,
-      padding: EdgeInsets.only(bottom: theme.gutter),
+      // The text ends where the card would: flush against the side, a
+      // wrapped line reads as if it were cut off.
+      padding: EdgeInsets.only(
+        right: itemExtent == null ? theme.gutter : 0,
+        bottom: theme.gutter,
+      ),
       itemBuilder:
           (context, index) => _Line(
             key: _lineKeys.putIfAbsent(index, GlobalKey.new),

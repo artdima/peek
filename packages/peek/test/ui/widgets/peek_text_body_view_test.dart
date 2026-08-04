@@ -99,13 +99,21 @@ void main() {
       );
     });
 
-    testWidgets('turns wrapping on and off', (tester) async {
+    testWidgets('wraps until told otherwise', (tester) async {
       await pumpBody(tester, const PeekTextBodyView(text: json));
-      expect(find.byTooltip('Wrap lines'), findsOneWidget);
-
-      await tester.tap(find.byTooltip('Wrap lines'));
-      await tester.pump();
       expect(find.byTooltip('Stop wrapping'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Stop wrapping'));
+      await tester.pump();
+      expect(find.byTooltip('Wrap lines'), findsOneWidget);
+    });
+
+    testWidgets('keeps a wrapped line off the right edge', (tester) async {
+      await pumpBody(tester, const PeekTextBodyView(text: json));
+
+      final list = tester.getRect(find.byType(ListView));
+      final line = tester.getRect(find.textContaining('"name": "Ann"'));
+      expect(line.right, lessThan(list.right));
     });
 
     testWidgets('copies the whole body', (tester) async {
