@@ -57,9 +57,25 @@ void main() {
     test('draws only the branches that are open', () {
       final root = PeekJsonNode.tryParse(_json)!;
       expect(root.rows(const {}), hasLength(1));
-      expect(root.rows(const {''}), hasLength(6));
-      expect(root.rows({'', 'repos'}), hasLength(8));
+      // The five values, between the brackets that hold them.
+      expect(root.rows(const {''}), hasLength(7));
+      expect(root.rows({'', 'repos'}), hasLength(10));
       expect(root.branchPaths, {'', 'repos', 'repos[0]', 'repos[1]'});
+    });
+
+    test('closes an open branch with its own bracket', () {
+      final root = PeekJsonNode.tryParse(_json)!;
+      final rows = root.rows(const {'', 'repos'});
+      final last = rows.last;
+
+      expect(last.isClosing, isTrue);
+      expect(last.node.closing, '}');
+      expect(last.depth, 0);
+
+      final array = rows.lastWhere((row) => row.node.path == 'repos');
+      expect(array.isClosing, isTrue);
+      expect(array.node.closing, ']');
+      expect(array.node.opening, '[');
     });
 
     test('opens the way to what a search found', () {
@@ -108,9 +124,14 @@ void main() {
     testWidgets('opens far enough to show the shape', (tester) async {
       await pumpTree(tester, const PeekJsonTreeView(source: _json));
       expect(find.textContaining('name: "Ann"'), findsOneWidget);
-      expect(find.textContaining('repos: […]'), findsOneWidget);
-      // The array and both objects in it hold two values each.
-      expect(find.textContaining('2 items'), findsNWidgets(3));
+      // An open branch reads as the document does, brackets and all; only
+      // a closed one stands in for what it holds.
+      expect(find.textContaining('repos: ['), findsOneWidget);
+      expect(find.textContaining('repos: […]'), findsNothing);
+      expect(find.text(']'), findsOneWidget);
+      expect(find.text('}'), findsOneWidget);
+      // Both objects in the array hold two values each.
+      expect(find.textContaining('2 items'), findsNWidgets(2));
       expect(find.textContaining('stars: 12'), findsNothing);
     });
 
@@ -121,8 +142,9 @@ void main() {
       await tester.tap(find.textContaining('0: {…}'));
       await tester.pump();
       expect(find.textContaining('name: "peek"'), findsOneWidget);
+      expect(find.text('}'), findsNWidgets(2));
 
-      await tester.tap(find.textContaining('0: {…}'));
+      await tester.tap(find.textContaining('0: {'));
       await tester.pump();
       expect(find.textContaining('name: "peek"'), findsNothing);
     });
@@ -173,7 +195,7 @@ void main() {
       );
 
       await pumpTree(tester, const PeekJsonTreeView(source: _json));
-      await tester.longPress(find.textContaining('repos: […]'));
+      await tester.longPress(find.textContaining('repos: ['));
       for (var frame = 0; frame < 8; frame++) {
         await tester.pump(const Duration(milliseconds: 60));
       }

@@ -70,9 +70,12 @@ Peek's core and nothing beyond it.
 1. An adapter sees a call and reports a `PeekEvent` into the `PeekSink` —
    `Peek` itself is the sink.
 2. `Peek.report` drops the event when recording is off, paused or disposed.
-3. Redaction runs first: headers, query parameters and body fields matching
-   the policy are replaced before anything keeps them. What is redacted is
-   never stored, so nothing downstream can leak it.
+3. Redaction runs first, when the app asked for it: headers, query
+   parameters and body fields matching the policy are replaced before
+   anything keeps them. What is redacted is never stored, so nothing
+   downstream can leak it. The default policy masks nothing — a log that
+   hides what was sent cannot be debugged — so masking is a line of
+   `PeekOptions`, and worth it wherever a log leaves the device.
 4. Size limits run second: bodies past `maxBodyBytes` are truncated and
    marked as such.
 5. The reducer applies the event to the store — starting an entry,

@@ -131,9 +131,8 @@ void main() {
     await tester.tap(find.widgetWithText(PeekPill, strings.request));
     await tester.pumpAndSettle();
     expect(find.text('Authorization'), findsOneWidget);
-    // Redaction is core's, and it is on by default.
-    expect(find.text('Bearer secret'), findsNothing);
-    expect(find.textContaining('*****'), findsWidgets);
+    // The call as it happened: masking is the app's to ask for.
+    expect(find.text('Bearer secret'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(PeekPill, strings.response));
     await tester.pumpAndSettle();

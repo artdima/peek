@@ -72,7 +72,7 @@ const List<Scenario> scenarios = [
   ),
   Scenario(
     name: 'A secret header',
-    detail: 'Authorization, masked by redaction',
+    detail: 'Authorization, shown as sent until a policy masks it',
     run: _secret,
   ),
 ];

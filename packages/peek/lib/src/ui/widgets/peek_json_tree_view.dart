@@ -282,7 +282,7 @@ class _Row extends StatelessWidget {
             SizedBox(
               width: 16,
               child:
-                  node.isBranch
+                  node.isBranch && !row.isClosing
                       ? Icon(
                         open ? Icons.expand_more : Icons.chevron_right,
                         size: 14,
@@ -292,31 +292,7 @@ class _Row extends StatelessWidget {
             ),
             Expanded(
               child: Text.rich(
-                TextSpan(
-                  children: [
-                    if (node.name case final name?)
-                      TextSpan(
-                        text: '$name: ',
-                        style: style.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                    if (node.index case final index?)
-                      TextSpan(
-                        text: '$index: ',
-                        style: style.copyWith(color: theme.secondaryLabel),
-                      ),
-                    TextSpan(
-                      text: node.text,
-                      style: style.copyWith(color: _colorFor(node, theme)),
-                    ),
-                    if (node.isBranch)
-                      TextSpan(
-                        text: '  ${strings.items(node.count)}',
-                        style: theme.caption.copyWith(
-                          color: theme.secondaryLabel,
-                        ),
-                      ),
-                  ],
-                ),
+                TextSpan(children: _spans(node, theme, style, strings)),
                 maxLines: open || !node.isBranch ? 3 : 1,
                 overflow: TextOverflow.ellipsis,
                 style: style,
@@ -326,6 +302,43 @@ class _Row extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// What the row reads.
+  ///
+  /// An open branch reads as the document does — its bracket, then its
+  /// children, then the bracket that closes it. Only a closed one stands
+  /// in for what it holds, and only that one is worth counting.
+  List<InlineSpan> _spans(
+    PeekJsonNode node,
+    PeekTheme theme,
+    TextStyle style,
+    PeekStrings strings,
+  ) {
+    final bracket = style.copyWith(color: _colorFor(node, theme));
+    if (row.isClosing) return [TextSpan(text: node.closing, style: bracket)];
+
+    return [
+      if (node.name case final name?)
+        TextSpan(
+          text: '$name: ',
+          style: style.copyWith(fontWeight: FontWeight.w600),
+        ),
+      if (node.index case final index?)
+        TextSpan(
+          text: '$index: ',
+          style: style.copyWith(color: theme.secondaryLabel),
+        ),
+      TextSpan(
+        text: open && node.isBranch ? node.opening : node.text,
+        style: bracket,
+      ),
+      if (node.isBranch && !open)
+        TextSpan(
+          text: '  ${strings.items(node.count)}',
+          style: theme.caption.copyWith(color: theme.secondaryLabel),
+        ),
+    ];
   }
 
   static Color _colorFor(PeekJsonNode node, PeekTheme theme) => switch (node

@@ -3,11 +3,14 @@ import 'package:peek/core.dart';
 
 void main() {
   group('PeekOptions', () {
-    test('defaults to recording with the standard limits and policy', () {
+    test('defaults to recording the call as it happened', () {
       const options = PeekOptions();
       expect(options.enabled, isTrue);
       expect(options.limits, const PeekLimits());
-      expect(options.redaction, const PeekRedactionPolicy());
+      // Masking is asked for, not assumed.
+      expect(options.redaction, PeekRedactionPolicy.none);
+      expect(options.redaction.isEmpty, isTrue);
+      expect(const PeekRedactionPolicy().isEmpty, isFalse);
       expect(options.clock, isA<PeekSystemClock>());
       expect(options.onError, isNull);
     });
@@ -22,14 +25,14 @@ void main() {
       expect(copy.enabled, isFalse);
       expect(copy.limits.maxEntries, 5);
       expect(copy.onError, handler);
-      expect(copy.redaction, const PeekRedactionPolicy());
+      expect(copy.redaction, PeekRedactionPolicy.none);
     });
 
     test('prints the parts that matter', () {
       expect(
         const PeekOptions(enabled: false).toString(),
         'PeekOptions(PeekLimits(1000 entries, 524288 body bytes, 50 pinned), '
-        'PeekRedactionPolicy(6 headers, 9 query keys, 10 body keys), '
+        'PeekRedactionPolicy(0 headers, 0 query keys, 0 body keys), '
         'enabled: false)',
       );
     });

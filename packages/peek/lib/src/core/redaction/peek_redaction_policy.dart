@@ -5,7 +5,10 @@ import '../internal/collection_equality.dart';
 /// Which headers, query parameters and body keys Peek masks before storing
 /// a call, so secrets never sit in memory or reach the screen.
 ///
-/// Names match case-insensitively and exactly. Add your own to the defaults:
+/// Peek masks nothing until it is asked to, through the `redaction` option;
+/// the default constructor is the policy worth asking for, since it covers
+/// the usual names. Names match case-insensitively and exactly, and your
+/// own go alongside the built-in ones:
 ///
 /// ```dart
 /// PeekRedactionPolicy(

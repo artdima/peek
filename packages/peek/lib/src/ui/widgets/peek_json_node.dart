@@ -126,6 +126,9 @@ final class PeekJsonNode {
   }
 
   /// The rows to draw, given which branches are open.
+  ///
+  /// An open branch is three things: the row that opens it, its children,
+  /// and a row holding the bracket that closes it. Closed, it is one row.
   List<PeekJsonRow> rows(Set<String> expanded) {
     final rows = <PeekJsonRow>[];
     void walk(PeekJsonNode node, int depth) {
@@ -134,6 +137,7 @@ final class PeekJsonNode {
       for (final child in node.children) {
         walk(child, depth + 1);
       }
+      rows.add(PeekJsonRow(node: node, depth: depth, isClosing: true));
     }
 
     walk(this, 0);
@@ -174,6 +178,20 @@ final class PeekJsonNode {
         (!isBranch && text.toLowerCase().contains(wanted));
   }
 
+  /// The bracket this branch opens with; empty for a scalar.
+  String get opening => switch (kind) {
+    PeekJsonKind.object => '{',
+    PeekJsonKind.array => '[',
+    _ => '',
+  };
+
+  /// The bracket this branch closes with; empty for a scalar.
+  String get closing => switch (kind) {
+    PeekJsonKind.object => '}',
+    PeekJsonKind.array => ']',
+    _ => '',
+  };
+
   /// The scalar as it reads in JSON: text in quotes, everything else bare.
   String get text => switch (kind) {
     PeekJsonKind.string => '"$value"',
@@ -204,11 +222,19 @@ final class PeekJsonNode {
 @immutable
 final class PeekJsonRow {
   /// Creates a row for [node] at [depth].
-  const PeekJsonRow({required this.node, required this.depth});
+  const PeekJsonRow({
+    required this.node,
+    required this.depth,
+    this.isClosing = false,
+  });
 
   /// What to draw.
   final PeekJsonNode node;
 
   /// How far in, in levels.
   final int depth;
+
+  /// Whether this is the bracket that closes an open branch, rather than
+  /// the branch itself.
+  final bool isClosing;
 }

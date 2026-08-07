@@ -87,6 +87,7 @@ void main() {
     peek = Peek(
       options: PeekOptions(
         limits: const PeekLimits(maxEntries: 3, maxBodyBytes: 30),
+        redaction: const PeekRedactionPolicy(),
         onError: (error, _) => errors.add(error),
       ),
     );
@@ -118,6 +119,19 @@ void main() {
       expect(responseBody.text, startsWith('{"access_token":"*****"'));
       expect(responseBody.isTruncated, isTrue);
       expect(errors, isEmpty);
+    });
+
+    test('masks nothing unless a policy asks it to', () {
+      final plain = Peek();
+      addTearDown(plain.dispose);
+
+      plain
+        ..report(started)
+        ..report(received);
+
+      final entry = plain.store.find(id)!;
+      expect(entry.request.uri.query, 'token=q');
+      expect(entry.request.headers['authorization'], 'Bearer x');
     });
 
     test('sanitises failures with a response and recorded entries', () {
