@@ -105,9 +105,12 @@ final class PeekJsonNode {
   /// What is inside, for an object or an array.
   final List<PeekJsonNode> children;
 
-  /// Whether this node has anything inside it.
+  /// Whether this node is an object or an array.
   bool get isBranch =>
       kind == PeekJsonKind.object || kind == PeekJsonKind.array;
+
+  /// Whether this node can be opened: a branch with something in it.
+  bool get isOpenable => isBranch && children.isNotEmpty;
 
   /// How many values are inside.
   int get count => children.length;
@@ -128,12 +131,13 @@ final class PeekJsonNode {
   /// The rows to draw, given which branches are open.
   ///
   /// An open branch is three things: the row that opens it, its children,
-  /// and a row holding the bracket that closes it. Closed, it is one row.
+  /// and a row holding the bracket that closes it. Closed, it is one row —
+  /// and so is an empty one, which reads `{}` and opens onto nothing.
   List<PeekJsonRow> rows(Set<String> expanded) {
     final rows = <PeekJsonRow>[];
     void walk(PeekJsonNode node, int depth) {
       rows.add(PeekJsonRow(node: node, depth: depth));
-      if (!node.isBranch || !expanded.contains(node.path)) return;
+      if (!node.isOpenable || !expanded.contains(node.path)) return;
       for (final child in node.children) {
         walk(child, depth + 1);
       }
@@ -196,8 +200,8 @@ final class PeekJsonNode {
   String get text => switch (kind) {
     PeekJsonKind.string => '"$value"',
     PeekJsonKind.nothing => 'null',
-    PeekJsonKind.object => '{…}',
-    PeekJsonKind.array => '[…]',
+    PeekJsonKind.object => children.isEmpty ? '{}' : '{…}',
+    PeekJsonKind.array => children.isEmpty ? '[]' : '[…]',
     _ => '$value',
   };
 

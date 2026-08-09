@@ -78,6 +78,22 @@ void main() {
       expect(array.node.opening, '[');
     });
 
+    test('keeps an empty branch on one line', () {
+      final root = PeekJsonNode.of(<String, dynamic>{
+        'args': <String, dynamic>{},
+        'tags': <dynamic>[],
+      });
+      final args = root.children.first;
+
+      expect(args.isBranch, isTrue);
+      expect(args.isOpenable, isFalse);
+      expect(args.text, '{}');
+      expect(root.children[1].text, '[]');
+      // The two values and the brackets around them: nothing opens onto
+      // nothing.
+      expect(root.rows({'', 'args', 'tags'}), hasLength(4));
+    });
+
     test('opens the way to what a search found', () {
       final root = PeekJsonNode.tryParse(_json)!;
       expect(root.pathsTo('peek_dio'), {'', 'repos', 'repos[1]'});

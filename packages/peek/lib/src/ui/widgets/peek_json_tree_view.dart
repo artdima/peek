@@ -152,7 +152,8 @@ class _PeekJsonTreeViewState extends State<PeekJsonTreeView> {
                 row: row,
                 open: _expanded.contains(row.node.path),
                 highlighted: row.node.matches(needle),
-                onTap: row.node.isBranch ? () => _toggle(row.node.path) : null,
+                onTap:
+                    row.node.isOpenable ? () => _toggle(row.node.path) : null,
                 onHold: () => unawaited(_actions(context, row.node, strings)),
               );
             },
@@ -261,20 +262,20 @@ class _Row extends StatelessWidget {
     final node = row.node;
     final style = theme.mono;
 
-    // A tree is read by scanning, so its rows stay denser than the 48 a
-    // tap target asks for: every value here is also reachable from the
-    // row's menu, and the text view shows the same body without a tree.
+    // A tree is read by scanning, so its rows sit a line apart rather than
+    // at the 44 a tap target asks for: every value here is also reachable
+    // from the row's menu, and the text view shows the same body flat.
     return PeekTappable(
       onTap: onTap,
       onLongPress: onHold,
       child: Container(
-        constraints: const BoxConstraints(minHeight: 28),
+        constraints: const BoxConstraints(minHeight: 18),
         color: highlighted ? theme.highlight : null,
         padding: EdgeInsets.fromLTRB(
           theme.gutter + row.depth * 14,
-          2,
+          0,
           theme.gutter,
-          2,
+          0,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -282,7 +283,7 @@ class _Row extends StatelessWidget {
             SizedBox(
               width: 16,
               child:
-                  node.isBranch && !row.isClosing
+                  node.isOpenable && !row.isClosing
                       ? Icon(
                         open ? Icons.expand_more : Icons.chevron_right,
                         size: 14,
@@ -293,7 +294,7 @@ class _Row extends StatelessWidget {
             Expanded(
               child: Text.rich(
                 TextSpan(children: _spans(node, theme, style, strings)),
-                maxLines: open || !node.isBranch ? 3 : 1,
+                maxLines: open || !node.isOpenable ? 3 : 1,
                 overflow: TextOverflow.ellipsis,
                 style: style,
               ),
@@ -330,10 +331,10 @@ class _Row extends StatelessWidget {
           style: style.copyWith(color: theme.secondaryLabel),
         ),
       TextSpan(
-        text: open && node.isBranch ? node.opening : node.text,
+        text: open && node.isOpenable ? node.opening : node.text,
         style: bracket,
       ),
-      if (node.isBranch && !open)
+      if (node.isOpenable && !open)
         TextSpan(
           text: '  ${strings.items(node.count)}',
           style: theme.caption.copyWith(color: theme.secondaryLabel),
