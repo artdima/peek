@@ -139,42 +139,42 @@ void main() {
   group('PeekJsonTreeView', () {
     testWidgets('opens far enough to show the shape', (tester) async {
       await pumpTree(tester, const PeekJsonTreeView(source: _json));
-      expect(find.textContaining('name: "Ann"'), findsOneWidget);
+      expect(find.textContaining('"name": "Ann"'), findsOneWidget);
       // An open branch reads as the document does, brackets and all; only
       // a closed one stands in for what it holds.
-      expect(find.textContaining('repos: ['), findsOneWidget);
-      expect(find.textContaining('repos: […]'), findsNothing);
+      expect(find.textContaining('"repos": ['), findsOneWidget);
+      expect(find.textContaining('"repos": […]'), findsNothing);
       expect(find.text(']'), findsOneWidget);
       expect(find.text('}'), findsOneWidget);
       // Both objects in the array hold two values each.
       expect(find.textContaining('2 items'), findsNWidgets(2));
-      expect(find.textContaining('stars: 12'), findsNothing);
+      expect(find.textContaining('"stars": 12'), findsNothing);
     });
 
     testWidgets('opens and closes a branch on tap', (tester) async {
       await pumpTree(tester, const PeekJsonTreeView(source: _json));
-      expect(find.textContaining('name: "peek"'), findsNothing);
+      expect(find.textContaining('"name": "peek"'), findsNothing);
 
       await tester.tap(find.textContaining('0: {…}'));
       await tester.pump();
-      expect(find.textContaining('name: "peek"'), findsOneWidget);
+      expect(find.textContaining('"name": "peek"'), findsOneWidget);
       expect(find.text('}'), findsNWidgets(2));
 
       await tester.tap(find.textContaining('0: {'));
       await tester.pump();
-      expect(find.textContaining('name: "peek"'), findsNothing);
+      expect(find.textContaining('"name": "peek"'), findsNothing);
     });
 
     testWidgets('opens everything and closes everything', (tester) async {
       await pumpTree(tester, const PeekJsonTreeView(source: _json));
       await tester.tap(find.byTooltip('Expand all'));
       await tester.pump();
-      expect(find.textContaining('stars: 12'), findsOneWidget);
-      expect(find.textContaining('stars: 3'), findsOneWidget);
+      expect(find.textContaining('"stars": 12'), findsOneWidget);
+      expect(find.textContaining('"stars": 3'), findsOneWidget);
 
       await tester.tap(find.byTooltip('Collapse all'));
       await tester.pump();
-      expect(find.textContaining('name: "Ann"'), findsNothing);
+      expect(find.textContaining('"name": "Ann"'), findsNothing);
     });
 
     testWidgets('a search opens the way to what it found', (tester) async {
@@ -211,7 +211,7 @@ void main() {
       );
 
       await pumpTree(tester, const PeekJsonTreeView(source: _json));
-      await tester.longPress(find.textContaining('repos: ['));
+      await tester.longPress(find.textContaining('"repos": ['));
       for (var frame = 0; frame < 8; frame++) {
         await tester.pump(const Duration(milliseconds: 60));
       }

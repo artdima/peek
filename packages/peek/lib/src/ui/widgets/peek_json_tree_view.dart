@@ -320,11 +320,10 @@ class _Row extends StatelessWidget {
     if (row.isClosing) return [TextSpan(text: node.closing, style: bracket)];
 
     return [
-      if (node.name case final name?)
-        TextSpan(
-          text: '$name: ',
-          style: style.copyWith(fontWeight: FontWeight.w600),
-        ),
+      // A key reads as it is written in the document: in quotes, in the
+      // same weight as everything else. The colour of the value is what
+      // the eye needs, not a bold name.
+      if (node.name case final name?) TextSpan(text: '"$name": '),
       if (node.index case final index?)
         TextSpan(
           text: '$index: ',
