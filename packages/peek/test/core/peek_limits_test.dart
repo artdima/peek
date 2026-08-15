@@ -6,7 +6,7 @@ void main() {
     test('has sensible defaults', () {
       const limits = PeekLimits();
       expect(limits.maxEntries, 1000);
-      expect(limits.maxBodyBytes, 512 * 1024);
+      expect(limits.maxBodyBytes, 1024 * 1024);
       expect(limits.maxPinned, 50);
     });
 

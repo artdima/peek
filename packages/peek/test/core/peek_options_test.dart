@@ -31,7 +31,7 @@ void main() {
     test('prints the parts that matter', () {
       expect(
         const PeekOptions(enabled: false).toString(),
-        'PeekOptions(PeekLimits(1000 entries, 524288 body bytes, 50 pinned), '
+        'PeekOptions(PeekLimits(1000 entries, 1048576 body bytes, 50 pinned), '
         'PeekRedactionPolicy(0 headers, 0 query keys, 0 body keys), '
         'enabled: false)',
       );

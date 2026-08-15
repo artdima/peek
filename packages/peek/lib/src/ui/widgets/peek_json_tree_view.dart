@@ -85,14 +85,19 @@ class _PeekJsonTreeViewState extends State<PeekJsonTreeView> {
 
     if (_decoding) return const SizedBox.shrink();
     if (_invalid || root == null) {
+      // A body Peek cut at the limit is not a body that came back broken,
+      // and saying so in red would send a reader after the wrong bug.
+      final cut = _wasCutShort;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: EdgeInsets.fromLTRB(theme.gutter, 0, theme.gutter, 4),
             child: Text(
-              strings.notJson,
-              style: theme.footnote.copyWith(color: theme.failure),
+              cut ? strings.treeNeedsWholeBody : strings.notJson,
+              style: theme.footnote.copyWith(
+                color: cut ? theme.secondaryLabel : theme.failure,
+              ),
             ),
           ),
           Expanded(
@@ -161,6 +166,13 @@ class _PeekJsonTreeViewState extends State<PeekJsonTreeView> {
         ),
       ],
     );
+  }
+
+  /// Whether Peek kept less of the body than the call carried.
+  bool get _wasCutShort {
+    final captured = widget.capturedSize;
+    final total = widget.totalSize;
+    return captured != null && total != null && total > captured;
   }
 
   Future<void> _decode() async {

@@ -296,6 +296,11 @@ class PeekStrings {
   /// Says a body would not decode as JSON after all.
   String get notJson => 'This is not valid JSON';
 
+  /// Says why a body that was cut short has no tree.
+  String get treeNeedsWholeBody =>
+      'A tree needs the whole body, and this '
+      'one was cut short';
+
   /// Copies the value under a node.
   String get copyValue => 'Copy value';
 

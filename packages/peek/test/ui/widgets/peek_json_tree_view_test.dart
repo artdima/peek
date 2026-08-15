@@ -20,6 +20,8 @@ const String _json = '''
 }''';
 
 void main() {
+  const strings = PeekStrings();
+
   group('PeekJsonNode', () {
     test('builds a tree with paths that read like code', () {
       final root = PeekJsonNode.tryParse(_json)!;
@@ -223,6 +225,23 @@ void main() {
       }
       expect(copied.single, 'repos');
       await tester.pump(const Duration(seconds: 2));
+    });
+
+    testWidgets('blames the limit, not the body, when it was cut', (
+      tester,
+    ) async {
+      await pumpTree(
+        tester,
+        PeekJsonTreeView(
+          source: _json.substring(0, 40),
+          capturedSize: 40,
+          totalSize: 400,
+        ),
+      );
+
+      expect(find.text(strings.treeNeedsWholeBody), findsOneWidget);
+      expect(find.text(strings.notJson), findsNothing);
+      expect(find.byType(PeekTextBodyView), findsOneWidget);
     });
 
     testWidgets('falls back to text when it is not JSON', (tester) async {
