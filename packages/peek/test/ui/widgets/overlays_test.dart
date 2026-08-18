@@ -54,7 +54,7 @@ void main() {
       context,
       title: 'Entry',
       actions: const [
-        PeekAction(value: 'har', label: 'Export HAR', icon: PeekIcons.har),
+        PeekAction(value: 'har', label: 'Export HAR', icon: PeekIcons.braces),
       ],
     );
     await tester.pumpAndSettle();

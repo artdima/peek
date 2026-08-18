@@ -34,6 +34,7 @@ final class PeekTextBodyView extends StatefulWidget {
     this.capturedSize,
     this.totalSize,
     this.wrap = true,
+    this.action,
     super.key,
   });
 
@@ -51,6 +52,9 @@ final class PeekTextBodyView extends StatefulWidget {
   /// On by default: a body is read, and reading it should not mean
   /// dragging it sideways. The viewer offers the other way in a button.
   final bool wrap;
+
+  /// A button of the caller's, shown before the view's own.
+  final Widget? action;
 
   @override
   State<PeekTextBodyView> createState() => _PeekTextBodyViewState();
@@ -107,6 +111,7 @@ class _PeekTextBodyViewState extends State<PeekTextBodyView> {
                   onClear: () => _find(''),
                 ),
               ),
+              if (widget.action case final action?) action,
               PeekIconButton(
                 icon: _wrap ? Icons.wrap_text : Icons.notes,
                 tooltip: _wrap ? strings.stopWrapping : strings.wrapLines,

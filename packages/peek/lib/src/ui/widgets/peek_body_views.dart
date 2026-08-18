@@ -5,15 +5,16 @@ import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_body.dart';
 import '../../core/model/peek_form_data.dart';
+import '../icons/peek_icons.dart';
 import '../peek_scope.dart';
 import '../theme/peek_theme.dart';
 import 'peek_copy_button.dart';
 import 'peek_empty_state.dart';
+import 'peek_icon_button.dart';
 import 'peek_json_tree_view.dart';
 import 'peek_key_value_row.dart';
 import 'peek_key_values_view.dart';
 import 'peek_list_section.dart';
-import 'peek_segmented.dart';
 import 'peek_text_body_view.dart';
 
 /// How a body that could be read either way is being read.
@@ -51,40 +52,36 @@ class _PeekBodyViewState extends State<PeekBodyView> {
   @override
   Widget build(BuildContext context) {
     final strings = PeekScope.stringsOf(context);
-    final theme = PeekTheme.of(context);
     final body = widget.body;
 
     if (body is PeekTextBody && (body.contentType?.isJson ?? false)) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(theme.gutter, 0, theme.gutter, 4),
-            child: PeekSegmented<PeekBodyMode>(
-              selected: _mode,
-              onChanged: (mode) => setState(() => _mode = mode),
-              segments: [
-                PeekSegment(value: PeekBodyMode.tree, label: strings.tree),
-                PeekSegment(value: PeekBodyMode.raw, label: strings.raw),
-              ],
+      final tree = _mode == PeekBodyMode.tree;
+      // The two ways of reading a body are one button, and it shows the
+      // way it would switch to: a segment of two words for the same thing
+      // cost a row of its own.
+      final button = PeekIconButton(
+        glyph: tree ? PeekIcons.braces : PeekIcons.tree,
+        tooltip: tree ? strings.raw : strings.tree,
+        size: 18,
+        onPressed:
+            () => setState(
+              () => _mode = tree ? PeekBodyMode.raw : PeekBodyMode.tree,
             ),
-          ),
-          Expanded(
-            child:
-                _mode == PeekBodyMode.tree
-                    ? PeekJsonTreeView(
-                      source: body.text,
-                      capturedSize: body.capturedSize,
-                      totalSize: body.size,
-                    )
-                    : PeekTextBodyView(
-                      text: body.text,
-                      capturedSize: body.capturedSize,
-                      totalSize: body.size,
-                    ),
-          ),
-        ],
       );
+
+      return tree
+          ? PeekJsonTreeView(
+            source: body.text,
+            capturedSize: body.capturedSize,
+            totalSize: body.size,
+            action: button,
+          )
+          : PeekTextBodyView(
+            text: body.text,
+            capturedSize: body.capturedSize,
+            totalSize: body.size,
+            action: button,
+          );
     }
 
     return switch (body) {

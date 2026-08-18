@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
+import '../icons/peek_icons.dart';
 import '../peek_scope.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
@@ -27,6 +28,7 @@ final class PeekJsonTreeView extends StatefulWidget {
     required this.source,
     this.capturedSize,
     this.totalSize,
+    this.action,
     super.key,
   });
 
@@ -38,6 +40,9 @@ final class PeekJsonTreeView extends StatefulWidget {
 
   /// How many bytes the body had, for the fallback text view.
   final int? totalSize;
+
+  /// A button of the caller's, shown before the view's own.
+  final Widget? action;
 
   /// The size from which decoding moves off the main thread.
   static const int asyncFrom = 64 * 1024;
@@ -105,6 +110,7 @@ class _PeekJsonTreeViewState extends State<PeekJsonTreeView> {
               text: widget.source,
               capturedSize: widget.capturedSize,
               totalSize: widget.totalSize,
+              action: widget.action,
             ),
           ),
         ],
@@ -129,18 +135,23 @@ class _PeekJsonTreeViewState extends State<PeekJsonTreeView> {
                   onClear: () => _find(''),
                 ),
               ),
+              if (widget.action case final action?) action,
+              // One button, because the two of them were never both
+              // useful: either there is something left to open, or there
+              // is not.
               PeekIconButton(
-                icon: Icons.unfold_more,
-                tooltip: strings.expandAll,
+                glyph: _allOpen(root) ? PeekIcons.collapse : PeekIcons.expand,
+                tooltip:
+                    _allOpen(root) ? strings.collapseAll : strings.expandAll,
                 size: 18,
                 onPressed:
-                    () => setState(() => _expanded.addAll(root.branchPaths)),
-              ),
-              PeekIconButton(
-                icon: Icons.unfold_less,
-                tooltip: strings.collapseAll,
-                size: 18,
-                onPressed: () => setState(_expanded.clear),
+                    () => setState(() {
+                      if (_allOpen(root)) {
+                        _expanded.clear();
+                      } else {
+                        _expanded.addAll(root.branchPaths);
+                      }
+                    }),
               ),
               PeekCopyButton(text: widget.source, dense: false),
             ],
@@ -167,6 +178,9 @@ class _PeekJsonTreeViewState extends State<PeekJsonTreeView> {
       ],
     );
   }
+
+  /// Whether every branch worth opening is open.
+  bool _allOpen(PeekJsonNode root) => _expanded.containsAll(root.branchPaths);
 
   /// Whether Peek kept less of the body than the call carried.
   bool get _wasCutShort {

@@ -267,7 +267,7 @@ class PeekStrings {
   String get copied => 'Copied';
 
   /// Shows a body as it arrived.
-  String get raw => 'Raw';
+  String get raw => 'Show as text';
 
   /// Heading for the fields of a form.
   String get fields => 'Fields';
@@ -288,7 +288,7 @@ class PeekStrings {
   String firstBytes(int count) => 'First $count bytes';
 
   /// Shows a JSON body as a tree.
-  String get tree => 'Tree';
+  String get tree => 'Show as tree';
 
   /// Expands every node of a tree.
   String get expandAll => 'Expand all';

@@ -83,7 +83,7 @@ Future<void> showPeekEntryActions(
       PeekAction(
         value: PeekEntryAction.copyHar,
         label: strings.exportHar,
-        icon: PeekIcons.har,
+        icon: PeekIcons.braces,
       ),
       if (share != null)
         PeekAction(
@@ -133,7 +133,7 @@ Future<void> showPeekListActions(BuildContext context) async {
       PeekAction(
         value: PeekEntryAction.copyHar,
         label: strings.exportHar,
-        icon: PeekIcons.har,
+        icon: PeekIcons.braces,
       ),
       if (share != null)
         PeekAction(

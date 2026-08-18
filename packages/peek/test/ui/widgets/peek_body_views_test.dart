@@ -40,12 +40,13 @@ void main() {
       expect(find.byType(PeekJsonTreeView), findsOneWidget);
       expect(find.byType(PeekTextBodyView), findsNothing);
 
-      await tester.tap(find.widgetWithText(PeekPill, 'Raw'));
+      // One button, showing the way it would switch to.
+      await tester.tap(find.byTooltip(const PeekStrings().raw));
       await tester.pump();
       expect(find.byType(PeekTextBodyView), findsOneWidget);
       expect(find.byType(PeekJsonTreeView), findsNothing);
 
-      await tester.tap(find.widgetWithText(PeekPill, 'Tree'));
+      await tester.tap(find.byTooltip(const PeekStrings().tree));
       await tester.pump();
       expect(find.byType(PeekJsonTreeView), findsOneWidget);
     });
@@ -55,7 +56,8 @@ void main() {
         tester,
         PeekBody.text('plain', contentType: PeekMediaType.plainText),
       );
-      expect(find.byType(PeekPill), findsNothing);
+      expect(find.byTooltip(const PeekStrings().raw), findsNothing);
+      expect(find.byTooltip(const PeekStrings().tree), findsNothing);
     });
 
     testWidgets('shows other text as numbered lines', (tester) async {

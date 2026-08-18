@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/widgets.dart';
 
+import '../icons/peek_icon.dart';
+import '../icons/peek_icon_data.dart';
 import '../theme/peek_theme.dart';
 import 'peek_tappable.dart';
 
@@ -13,22 +15,29 @@ import 'peek_tappable.dart';
 /// [Tooltip] is the single Material widget Peek keeps: it is what names the
 /// button for assistive tech, and it draws nothing until asked.
 final class PeekIconButton extends StatelessWidget {
-  /// Creates a button showing [icon], named [tooltip].
+  /// Creates a button showing [icon] or [glyph], named [tooltip].
   const PeekIconButton({
-    required this.icon,
     required this.tooltip,
+    this.icon,
+    this.glyph,
     this.onPressed,
     this.color,
     this.badgeCount = 0,
     this.size = 22,
     super.key,
-  });
+  }) : assert(
+         (icon == null) != (glyph == null),
+         'a button wears one glyph: either icon or glyph',
+       );
 
   /// How wide the tap target is.
   static const double width = 44;
 
-  /// The glyph to show.
-  final IconData icon;
+  /// The glyph to show, from the app's icon font.
+  final IconData? icon;
+
+  /// The glyph to show, from Peek's own set.
+  final PeekIconData? glyph;
 
   /// What the button does, for tooltips and screen readers.
   final String tooltip;
@@ -67,7 +76,10 @@ final class PeekIconButton extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  Icon(icon, size: size, color: tint),
+                  if (glyph case final glyph?)
+                    PeekIcon(glyph, size: size, color: tint)
+                  else
+                    Icon(icon, size: size, color: tint),
                   if (badgeCount > 0)
                     Positioned(
                       top: 8,

@@ -163,14 +163,49 @@ abstract final class PeekIcons {
     paths: ['M4 9L20 9', 'M4 15L20 15', 'M10 3L8 21', 'M16 3L14 21'],
   );
 
-  /// The call as an HTTP Archive: JSON, and so a pair of braces.
-  static const PeekIconData har = PeekIconData(
+  /// JSON, in the shape it is written: a pair of braces.
+  static const PeekIconData braces = PeekIconData(
     width: 24,
     height: 24,
     strokeWidth: 2,
     paths: [
       'M8 3L7 3C5.895 3 5 3.895 5 5L5 10C5 11.105 4.105 12 3 12C4.105 12 5 12.895 5 14L5 19C5 20.1 5.9 21 7 21L8 21',
       'M16 21L17 21C18.105 21 19 20.105 19 19L19 14C19 12.9 19.9 12 21 12C19.895 12 19 11.105 19 10L19 5C19 3.895 18.105 3 17 3L16 3',
+    ],
+  );
+
+  /// A body read as a tree of branches.
+  static const PeekIconData tree = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M8 5L21 5',
+      'M13 12L21 12',
+      'M13 19L21 19',
+      'M3 10C3 11.105 3.895 12 5 12L8 12',
+      'M3 5L3 17C3 18.105 3.895 19 5 19L8 19',
+    ],
+  );
+
+  /// Opens everything at once.
+  static const PeekIconData expand = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: ['M15 3L21 3L21 9', 'M21 3L14 10', 'M3 21L10 14', 'M9 21L3 21L3 15'],
+  );
+
+  /// Closes everything at once.
+  static const PeekIconData collapse = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M14 10L21 3',
+      'M20 10L14 10L14 4',
+      'M3 21L10 14',
+      'M4 14L10 14L10 20',
     ],
   );
 
