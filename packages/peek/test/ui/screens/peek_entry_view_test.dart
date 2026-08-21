@@ -76,12 +76,10 @@ void main() {
 
     testWidgets('lays the overview out in cards', (tester) async {
       await pumpView(tester, redirected);
-      expect(find.text('GENERAL'), findsOneWidget);
       expect(find.text('REQUEST'), findsOneWidget);
       expect(find.text('RESPONSE'), findsOneWidget);
       expect(find.text('REDIRECTS'), findsOneWidget);
       expect(find.text('DETAILS'), findsOneWidget);
-      expect(find.widgetWithText(PeekListRow, 'Finished'), findsOneWidget);
       expect(
         find.widgetWithText(PeekListRow, 'Response headers'),
         findsOneWidget,
@@ -91,6 +89,21 @@ void main() {
         findsOneWidget,
       );
       expect(find.widgetWithText(PeekListRow, '301 GET'), findsOneWidget);
+    });
+
+    testWidgets('opens the times under how long it took', (tester) async {
+      await pumpView(tester, e1);
+      expect(find.widgetWithText(PeekListRow, 'Started'), findsNothing);
+      expect(find.widgetWithText(PeekListRow, 'Finished'), findsNothing);
+
+      await tester.tap(find.widgetWithText(PeekListRow, 'Timing'));
+      await tester.pump();
+      expect(find.widgetWithText(PeekListRow, 'Started'), findsOneWidget);
+      expect(find.widgetWithText(PeekListRow, 'Finished'), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(PeekListRow, 'Timing'));
+      await tester.pump();
+      expect(find.widgetWithText(PeekListRow, 'Started'), findsNothing);
     });
 
     testWidgets('leads from the error summary to the error tab', (
@@ -125,13 +138,13 @@ void main() {
 
     testWidgets('moves between the tabs', (tester) async {
       await pumpView(tester, e1);
-      expect(find.widgetWithText(PeekListRow, 'Started'), findsOneWidget);
-      expect(find.text('GENERAL'), findsOneWidget);
+      expect(find.widgetWithText(PeekListRow, 'Timing'), findsOneWidget);
+      expect(find.text('DETAILS'), findsOneWidget);
 
       await openTab(tester, 'Request');
       expect(find.widgetWithText(PeekListRow, 'Method'), findsOneWidget);
-      expect(find.widgetWithText(PeekListRow, 'Started'), findsNothing);
-      expect(find.text('GENERAL'), findsNothing);
+      expect(find.widgetWithText(PeekListRow, 'Timing'), findsNothing);
+      expect(find.text('DETAILS'), findsNothing);
 
       await openTab(tester, 'Response');
       expect(find.widgetWithText(PeekListRow, 'Content type'), findsOneWidget);

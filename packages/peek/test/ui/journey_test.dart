@@ -126,7 +126,8 @@ void main() {
     await tester.tap(find.byType(PeekEntryTile));
     await tester.pumpAndSettle();
     expect(find.byType(PeekEntryView), findsOneWidget);
-    expect(find.text('api.example.com'), findsWidgets);
+    // The address line carries the host now that the general card is gone.
+    expect(find.textContaining('api.example.com'), findsWidgets);
 
     await tester.tap(find.widgetWithText(PeekPill, strings.request));
     await tester.pumpAndSettle();

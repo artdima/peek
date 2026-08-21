@@ -15,6 +15,7 @@ final class PeekListRow extends StatelessWidget {
     this.trailing,
     this.onTap,
     this.chevron = false,
+    this.open,
     this.enabled = true,
     this.titleStyle,
     super.key,
@@ -40,6 +41,10 @@ final class PeekListRow extends StatelessWidget {
 
   /// Whether to show that the row leads somewhere.
   final bool chevron;
+
+  /// Whether the row is open, for a row that opens rather than leads: the
+  /// same mark, turned down.
+  final bool? open;
 
   /// Whether the row means anything; a disabled row is greyed and inert.
   final bool enabled;
@@ -109,7 +114,11 @@ final class PeekListRow extends StatelessWidget {
               if (trailing != null) ...[const SizedBox(width: 8), trailing],
               if (chevron) ...[
                 const SizedBox(width: 4),
-                Icon(Icons.chevron_right, size: 18, color: theme.tertiaryLabel),
+                Icon(
+                  (open ?? false) ? Icons.expand_more : Icons.chevron_right,
+                  size: 18,
+                  color: theme.tertiaryLabel,
+                ),
               ],
             ],
           ),

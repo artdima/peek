@@ -307,7 +307,7 @@ class _Address extends StatelessWidget {
   }
 }
 
-class _Overview extends StatelessWidget {
+class _Overview extends StatefulWidget {
   const _Overview({
     required this.entry,
     required this.strings,
@@ -319,7 +319,17 @@ class _Overview extends StatelessWidget {
   final ValueChanged<PeekEntryTab> onShowTab;
 
   @override
+  State<_Overview> createState() => _OverviewState();
+}
+
+class _OverviewState extends State<_Overview> {
+  bool _timesShown = false;
+
+  @override
   Widget build(BuildContext context) {
+    final entry = widget.entry;
+    final strings = widget.strings;
+    final onShowTab = widget.onShowTab;
     final theme = PeekTheme.of(context);
     final elapsed = entry.duration;
     final finishedAt = entry.completedAt;
@@ -330,23 +340,6 @@ class _Overview extends StatelessWidget {
 
     return Column(
       children: [
-        PeekListSection(
-          title: strings.general,
-          children: [
-            PeekListRow(title: strings.host, value: entry.request.host),
-            PeekListRow(
-              title: strings.started,
-              value: strings.timestamp(entry.startedAt),
-            ),
-            PeekListRow(
-              title: strings.finished,
-              value:
-                  finishedAt == null
-                      ? strings.none
-                      : strings.timestamp(finishedAt),
-            ),
-          ],
-        ),
         if (failure != null)
           PeekListSection(
             title: strings.error,
@@ -453,12 +446,29 @@ class _Overview extends StatelessWidget {
         PeekListSection(
           title: strings.details,
           children: [
+            // How long it took is the question; when it started and
+            // when it ended are the answer behind it, and belong under it
+            // rather than in a card of their own.
             _Holds(
               icon: PeekIcons.timing,
               title: strings.timing,
               value: elapsed == null ? strings.none : strings.elapsed(elapsed),
-              onTap: () => onShowTab(PeekEntryTab.timing),
+              open: _timesShown,
+              onTap: () => setState(() => _timesShown = !_timesShown),
             ),
+            if (_timesShown) ...[
+              PeekListRow(
+                title: strings.started,
+                value: strings.timestamp(entry.startedAt),
+              ),
+              PeekListRow(
+                title: strings.finished,
+                value:
+                    finishedAt == null
+                        ? strings.none
+                        : strings.timestamp(finishedAt),
+              ),
+            ],
             _Holds(
               icon: PeekIcons.source,
               title: strings.source,
@@ -495,12 +505,16 @@ class _Holds extends StatelessWidget {
     required this.title,
     required this.value,
     this.onTap,
+    this.open,
   });
 
   final PeekIconData icon;
   final String title;
   final String value;
   final VoidCallback? onTap;
+
+  /// Set when the row opens onto more rows rather than leading away.
+  final bool? open;
 
   @override
   Widget build(BuildContext context) {
@@ -517,6 +531,7 @@ class _Holds extends StatelessWidget {
       // Kept even where the row leads nowhere: without it the values of a
       // card would not line up.
       chevron: true,
+      open: open,
       enabled: leads,
       onTap: onTap,
     );

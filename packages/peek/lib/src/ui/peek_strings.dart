@@ -164,9 +164,6 @@ class PeekStrings {
   /// Heading for the redirect chain.
   String get redirects => 'Redirects';
 
-  /// Heading for the card that answers "what call was this".
-  String get general => 'General';
-
   /// Label for the request body.
   String get requestBody => 'Request body';
 
