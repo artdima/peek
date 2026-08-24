@@ -91,6 +91,30 @@ void main() {
       expect(find.widgetWithText(PeekListRow, '301 GET'), findsOneWidget);
     });
 
+    testWidgets('opens a table of headers on a screen of its own', (
+      tester,
+    ) async {
+      await pumpView(tester, e1);
+
+      await tester.tap(find.widgetWithText(PeekListRow, 'Response headers'));
+      await tester.pumpAndSettle();
+
+      // A screen of its own, not the tab behind: the overview is gone.
+      expect(find.byType(PeekKeyValuesView), findsOneWidget);
+      expect(find.text('Content-Type'), findsOneWidget);
+      expect(
+        find.widgetWithText(PeekListRow, 'Response headers'),
+        findsNothing,
+      );
+
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+      expect(
+        find.widgetWithText(PeekListRow, 'Response headers'),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('opens the times under how long it took', (tester) async {
       await pumpView(tester, e1);
       expect(find.widgetWithText(PeekListRow, 'Started'), findsNothing);

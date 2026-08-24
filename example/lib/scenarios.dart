@@ -75,6 +75,11 @@ const List<Scenario> scenarios = [
     detail: 'Authorization, shown as sent until a policy masks it',
     run: _secret,
   ),
+  Scenario(
+    name: 'Many headers',
+    detail: 'Enough to filter, and one name carrying three values',
+    run: _manyHeaders,
+  ),
 ];
 
 Future<void> _getJson(Dio dio) => dio.get<dynamic>('$_placeholder/users/1');
@@ -118,6 +123,25 @@ Future<void> _image(Dio dio) => dio.get<dynamic>(
 );
 
 Future<void> _bigBody(Dio dio) => dio.get<dynamic>('$_placeholder/photos');
+
+Future<void> _manyHeaders(Dio dio) => dio.get<dynamic>(
+  '$_httpbin/headers',
+  options: Options(
+    headers: const {
+      'Accept-Language': 'en-GB, en;q=0.9, ru;q=0.8',
+      'Cache-Control': 'no-cache',
+      'If-None-Match': 'W/"a1b2c3"',
+      'X-Client-Build': '2026.9.1+482',
+      'X-Client-Platform': 'ios',
+      'X-Correlation-Id': 'c0ffee-1234-5678',
+      'X-Feature-Flags': 'peek,tree,wrap',
+      'X-Request-Start': 't=1757745600',
+      // One name, three values: sent as three lines, and read back as one
+      // row per value.
+      'X-Peek-Tag': ['alpha', 'beta', 'gamma'],
+    },
+  ),
+);
 
 Future<void> _secret(Dio dio) => dio.get<dynamic>(
   '$_httpbin/bearer',

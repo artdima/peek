@@ -58,11 +58,18 @@ final class PeekEntryScreen extends StatelessWidget {
   }
 }
 
-/// Pushes [body] over [context], titled [title].
-Future<void> showPeekBody(
+/// Pushes what [builder] draws over [context], as a screen titled [title].
+///
+/// One part of a call at a time — a body, a table of headers — read on a
+/// screen of its own rather than by moving the screen behind to another
+/// tab, which loses the reader's place.
+///
+/// The scope is handed over explicitly: a route builds beside the screen
+/// that pushed it, not under it.
+Future<void> showPeekDetail(
   BuildContext context, {
-  required PeekBody body,
   required String title,
+  required WidgetBuilder builder,
 }) {
   final controller = PeekScope.read(context);
   final strings = PeekScope.stringsOf(context);
@@ -74,17 +81,28 @@ Future<void> showPeekBody(
             controller: controller,
             strings: strings,
             share: share,
-            child: _PeekBodyScreen(body: body, title: title),
+            child: _PeekDetailScreen(title: title, builder: builder),
           ),
     ),
   );
 }
 
-class _PeekBodyScreen extends StatelessWidget {
-  const _PeekBodyScreen({required this.body, required this.title});
+/// Pushes [body] over [context], titled [title].
+Future<void> showPeekBody(
+  BuildContext context, {
+  required PeekBody body,
+  required String title,
+}) => showPeekDetail(
+  context,
+  title: title,
+  builder: (context) => PeekBodyView(body),
+);
 
-  final PeekBody body;
+class _PeekDetailScreen extends StatelessWidget {
+  const _PeekDetailScreen({required this.title, required this.builder});
+
   final String title;
+  final WidgetBuilder builder;
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +119,7 @@ class _PeekBodyScreen extends StatelessWidget {
         size: 17,
         onPressed: () => Navigator.of(context).maybePop(),
       ),
-      child: PeekBodyView(body),
+      child: Builder(builder: builder),
     );
   }
 }

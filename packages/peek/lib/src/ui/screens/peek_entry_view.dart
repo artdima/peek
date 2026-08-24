@@ -378,7 +378,13 @@ class _OverviewState extends State<_Overview> {
               onTap:
                   request.headers.length == 0
                       ? null
-                      : () => onShowTab(PeekEntryTab.request),
+                      : () => unawaited(
+                        _showPairs(
+                          context,
+                          title: strings.requestHeaders,
+                          child: PeekHeadersView(request.headers),
+                        ),
+                      ),
             ),
             _Holds(
               icon: PeekIcons.cookies,
@@ -387,7 +393,13 @@ class _OverviewState extends State<_Overview> {
               onTap:
                   request.headers.cookies.isEmpty
                       ? null
-                      : () => onShowTab(PeekEntryTab.request),
+                      : () => unawaited(
+                        _showPairs(
+                          context,
+                          title: strings.requestCookies,
+                          child: PeekCookiesView(request.headers.cookies),
+                        ),
+                      ),
             ),
           ],
         ),
@@ -419,7 +431,13 @@ class _OverviewState extends State<_Overview> {
               onTap:
                   response == null || response.headers.length == 0
                       ? null
-                      : () => onShowTab(PeekEntryTab.response),
+                      : () => unawaited(
+                        _showPairs(
+                          context,
+                          title: strings.responseHeaders,
+                          child: PeekHeadersView(response.headers),
+                        ),
+                      ),
             ),
             _Holds(
               icon: PeekIcons.cookies,
@@ -428,7 +446,13 @@ class _OverviewState extends State<_Overview> {
               onTap:
                   response == null || response.headers.setCookies.isEmpty
                       ? null
-                      : () => onShowTab(PeekEntryTab.response),
+                      : () => unawaited(
+                        _showPairs(
+                          context,
+                          title: strings.responseCookies,
+                          child: PeekCookiesView(response.headers.setCookies),
+                        ),
+                      ),
             ),
           ],
         ),
@@ -499,6 +523,23 @@ class _Fact extends StatelessWidget {
 
 /// One thing a call holds: what it is, how much of it there is, and the way
 /// to it when there is anything to see.
+/// Shows one table of a call — headers, cookies — on its own screen.
+Future<void> _showPairs(
+  BuildContext context, {
+  required String title,
+  required Widget child,
+}) => showPeekDetail(
+  context,
+  title: title,
+  builder: (context) {
+    final theme = PeekTheme.of(context);
+    return ListView(
+      padding: EdgeInsets.only(top: theme.rowSpacing, bottom: theme.gutter),
+      children: [child],
+    );
+  },
+);
+
 class _Holds extends StatelessWidget {
   const _Holds({
     required this.icon,
