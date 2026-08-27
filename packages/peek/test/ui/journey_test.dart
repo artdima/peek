@@ -129,19 +129,19 @@ void main() {
     // The address line carries the host now that the general card is gone.
     expect(find.textContaining('api.example.com'), findsWidgets);
 
-    await tester.tap(find.widgetWithText(PeekPill, strings.request));
+    await tester.tap(find.widgetWithText(PeekListRow, strings.requestHeaders));
     await tester.pumpAndSettle();
     expect(find.text('Authorization'), findsOneWidget);
     // The call as it happened: masking is the app's to ask for.
     expect(find.text('Bearer secret'), findsOneWidget);
-
-    await tester.tap(find.widgetWithText(PeekPill, strings.response));
+    await tester.tap(find.byTooltip(strings.back));
     await tester.pumpAndSettle();
-    expect(
-      find.widgetWithText(PeekListRow, strings.contentType),
-      findsOneWidget,
-    );
+
+    await tester.tap(find.widgetWithText(PeekListRow, strings.responseHeaders));
+    await tester.pumpAndSettle();
     expect(find.text('Content-Type'), findsWidgets);
+    await tester.tap(find.byTooltip(strings.back));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.widgetWithText(PeekListRow, strings.responseBody));
     await tester.pumpAndSettle();
@@ -187,8 +187,16 @@ void main() {
     await tester.tap(find.byType(PeekEntryTile));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(PeekPill, strings.error));
+    // The kind reads twice — in the head and on the error row — so the
+    // row is found by the message only it carries.
+    await tester.tap(
+      find.ancestor(
+        of: find.text('Connection timed out'),
+        matching: find.byType(PeekListRow),
+      ),
+    );
     await tester.pumpAndSettle();
+    expect(find.byType(PeekErrorView), findsOneWidget);
     expect(find.text('Connection timed out'), findsWidgets);
   });
 

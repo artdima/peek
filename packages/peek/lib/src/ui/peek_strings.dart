@@ -8,7 +8,6 @@ import '../core/model/peek_status_class.dart';
 import '../core/query/peek_filter.dart';
 import '../core/query/peek_search_query.dart';
 import '../core/query/peek_sort.dart';
-import 'screens/peek_entry_tab.dart';
 
 /// Every word Peek shows, in one place.
 ///
@@ -83,12 +82,6 @@ class PeekStrings {
   /// What to do about that.
   String get noMatchesHint => 'Try a different search or clear the filters.';
 
-  /// Shown on the response tab of a call still in flight.
-  String get noResponse => 'No response yet';
-
-  /// What to do about it.
-  String get noResponseHint => 'The call has not come back.';
-
   /// Empty detail pane, before a call is picked.
   String get noSelection => 'Nothing selected';
 
@@ -125,13 +118,10 @@ class PeekStrings {
   /// Names the floating button that opens Peek.
   String get openPeek => 'Open Peek';
 
-  /// Tab and heading for the summary.
-  String get overview => 'Overview';
-
-  /// Tab and heading for the failure.
+  /// Heading for the failure.
   String get error => 'Error';
 
-  /// Tab and heading for the phase timings.
+  /// Heading for the phase timings.
   String get timing => 'Timing';
 
   /// Heading for the phases a call went through.
@@ -477,15 +467,6 @@ class PeekStrings {
     PeekEntryState.pending => pending,
     PeekEntryState.completed => 'Completed',
     PeekEntryState.failed => failed,
-  };
-
-  /// Names a tab of the detail screen.
-  String entryTab(PeekEntryTab tab) => switch (tab) {
-    PeekEntryTab.overview => overview,
-    PeekEntryTab.request => request,
-    PeekEntryTab.response => response,
-    PeekEntryTab.error => error,
-    PeekEntryTab.timing => timing,
   };
 
   /// Says the adapter gave no phase timings.

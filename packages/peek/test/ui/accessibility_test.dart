@@ -325,20 +325,18 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('a tab says it is one of a set', (tester) async {
+    testWidgets('a segment says it is one of a set', (tester) async {
       final handle = tester.ensureSemantics();
-      await pumpPeek(
-        tester,
-        PeekScope(controller: controller, child: PeekEntryScreen(e2.id)),
-      );
-      await tester.pump();
+      await pumpScreen(tester);
 
+      // The segment carries its count, and reads as one line with it.
+      final label = '${const PeekStrings().all}\n${controller.facets.total}';
       expect(
         tester.getSemantics(
-          find.widgetWithText(PeekPill, const PeekStrings().overview),
+          find.widgetWithText(PeekPill, const PeekStrings().all),
         ),
         matchesSemantics(
-          label: const PeekStrings().overview,
+          label: label,
           isButton: true,
           isEnabled: true,
           hasEnabledState: true,

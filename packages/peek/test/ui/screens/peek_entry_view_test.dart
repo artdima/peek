@@ -31,13 +31,18 @@ void main() {
     );
   }
 
-  Future<void> openTab(WidgetTester tester, String label) async {
-    await tester.tap(find.widgetWithText(PeekPill, label));
-    await tester.pump();
+  Future<void> open(WidgetTester tester, String row) async {
+    await tester.tap(find.widgetWithText(PeekListRow, row));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> back(WidgetTester tester) async {
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
   }
 
   group('PeekEntryView', () {
-    testWidgets('summarises the call above the tabs', (tester) async {
+    testWidgets('summarises the call above its cards', (tester) async {
       await pumpView(tester, e1);
       expect(find.widgetWithText(PeekListRow, '200'), findsOneWidget);
       expect(
@@ -50,28 +55,18 @@ void main() {
       expect(find.widgetWithText(PeekListRow, 'dio'), findsOneWidget);
     });
 
-    testWidgets('offers only the tabs the call has something for', (
+    testWidgets('reads as one page, with nothing to switch between', (
       tester,
     ) async {
       await pumpView(tester, e1);
-      expect(find.byType(PeekPill), findsNWidgets(3));
-      expect(find.widgetWithText(PeekPill, 'Error'), findsNothing);
-      expect(find.widgetWithText(PeekPill, 'Timing'), findsNothing);
+      expect(find.byType(PeekPill), findsNothing);
+      expect(find.text('REQUEST'), findsOneWidget);
+      expect(find.text('RESPONSE'), findsOneWidget);
+      expect(find.text('DETAILS'), findsOneWidget);
+      expect(find.text('ERROR'), findsNothing);
 
       await pumpView(tester, e5);
-      expect(find.widgetWithText(PeekPill, 'Error'), findsOneWidget);
-
-      await pumpView(
-        tester,
-        e1.copyWith(
-          timings: const PeekTimings(
-            dns: Duration(milliseconds: 12),
-            connect: Duration(milliseconds: 30),
-            wait: Duration(milliseconds: 60),
-          ),
-        ),
-      );
-      expect(find.widgetWithText(PeekPill, 'Timing'), findsOneWidget);
+      expect(find.text('ERROR'), findsOneWidget);
     });
 
     testWidgets('lays the overview out in cards', (tester) async {
@@ -115,41 +110,22 @@ void main() {
       );
     });
 
-    testWidgets('opens the times under how long it took', (tester) async {
-      await pumpView(tester, e1);
-      expect(find.widgetWithText(PeekListRow, 'Started'), findsNothing);
-      expect(find.widgetWithText(PeekListRow, 'Finished'), findsNothing);
-
-      await tester.tap(find.widgetWithText(PeekListRow, 'Timing'));
-      await tester.pump();
-      expect(find.widgetWithText(PeekListRow, 'Started'), findsOneWidget);
-      expect(find.widgetWithText(PeekListRow, 'Finished'), findsOneWidget);
-
-      await tester.tap(find.widgetWithText(PeekListRow, 'Timing'));
-      await tester.pump();
-      expect(find.widgetWithText(PeekListRow, 'Started'), findsNothing);
-    });
-
-    testWidgets('leads from the error summary to the error tab', (
+    testWidgets('leads from the error summary to the error itself', (
       tester,
     ) async {
       await pumpView(tester, e5);
       expect(find.text('ERROR'), findsOneWidget);
       expect(find.widgetWithText(PeekListRow, 'slow'), findsOneWidget);
 
-      // The message is on the summary row alone; the kind is also the
-      // status in the general card.
       await tester.tap(
         find.ancestor(
           of: find.text('slow'),
           matching: find.byType(PeekListRow),
         ),
       );
-      await tester.pump();
-      final errorTab = tester.widget<PeekPill>(
-        find.widgetWithText(PeekPill, 'Error'),
-      );
-      expect(errorTab.selected, isTrue);
+      await tester.pumpAndSettle();
+      expect(find.byType(PeekErrorView), findsOneWidget);
+      expect(find.widgetWithText(PeekListRow, 'Timed out'), findsOneWidget);
     });
 
     testWidgets('keeps the redirects card away when there are none', (
@@ -160,43 +136,20 @@ void main() {
       expect(find.text('ERROR'), findsNothing);
     });
 
-    testWidgets('moves between the tabs', (tester) async {
+    testWidgets('leads to the body on a screen of its own', (tester) async {
       await pumpView(tester, e1);
-      expect(find.widgetWithText(PeekListRow, 'Timing'), findsOneWidget);
-      expect(find.text('DETAILS'), findsOneWidget);
 
-      await openTab(tester, 'Request');
-      expect(find.widgetWithText(PeekListRow, 'Method'), findsOneWidget);
-      expect(find.widgetWithText(PeekListRow, 'Timing'), findsNothing);
-      expect(find.text('DETAILS'), findsNothing);
+      await open(tester, 'Response body');
+      expect(find.byType(PeekBodyView), findsOneWidget);
+      expect(find.text('RESPONSE'), findsNothing);
 
-      await openTab(tester, 'Response');
-      expect(find.widgetWithText(PeekListRow, 'Content type'), findsOneWidget);
-      expect(
-        find.widgetWithText(PeekListRow, 'application/json; charset=utf-8'),
-        findsNothing,
-      );
-      expect(
-        find.widgetWithText(PeekListRow, 'application/json'),
-        findsOneWidget,
-      );
+      await back(tester);
+      expect(find.text('RESPONSE'), findsOneWidget);
     });
 
-    testWidgets('says the response is not there yet', (tester) async {
-      await pumpView(tester, e4);
-      await openTab(tester, 'Response');
-      expect(find.text('No response yet'), findsOneWidget);
-    });
-
-    testWidgets('names what stopped the call', (tester) async {
-      await pumpView(tester, e5);
-      await openTab(tester, 'Error');
-      // Once in the head, once as the error the tab opens on.
-      expect(find.widgetWithText(PeekListRow, 'Timed out'), findsNWidgets(2));
-      expect(find.widgetWithText(PeekListRow, 'slow'), findsOneWidget);
-    });
-
-    testWidgets('lists where the time went', (tester) async {
+    testWidgets('lists where the time went, on the timing screen', (
+      tester,
+    ) async {
       await pumpView(
         tester,
         e1.copyWith(
@@ -206,17 +159,21 @@ void main() {
           ),
         ),
       );
-      await openTab(tester, 'Timing');
+
+      await open(tester, 'Timing');
       expect(find.byType(PeekTimingView), findsOneWidget);
       expect(find.text('DNS'), findsOneWidget);
       expect(find.text('Waiting'), findsOneWidget);
       expect(find.text('60 ms'), findsOneWidget);
+      // The times moved here with it.
+      expect(find.widgetWithText(PeekListRow, 'Started'), findsOneWidget);
+      expect(find.widgetWithText(PeekListRow, 'Finished'), findsOneWidget);
     });
 
     testWidgets('fills itself in when the call comes back', (tester) async {
       await pumpView(tester, e4);
       expect(find.widgetWithText(PeekListRow, 'Pending'), findsOneWidget);
-      expect(find.widgetWithText(PeekPill, 'Error'), findsNothing);
+      expect(find.text('ERROR'), findsNothing);
 
       // A finish is a new entry, not a copy: completedAt travels with the
       // response, and copyWith deliberately will not set one without it.

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_body.dart';
@@ -12,92 +11,35 @@ import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
 import '../widgets/widgets.dart';
 import 'peek_entry_screen.dart';
-import 'peek_entry_tab.dart';
 
 /// One call in full, without a screen around it.
 ///
 /// The same widget fills the detail pane of the wide layout and the body
 /// of the pushed screen, so a call reads the same either way. A call that
-/// is still running fills itself in as it goes: the tabs it can offer
-/// follow what it has.
-final class PeekEntryView extends StatefulWidget {
-  /// Creates the view of [entry], opened on [initialTab].
-  const PeekEntryView(
-    this.entry, {
-    this.initialTab = PeekEntryTab.overview,
-    super.key,
-  });
+/// is still running fills itself in as it goes.
+///
+/// Everything is on one page: what a call holds — bodies, headers,
+/// cookies, the phases of its time — opens on a screen of its own rather
+/// than in a tab, so the reader keeps their place.
+final class PeekEntryView extends StatelessWidget {
+  /// Creates the view of [entry].
+  const PeekEntryView(this.entry, {super.key});
 
   /// The call to show.
   final PeekEntry entry;
-
-  /// Which tab to open on.
-  final PeekEntryTab initialTab;
-
-  @override
-  State<PeekEntryView> createState() => _PeekEntryViewState();
-}
-
-class _PeekEntryViewState extends State<PeekEntryView> {
-  late PeekEntryTab _tab = widget.initialTab;
-
-  /// The tabs this call has something to say on.
-  List<PeekEntryTab> get _tabs => [
-    PeekEntryTab.overview,
-    PeekEntryTab.request,
-    PeekEntryTab.response,
-    if (widget.entry.failure != null) PeekEntryTab.error,
-    if (widget.entry.timings != null) PeekEntryTab.timing,
-  ];
 
   @override
   Widget build(BuildContext context) {
     final strings = PeekScope.stringsOf(context);
     final theme = PeekTheme.of(context);
-    final tabs = _tabs;
-    // A tab can go away — a failure that a retry replaced, say — and the
-    // view must not keep showing an empty one.
-    final tab = tabs.contains(_tab) ? _tab : PeekEntryTab.overview;
 
     return ColoredBox(
       color: theme.groupedBackground,
       child: ListView(
         children: [
-          _Summary(entry: widget.entry, strings: strings),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: theme.gutter),
-            child: PeekSegmented<PeekEntryTab>(
-              selected: tab,
-              onChanged: (value) => setState(() => _tab = value),
-              segments: [
-                for (final value in tabs)
-                  PeekSegment(value: value, label: strings.entryTab(value)),
-              ],
-            ),
-          ),
+          _Summary(entry: entry, strings: strings),
           SizedBox(height: theme.rowSpacing),
-          switch (tab) {
-            PeekEntryTab.overview => _Overview(
-              entry: widget.entry,
-              strings: strings,
-              onShowTab: (value) => setState(() => _tab = value),
-            ),
-            PeekEntryTab.request => _Request(
-              entry: widget.entry,
-              strings: strings,
-            ),
-            PeekEntryTab.response => _Response(
-              entry: widget.entry,
-              strings: strings,
-            ),
-            PeekEntryTab.error => PeekErrorView(
-              widget.entry.failure!,
-              hasResponse: widget.entry.response != null,
-              onShowResponse:
-                  () => setState(() => _tab = PeekEntryTab.response),
-            ),
-            PeekEntryTab.timing => PeekTimingView(widget.entry),
-          },
+          _Contents(entry: entry, strings: strings),
         ],
       ),
     );
@@ -307,32 +249,17 @@ class _Address extends StatelessWidget {
   }
 }
 
-class _Overview extends StatefulWidget {
-  const _Overview({
-    required this.entry,
-    required this.strings,
-    required this.onShowTab,
-  });
+/// Everything a call holds, card by card.
+class _Contents extends StatelessWidget {
+  const _Contents({required this.entry, required this.strings});
 
   final PeekEntry entry;
   final PeekStrings strings;
-  final ValueChanged<PeekEntryTab> onShowTab;
-
-  @override
-  State<_Overview> createState() => _OverviewState();
-}
-
-class _OverviewState extends State<_Overview> {
-  bool _timesShown = false;
 
   @override
   Widget build(BuildContext context) {
-    final entry = widget.entry;
-    final strings = widget.strings;
-    final onShowTab = widget.onShowTab;
     final theme = PeekTheme.of(context);
     final elapsed = entry.duration;
-    final finishedAt = entry.completedAt;
     final failure = entry.failure;
     final request = entry.request;
     final response = entry.response;
@@ -349,7 +276,36 @@ class _OverviewState extends State<_Overview> {
                 title: strings.failureKind(failure.kind),
                 subtitle: failure.message.isEmpty ? null : failure.message,
                 chevron: true,
-                onTap: () => onShowTab(PeekEntryTab.error),
+                onTap:
+                    () => unawaited(
+                      showPeekDetail(
+                        context,
+                        title: strings.error,
+                        builder:
+                            (context) => ListView(
+                              padding: EdgeInsets.only(
+                                top: PeekTheme.of(context).rowSpacing,
+                                bottom: PeekTheme.of(context).gutter,
+                              ),
+                              children: [
+                                PeekErrorView(
+                                  failure,
+                                  hasResponse: response != null,
+                                  onShowResponse:
+                                      response == null
+                                          ? null
+                                          : () => unawaited(
+                                            showPeekBody(
+                                              context,
+                                              body: response.body,
+                                              title: strings.responseBody,
+                                            ),
+                                          ),
+                                ),
+                              ],
+                            ),
+                      ),
+                    ),
               ),
             ],
           ),
@@ -386,6 +342,20 @@ class _OverviewState extends State<_Overview> {
                         ),
                       ),
             ),
+            if (request.queryParameters.isNotEmpty)
+              _Holds(
+                icon: PeekIcons.curl,
+                title: strings.queryParameters,
+                value: '${request.queryParameters.length}',
+                onTap:
+                    () => unawaited(
+                      _showPairs(
+                        context,
+                        title: strings.queryParameters,
+                        child: PeekQueryParamsView(request.queryParameters),
+                      ),
+                    ),
+              ),
             _Holds(
               icon: PeekIcons.cookies,
               title: strings.requestCookies,
@@ -470,29 +440,29 @@ class _OverviewState extends State<_Overview> {
         PeekListSection(
           title: strings.details,
           children: [
-            // How long it took is the question; when it started and
-            // when it ended are the answer behind it, and belong under it
-            // rather than in a card of their own.
+            // How long it took is the question; when it started, when it
+            // ended and where the time went are the answer, and they are a
+            // screen of their own like every other part of a call.
             _Holds(
               icon: PeekIcons.timing,
               title: strings.timing,
               value: elapsed == null ? strings.none : strings.elapsed(elapsed),
-              open: _timesShown,
-              onTap: () => setState(() => _timesShown = !_timesShown),
+              onTap:
+                  () => unawaited(
+                    showPeekDetail(
+                      context,
+                      title: strings.timing,
+                      builder:
+                          (context) => ListView(
+                            padding: EdgeInsets.only(
+                              top: PeekTheme.of(context).rowSpacing,
+                              bottom: PeekTheme.of(context).gutter,
+                            ),
+                            children: [PeekTimingView(entry)],
+                          ),
+                    ),
+                  ),
             ),
-            if (_timesShown) ...[
-              PeekListRow(
-                title: strings.started,
-                value: strings.timestamp(entry.startedAt),
-              ),
-              PeekListRow(
-                title: strings.finished,
-                value:
-                    finishedAt == null
-                        ? strings.none
-                        : strings.timestamp(finishedAt),
-              ),
-            ],
             _Holds(
               icon: PeekIcons.source,
               title: strings.source,
@@ -506,20 +476,6 @@ class _OverviewState extends State<_Overview> {
 }
 
 /// One plain fact of a call, marked the way the rows around it are.
-class _Fact extends StatelessWidget {
-  const _Fact({required this.icon, required this.title, required this.value});
-
-  final PeekIconData icon;
-  final String title;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) => PeekListRow(
-    leading: PeekIcon(icon, color: PeekTheme.of(context).accent),
-    title: title,
-    value: value,
-  );
-}
 
 /// One thing a call holds: what it is, how much of it there is, and the way
 /// to it when there is anything to see.
@@ -546,16 +502,12 @@ class _Holds extends StatelessWidget {
     required this.title,
     required this.value,
     this.onTap,
-    this.open,
   });
 
   final PeekIconData icon;
   final String title;
   final String value;
   final VoidCallback? onTap;
-
-  /// Set when the row opens onto more rows rather than leading away.
-  final bool? open;
 
   @override
   Widget build(BuildContext context) {
@@ -572,133 +524,8 @@ class _Holds extends StatelessWidget {
       // Kept even where the row leads nowhere: without it the values of a
       // card would not line up.
       chevron: true,
-      open: open,
       enabled: leads,
       onTap: onTap,
-    );
-  }
-}
-
-class _Request extends StatelessWidget {
-  const _Request({required this.entry, required this.strings});
-
-  final PeekEntry entry;
-  final PeekStrings strings;
-
-  @override
-  Widget build(BuildContext context) {
-    final request = entry.request;
-    final query = request.queryParameters;
-    final cookies = request.headers.cookies;
-
-    return Column(
-      children: [
-        PeekListSection(
-          title: strings.request,
-          children: [
-            _Fact(
-              icon: PeekIcons.curl,
-              title: strings.method,
-              value: request.method,
-            ),
-            _Fact(
-              icon: PeekIcons.source,
-              title: strings.host,
-              value: request.host,
-            ),
-            _Fact(
-              icon: PeekIcons.headers,
-              title: strings.contentType,
-              value: request.mediaType?.mimeType ?? strings.none,
-            ),
-            _BodyRow(
-              body: request.body,
-              title: strings.requestBody,
-              icon: PeekIcons.sent,
-              strings: strings,
-            ),
-          ],
-        ),
-        if (query.isNotEmpty) PeekQueryParamsView(query),
-        PeekHeadersView(request.headers),
-        if (cookies.isNotEmpty) PeekCookiesView(cookies),
-      ],
-    );
-  }
-}
-
-class _Response extends StatelessWidget {
-  const _Response({required this.entry, required this.strings});
-
-  final PeekEntry entry;
-  final PeekStrings strings;
-
-  @override
-  Widget build(BuildContext context) {
-    final response = entry.response;
-    if (response == null) {
-      return PeekEmptyState(
-        title: strings.noResponse,
-        message: strings.noResponseHint,
-        icon: Icons.hourglass_empty,
-      );
-    }
-    final cookies = response.headers.setCookies;
-
-    return Column(
-      children: [
-        PeekListSection(
-          title: strings.response,
-          children: [
-            _Fact(
-              icon: PeekIcons.headers,
-              title: strings.contentType,
-              value: response.mediaType?.mimeType ?? strings.none,
-            ),
-            _BodyRow(
-              body: response.body,
-              title: strings.responseBody,
-              icon: PeekIcons.received,
-              strings: strings,
-            ),
-          ],
-        ),
-        PeekHeadersView(response.headers),
-        if (cookies.isNotEmpty) PeekCookiesView(cookies),
-      ],
-    );
-  }
-}
-
-/// The row that leads to a body, and says how much of one there is.
-class _BodyRow extends StatelessWidget {
-  const _BodyRow({
-    required this.body,
-    required this.title,
-    required this.icon,
-    required this.strings,
-  });
-
-  final PeekBody body;
-  final String title;
-  final PeekIconData icon;
-  final PeekStrings strings;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = PeekTheme.of(context);
-    final nothing = body is PeekEmptyBody;
-
-    return PeekListRow(
-      leading: PeekIcon(
-        icon,
-        color: nothing ? theme.tertiaryLabel : theme.accent,
-      ),
-      title: title,
-      value: _bodyValue(strings, body),
-      chevron: true,
-      enabled: !nothing,
-      onTap: () => unawaited(showPeekBody(context, body: body, title: title)),
     );
   }
 }

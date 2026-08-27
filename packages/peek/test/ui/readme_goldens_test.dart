@@ -83,11 +83,11 @@ void main() {
       brightness: Brightness.light,
     );
     await tester.tap(
-      find.widgetWithText(PeekPill, const PeekStrings().response),
+      find.widgetWithText(PeekListRow, const PeekStrings().responseBody),
     );
     await tester.pumpAndSettle();
 
-    await expectGolden(find.byType(PeekEntryScreen), 'readme-body');
+    await expectGolden(find.byType(PeekBodyView), 'readme-body');
   });
 
   testWidgets('the list and a call, side by side', (tester) async {
