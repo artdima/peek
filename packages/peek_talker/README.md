@@ -54,7 +54,9 @@ here: the log entry still carries Dio's own objects, and that is what Peek
 maps.
 
 What Peek keeps and what it hides is set on the instance, through
-`PeekOptions` — one place for every adapter:
+`PeekOptions` — one place for every adapter. Nothing is masked until the
+app asks; the default policy covers the usual secret names, and a set can
+be extended by spreading the defaults back in:
 
 ```dart
 final peek = Peek(

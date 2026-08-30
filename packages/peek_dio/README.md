@@ -71,23 +71,30 @@ entry, because a second call is what happened.
 
 ## Redaction
 
+Peek shows a call as it happened: nothing is masked unless the app asks.
 What is hidden is Peek's decision, not the adapter's, so it is configured on
-the instance and applies to every adapter at once:
+the instance and applies to every adapter at once. The default policy
+covers the usual names — `Authorization`, `Cookie`, `token`, `password`
+and their relatives:
 
 ```dart
 final peek = Peek(
-  options: const PeekOptions(
-    redaction: PeekRedactionPolicy(
-      headerNames: {...PeekRedactionPolicy.defaultHeaderNames, 'x-api-key'},
-      bodyKeys: {...PeekRedactionPolicy.defaultBodyKeys, 'pin'},
-    ),
-  ),
+  options: const PeekOptions(redaction: PeekRedactionPolicy()),
 );
 ```
 
-Every set replaces the built-in one rather than adding to it, which is why
-the example spreads the defaults back in. Authorization headers, common
-secret query keys and body keys are masked out of the box; see
-`PeekRedactionPolicy`.
+Every set of names replaces the built-in one rather than adding to it, so
+extend a set by spreading the defaults back in:
+
+```dart
+PeekRedactionPolicy(
+  headerNames: {...PeekRedactionPolicy.defaultHeaderNames, 'x-api-key'},
+  bodyKeys: {...PeekRedactionPolicy.defaultBodyKeys, 'pin'},
+)
+```
+
+Masking runs before anything is stored, so a masked value never reaches the
+screen, the clipboard or an exported file. Worth turning on wherever a log
+leaves the device — a HAR attached to an issue, a screenshot in a chat.
 
 See the [repository README](../../README.md) for the full picture.
