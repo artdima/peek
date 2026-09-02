@@ -43,16 +43,22 @@ The scripts, all through `dart run melos run <name>`:
 ## Goldens
 
 Rendering differs between platforms, so goldens are authored and compared on
-Linux only; elsewhere those tests skip themselves rather than fail for the
-wrong reason. To add one, write the test with `expectGolden(finder, 'name')`,
-then rewrite the files on Linux — in CI, or locally through a container:
+Linux only, at the Flutter pinned in `.fvmrc`; elsewhere those tests skip
+themselves rather than fail for the wrong reason. To add one, write the test
+with `expectGolden(finder, 'name')`, then have the files rewritten where CI
+compares them: run the **Goldens** workflow (Actions → Goldens → Run
+workflow) on your branch. It runs `update:goldens` and commits the PNGs that
+changed back to the branch. The same command works locally in an x64 Linux
+container with that Flutter:
 
 ```sh
 dart run melos run update:goldens
 ```
 
-Set `PEEK_GOLDENS=1` to force the comparison on another platform; expect
-differences that mean nothing.
+Set `PEEK_GOLDENS=1` to force the comparison on another platform (expect
+differences that mean nothing) or `PEEK_GOLDENS=0` to skip it on Linux —
+which is what the `floor` job does, since an older Flutter draws the same
+widget differently.
 
 ## Definition of done
 

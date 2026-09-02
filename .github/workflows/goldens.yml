@@ -1,0 +1,46 @@
+name: Goldens
+
+# Golden files are compared on Linux at the Flutter pinned in .fvmrc, so
+# they are authored in the same place: this job rewrites them and commits
+# what changed to the branch it was run on. Run it after a change that
+# moves pixels on purpose, then let CI confirm the rest still match.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: goldens-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update:
+    name: Rewrite the golden files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref }}
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: .fvmrc
+          cache: true
+
+      - run: flutter pub get
+      - run: dart run melos run update:goldens
+
+      - name: Commit what changed
+        run: |
+          git add -A -- ':(glob)**/test/**/goldens/*.png'
+          if git diff --cached --quiet; then
+            echo "The goldens were already up to date."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email \
+            '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'test: update goldens'
+          git push

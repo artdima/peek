@@ -6,17 +6,24 @@ import 'package:flutter_test/flutter_test.dart';
 /// Whether golden files are compared in this run.
 ///
 /// Rendering differs between platforms, so goldens are authored and checked
-/// on Linux — in CI, or locally through a container. Elsewhere the golden
-/// tests are skipped rather than failing for the wrong reason.
-final bool goldensEnabled =
-    Platform.isLinux || Platform.environment['PEEK_GOLDENS'] == '1';
+/// on Linux — in CI, or locally through a container — and on the Flutter
+/// pinned in `.fvmrc`. Elsewhere the golden tests are skipped rather than
+/// failing for the wrong reason. `PEEK_GOLDENS=1` forces the comparison
+/// on, `PEEK_GOLDENS=0` forces it off: the floor job runs Linux on an
+/// older Flutter, whose pixels the pinned one does not owe.
+final bool goldensEnabled = switch (Platform.environment['PEEK_GOLDENS']) {
+  '1' => true,
+  '0' => false,
+  _ => Platform.isLinux,
+};
 
 /// The value passed to `skip:`: `false` when goldens run, otherwise the
 /// reason they are skipped.
 final Object skipGoldens =
     goldensEnabled
         ? false
-        : 'Goldens are only compared on Linux; set PEEK_GOLDENS=1 to force.';
+        : 'Goldens are compared on Linux at the pinned Flutter; '
+            'set PEEK_GOLDENS=1 to force.';
 
 /// Pumps [child] inside a minimal app, ready for a widget or golden test.
 ///
@@ -59,7 +66,8 @@ Future<void> pumpPeek(
   );
 }
 
-/// Compares the widget found by [finder] against `test/goldens/<name>.png`.
+/// Compares the widget found by [finder] against `goldens/<name>.png`
+/// beside the test file.
 ///
 /// A no-op where goldens are not compared, so the surrounding test still
 /// exercises the widget.

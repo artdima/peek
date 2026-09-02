@@ -113,8 +113,12 @@ jobs:
         working-directory: ${{ runner.temp }}/floor
       - run: flutter analyze --fatal-infos
         working-directory: ${{ runner.temp }}/floor
+      # Goldens are authored on the pinned Flutter; an older one draws
+      # them differently, and that difference is not a regression.
       - run: flutter test
         working-directory: ${{ runner.temp }}/floor
+        env:
+          PEEK_GOLDENS: '0'
 
   pana:
     name: pub.dev score (${{ matrix.package }})
