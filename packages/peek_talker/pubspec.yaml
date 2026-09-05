@@ -9,11 +9,11 @@ environment:
   flutter: '>=3.29.0'
 
 dependencies:
-  dio: ^5.7.0
+  dio: ^5.10.0
   peek: ^0.1.0
   peek_dio: ^0.1.0
   talker: ^5.0.0
-  talker_dio_logger: ^5.0.0
+  talker_dio_logger: ^5.1.6
 
 dev_dependencies:
   flutter_test:

@@ -25,7 +25,9 @@ dart run melos run ci     # format:check, analyze, test — what CI runs
 Flutter is pinned in `.fvmrc`; CI uses that version, and goldens are
 authored against it. The packages themselves promise less — Dart `^3.7.0`,
 Flutter `>=3.29.0` — and the `floor` job in CI checks each of them against
-that oldest SDK on its own.
+that oldest SDK on its own, with every dependency downgraded to the oldest
+version its pubspec admits. A lower bound is a promise: raise it when the
+code starts using something newer.
 
 The scripts, all through `dart run melos run <name>`:
 
