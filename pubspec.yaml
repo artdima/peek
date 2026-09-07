@@ -6,8 +6,8 @@ environment:
   sdk: ^3.9.0
 
 workspace:
-  - example
   - packages/peek
+  - packages/peek/example
   - packages/peek_dio
   - packages/peek_talker
 

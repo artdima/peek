@@ -40,7 +40,7 @@ showPeek(context, peek: peek);
 ```
 
 The compiled version of these lines lives in
-[`example/lib/dio_setup.dart`](../../example/lib/dio_setup.dart).
+[`example/lib/dio_setup.dart`](../peek/example/lib/dio_setup.dart).
 
 ## Add it last
 

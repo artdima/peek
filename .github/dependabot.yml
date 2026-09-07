@@ -9,5 +9,6 @@ updates:
     directories:
       - /
       - /packages/*
+      - /packages/peek/example
     schedule:
       interval: weekly

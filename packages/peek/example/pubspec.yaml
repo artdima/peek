@@ -1,5 +1,5 @@
 name: peek_example
-description: A minimal app showing Peek's user interface with demo data.
+description: An app that makes real calls through Dio and Talker and reads them in Peek.
 publish_to: none
 version: 1.0.0
 resolution: workspace

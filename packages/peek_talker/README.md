@@ -35,7 +35,7 @@ dio.interceptors.add(TalkerDioLogger(talker: talker));
 releases it. An adapter built without attaching must be disposed by hand.
 
 The compiled version of these lines lives in
-[`example/lib/talker_setup.dart`](../../example/lib/talker_setup.dart).
+[`example/lib/talker_setup.dart`](../peek/example/lib/talker_setup.dart).
 
 ## The history is replayed
 

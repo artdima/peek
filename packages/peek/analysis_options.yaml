@@ -1,4 +1,6 @@
 analyzer:
   exclude:
     - build/**
+    # A package of its own, analysed as one.
+    - example/**
 include: ../../analysis_options.yaml
