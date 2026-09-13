@@ -18,6 +18,8 @@ Peek is a monorepo: pub workspaces resolve the packages together, melos runs
 the scripts.
 
 ```sh
+git clone https://github.com/artdima/peek.git
+cd peek
 flutter pub get           # resolves the whole workspace at once
 dart run melos run ci     # format:check, analyze, test — what CI runs
 ```
@@ -96,7 +98,8 @@ a branch and lands through a pull request, even solo — that is what runs CI.
 
 ## Adding an adapter
 
-Adapters for widely used loggers are welcome as packages in this repository;
+Adapters for widely used loggers are welcome as packages in
+[this repository](https://github.com/artdima/peek);
 anything more specific is better as your own package, and Peek will happily
 link to it. Either way, follow `doc/adapters.md` — an adapter watches, and
 never intervenes.

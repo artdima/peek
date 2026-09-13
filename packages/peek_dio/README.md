@@ -40,7 +40,7 @@ showPeek(context, peek: peek);
 ```
 
 The compiled version of these lines lives in
-[`example/lib/dio_setup.dart`](../peek/example/lib/dio_setup.dart).
+[`example/lib/dio_setup.dart`](https://github.com/artdima/peek/blob/main/packages/peek/example/lib/dio_setup.dart).
 
 ## Add it last
 
@@ -97,4 +97,4 @@ Masking runs before anything is stored, so a masked value never reaches the
 screen, the clipboard or an exported file. Worth turning on wherever a log
 leaves the device — a HAR attached to an issue, a screenshot in a chat.
 
-See the [repository README](../../README.md) for the full picture.
+See the [repository README](https://github.com/artdima/peek) for the full picture.

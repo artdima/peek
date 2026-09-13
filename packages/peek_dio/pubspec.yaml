@@ -4,6 +4,10 @@ description: >-
 version: 0.1.0
 resolution: workspace
 
+repository: https://github.com/artdima/peek/tree/main/packages/peek_dio
+issue_tracker: https://github.com/artdima/peek/issues
+homepage: https://github.com/artdima/peek
+
 environment:
   sdk: ^3.7.0
   flutter: '>=3.29.0'

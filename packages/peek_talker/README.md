@@ -35,7 +35,7 @@ dio.interceptors.add(TalkerDioLogger(talker: talker));
 releases it. An adapter built without attaching must be disposed by hand.
 
 The compiled version of these lines lives in
-[`example/lib/talker_setup.dart`](../peek/example/lib/talker_setup.dart).
+[`example/lib/talker_setup.dart`](https://github.com/artdima/peek/blob/main/packages/peek/example/lib/talker_setup.dart).
 
 ## The history is replayed
 
@@ -121,4 +121,4 @@ PeekTalkerAdapter(
 - **Do not use both** `peek_talker` and `PeekDioInterceptor` on the same
   client: the call would be reported twice, once by each.
 
-See the [repository README](../../README.md) for the full picture.
+See the [repository README](https://github.com/artdima/peek) for the full picture.

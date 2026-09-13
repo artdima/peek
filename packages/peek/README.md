@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="../../assets/peek-logo.png" width="320" alt="Peek">
+  <img src="https://raw.githubusercontent.com/artdima/peek/main/assets/peek-logo.png" width="320" alt="Peek">
 </p>
 
 <p align="center">
@@ -7,8 +7,10 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/status-work%20in%20progress-orange" alt="Status: work in progress">
-  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT">
+  <a href="https://pub.dev/packages/peek"><img src="https://img.shields.io/pub/v/peek.svg" alt="pub package"></a>
+  <a href="https://github.com/artdima/peek/actions/workflows/ci.yml"><img src="https://github.com/artdima/peek/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://codecov.io/gh/artdima/peek"><img src="https://codecov.io/gh/artdima/peek/branch/main/graph/badge.svg" alt="Coverage"></a>
+  <a href="https://github.com/artdima/peek/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT"></a>
 </p>
 
 ---
@@ -31,7 +33,7 @@ hands — and if anything inside Peek fails, the failure reaches
 platforms. It is an independent project, written from scratch for Flutter.
 
 <p align="center">
-  <img src="../../assets/screens.png" alt="Peek: the console, a call and a JSON body" width="800">
+  <img src="https://raw.githubusercontent.com/artdima/peek/main/assets/screens.png" alt="Peek: the console, a call and a JSON body" width="800">
 </p>
 
 ## Quick start
@@ -70,16 +72,16 @@ MaterialApp(
 ```
 
 These lines are compiled, not just quoted: they live in
-[`example`](example), an app that makes real
+[`example`](https://github.com/artdima/peek/tree/main/packages/peek/example), an app that makes real
 calls both ways and drives every screen.
 
 ## Packages
 
 | Package | What it is | Depends on |
 | --- | --- | --- |
-| [`peek`](.) | The core model, store and exporters (`package:peek/core.dart`, pure Dart) and the Flutter UI (`package:peek/peek.dart`) | `flutter`, `meta` |
-| [`peek_dio`](../peek_dio) | `PeekDioInterceptor`: reports what a Dio client does | `peek`, `dio` |
-| [`peek_talker`](../peek_talker) | `PeekTalkerAdapter`: reads what Talker logs, `talker_dio_logger` understood out of the box | `peek`, `peek_dio`, `talker`, `talker_dio_logger` |
+| [`peek`](https://github.com/artdima/peek/tree/main/packages/peek) | The core model, store and exporters (`package:peek/core.dart`, pure Dart) and the Flutter UI (`package:peek/peek.dart`) | `flutter`, `meta` |
+| [`peek_dio`](https://github.com/artdima/peek/tree/main/packages/peek_dio) | `PeekDioInterceptor`: reports what a Dio client does | `peek`, `dio` |
+| [`peek_talker`](https://github.com/artdima/peek/tree/main/packages/peek_talker) | `PeekTalkerAdapter`: reads what Talker logs, `talker_dio_logger` understood out of the box | `peek`, `peek_dio`, `talker`, `talker_dio_logger` |
 
 ## Configuration
 
@@ -121,17 +123,17 @@ final peek = Peek(
 
 An adapter watches a logger and reports `PeekEvent`s into a `PeekSink`. It
 needs one import — `package:peek/core.dart` — and about a screen of code;
-[`doc/adapters.md`](../../doc/adapters.md) is the guide, from the contract to the
+[`doc/adapters.md`](https://github.com/artdima/peek/blob/main/doc/adapters.md) is the guide, from the contract to the
 package layout, with a checklist at the end.
 
 ## Contributing
 
 Bugs and ideas go through the issue templates; pull requests through
-[`CONTRIBUTING.md`](../../CONTRIBUTING.md), which has the setup, the scripts and
+[`CONTRIBUTING.md`](https://github.com/artdima/peek/blob/main/CONTRIBUTING.md), which has the setup, the scripts and
 the definition of done. Security reports are private: see
-[`SECURITY.md`](../../SECURITY.md).
+[`SECURITY.md`](https://github.com/artdima/peek/blob/main/SECURITY.md).
 
 ## License
 
 MIT © 2026 Dmitrii Medyannik. The icon outlines come from
-[Lucide](https://lucide.dev) (ISC); see [`NOTICE`](NOTICE).
+[Lucide](https://lucide.dev) (ISC); see [`NOTICE`](https://github.com/artdima/peek/blob/main/NOTICE).

@@ -9,9 +9,9 @@ Peek is pre-1.0: fixes land on `main` and go out in the next release. Once
 
 Please do not open a public issue for a security problem.
 
-Report it through GitHub's private vulnerability reporting — the **Report a
-vulnerability** button on the repository's Security tab — or by email to
-<mail@artdima.ru>. Include what you did, what happened, and the versions of
+Report it through [GitHub's private vulnerability reporting](https://github.com/artdima/peek/security/advisories/new)
+— the **Report a vulnerability** button on the repository's Security tab —
+or by email to <mail@artdima.ru>. Include what you did, what happened, and the versions of
 Peek and Flutter you used. You will get an acknowledgement within a few
 days, and an honest estimate of when a fix will land.
 
