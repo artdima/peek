@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   pull_request:
+  # A push made by a workflow does not start another one, so the run that
+  # follows a golden rewrite has to be asked for.
+  workflow_dispatch:
 
 permissions:
   contents: read
