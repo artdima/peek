@@ -55,11 +55,52 @@ final class PeekCookie {
   /// The raw `Expires` attribute.
   String? get expires => attributes['expires'];
 
+  /// The `Expires` attribute as a UTC time.
+  ///
+  /// `null` when the attribute is absent or written in a form other than the
+  /// RFC 1123 one servers send: `Wed, 21 Oct 2015 07:28:00 GMT`.
+  DateTime? get expiresAt {
+    final raw = expires;
+    if (raw == null) return null;
+    final match = _expiresFormat.firstMatch(raw.trim());
+    if (match == null) return null;
+    final month = _months.indexOf(match[2]!.toLowerCase()) + 1;
+    if (month == 0) return null;
+    return DateTime.utc(
+      int.parse(match[3]!),
+      month,
+      int.parse(match[1]!),
+      int.parse(match[4]!),
+      int.parse(match[5]!),
+      int.parse(match[6]!),
+    );
+  }
+
   /// The `Max-Age` attribute in seconds, when present and numeric.
   int? get maxAge => int.tryParse(attributes['max-age'] ?? '');
 
   /// The `SameSite` attribute.
   String? get sameSite => attributes['samesite'];
+
+  static final RegExp _expiresFormat = RegExp(
+    r'^[A-Za-z]{3},\s+(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})\s+'
+    r'(\d{1,2}):(\d{2}):(\d{2})\s+GMT$',
+  );
+
+  static const List<String> _months = [
+    'jan',
+    'feb',
+    'mar',
+    'apr',
+    'may',
+    'jun',
+    'jul',
+    'aug',
+    'sep',
+    'oct',
+    'nov',
+    'dec',
+  ];
 
   /// Whether the `Secure` flag is set.
   bool get isSecure => attributes.containsKey('secure');

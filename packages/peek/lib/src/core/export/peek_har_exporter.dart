@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 
 import '../model/peek_body.dart';
 import '../model/peek_cookie.dart';
@@ -38,15 +39,18 @@ final class PeekHarExporter {
   };
 
   Map<String, Object?> _entry(PeekEntry entry) {
-    final total = _millis(entry.duration ?? Duration.zero);
+    final timings = _timings(
+      entry.timings,
+      _millis(entry.duration ?? Duration.zero),
+    );
     final failure = entry.failure;
     return {
       'startedDateTime': entry.startedAt.toUtc().toIso8601String(),
-      'time': total,
+      'time': _total(timings),
       'request': _request(entry.request),
       'response': _response(entry.response),
       'cache': <String, Object?>{},
-      'timings': _timings(entry.timings, total),
+      'timings': timings,
       if (failure != null)
         '_error': {'kind': failure.kind.name, 'message': failure.message},
       '_peek': {'id': entry.id.value, 'source': entry.source},
@@ -152,18 +156,37 @@ final class PeekHarExporter {
     };
   }
 
-  Map<String, Object?> _timings(PeekTimings? timings, double total) {
+  Map<String, double> _timings(PeekTimings? timings, double total) {
+    final blocked = _millisOrNone(timings?.blocked);
+    final dns = _millisOrNone(timings?.dns);
+    final connect = _millisOrNone(timings?.connect);
+    final send = _millis(timings?.send ?? Duration.zero);
+    final receive = _millis(timings?.receive ?? Duration.zero);
     final wait = timings?.wait;
+    final measured = _total({
+      'blocked': blocked,
+      'dns': dns,
+      'connect': connect,
+      'send': send,
+      'receive': receive,
+    });
     return {
-      'blocked': _millisOrNone(timings?.blocked),
-      'dns': _millisOrNone(timings?.dns),
-      'connect': _millisOrNone(timings?.connect),
+      'blocked': blocked,
+      'dns': dns,
+      'connect': connect,
       'ssl': _millisOrNone(timings?.ssl),
-      'send': _millis(timings?.send ?? Duration.zero),
-      'wait': wait == null ? total : _millis(wait),
-      'receive': _millis(timings?.receive ?? Duration.zero),
+      'send': send,
+      // Whatever the named phases leave over was spent waiting.
+      'wait': wait == null ? math.max(total - measured, 0.0) : _millis(wait),
+      'receive': receive,
     };
   }
+
+  /// The elapsed time HAR expects beside the phases: their sum, with `ssl`
+  /// left out because it is already counted inside `connect`.
+  static double _total(Map<String, double> timings) => timings.entries
+      .where((phase) => phase.key != 'ssl' && phase.value >= 0)
+      .fold(0, (sum, phase) => sum + phase.value);
 
   static List<Map<String, String>> _headers(PeekHeaders headers) => [
     for (final entry in headers.entries)
@@ -175,7 +198,8 @@ final class PeekHarExporter {
     'value': cookie.value,
     if (cookie.path != null) 'path': cookie.path,
     if (cookie.domain != null) 'domain': cookie.domain,
-    if (cookie.expires != null) 'expires': cookie.expires,
+    if (cookie.expiresAt case final expires?)
+      'expires': expires.toIso8601String(),
     'httpOnly': cookie.isHttpOnly,
     'secure': cookie.isSecure,
   };

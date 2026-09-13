@@ -107,7 +107,7 @@ abstract final class PeekDioMapper {
   /// The body of a response, by the type Dio decoded it as.
   static PeekBody responseBody(Response<dynamic> value) {
     final type = PeekMediaType.tryParse(
-      value.headers.value(Headers.contentTypeHeader),
+      value.headers[Headers.contentTypeHeader]?.firstOrNull,
     );
     final data = value.data;
     if (data == null) return const PeekBody.empty();

@@ -156,6 +156,20 @@ void main() {
   });
 
   group('response', () {
+    test('survives a repeated Content-Type', () {
+      final mapped = PeekDioMapper.response(
+        response(
+          data: 'hello',
+          headers: {
+            'content-type': ['text/plain', 'text/plain'],
+          },
+          responseType: ResponseType.plain,
+        ),
+      );
+
+      expect(mapped.body.contentType?.subtype, 'plain');
+    });
+
     test('carries the status, the headers and the hops', () {
       final mapped = PeekDioMapper.response(
         response(

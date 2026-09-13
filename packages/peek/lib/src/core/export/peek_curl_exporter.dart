@@ -29,7 +29,10 @@ final class PeekCurlExporter {
       PeekTextBody() || PeekFormBody() || PeekBytesBody() => true,
       PeekEmptyBody() || PeekUnavailableBody() => false,
     };
-    if (request.method != 'GET' || sendsData) {
+    // -X HEAD leaves curl waiting for a body no server will send.
+    if (request.method == 'HEAD') {
+      head.add('-I');
+    } else if (request.method != 'GET' || sendsData) {
       head.add('-X ${request.method}');
     }
     head.add(_quote(request.uri.toString()));

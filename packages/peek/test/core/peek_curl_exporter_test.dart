@@ -106,6 +106,13 @@ void main() {
       );
     });
 
+    test('asks for headers only on HEAD', () {
+      expect(
+        exporter.exportRequest(request(method: 'HEAD')),
+        "curl -I 'https://api.example.com/users?page=1&q=a%20b'",
+      );
+    });
+
     test('URL-encodes plain form fields', () {
       final command = exporter.exportRequest(
         request(
@@ -208,12 +215,12 @@ void main() {
     test('exports an entry through its request', () {
       final entry = PeekEntry(
         id: const PeekId('e'),
-        request: request(method: 'HEAD'),
+        request: request(method: 'DELETE'),
         startedAt: DateTime.utc(2026),
         source: 'test',
       );
       expect(exporter.export(entry), exporter.exportRequest(entry.request));
-      expect(exporter.export(entry), startsWith("curl -X HEAD 'https://"));
+      expect(exporter.export(entry), startsWith("curl -X DELETE 'https://"));
     });
   });
 }

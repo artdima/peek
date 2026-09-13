@@ -146,6 +146,44 @@ void main() {
       });
     });
 
+    test('gives the phases it was not told about to wait', () {
+      final timed = rich.copyWith(
+        timings: const PeekTimings(
+          dns: Duration(milliseconds: 10),
+          connect: Duration(milliseconds: 20),
+          ssl: Duration(milliseconds: 15),
+          send: Duration(milliseconds: 5),
+          receive: Duration(milliseconds: 15),
+        ),
+      );
+      final entry = single(timed);
+      expect((entry['timings']! as Map<String, Object?>)['wait'], 200.0);
+      expect(entry['time'], 250.0);
+    });
+
+    test('writes cookie expiry as an ISO 8601 time', () {
+      final entry = single(
+        rich.copyWith(
+          response: rich.response!.copyWith(
+            headers: PeekHeaders.fromMultiMap({
+              'Set-Cookie': [
+                'sid=def; Expires=Wed, 21 Oct 2015 07:28:00 GMT',
+                'theme=dark; Expires=whenever',
+              ],
+            }),
+          ),
+        ),
+      );
+      final cookies =
+          (entry['response']! as Map<String, Object?>)['cookies']!
+              as List<Object?>;
+      expect(
+        (cookies.first! as Map<String, Object?>)['expires'],
+        '2015-10-21T07:28:00.000Z',
+      );
+      expect(cookies.last! as Map<String, Object?>, isNot(contains('expires')));
+    });
+
     test('base64-encodes binary bodies on both sides', () {
       final binary = PeekEntry(
         id: const PeekId('bin'),

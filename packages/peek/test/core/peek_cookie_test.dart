@@ -82,6 +82,31 @@ void main() {
     });
   });
 
+  group('PeekCookie.expiresAt', () {
+    test('reads the RFC 1123 form as UTC', () {
+      final cookie = PeekCookie.parseSetCookie(
+        'sid=1; Expires=Wed, 21 Oct 2015 07:28:00 GMT',
+      );
+      expect(cookie!.expiresAt, DateTime.utc(2015, 10, 21, 7, 28));
+    });
+
+    test('is null when absent or written another way', () {
+      expect(PeekCookie.parseSetCookie('sid=1')!.expiresAt, isNull);
+      expect(
+        PeekCookie.parseSetCookie(
+          'sid=1; Expires=2015-10-21T07:28:00Z',
+        )!.expiresAt,
+        isNull,
+      );
+      expect(
+        PeekCookie.parseSetCookie(
+          'sid=1; Expires=Wed, 21 Foo 2015 07:28:00 GMT',
+        )!.expiresAt,
+        isNull,
+      );
+    });
+  });
+
   group('PeekCookie', () {
     test('compares by name, value and attributes', () {
       const cookie = PeekCookie('n', 'v', attributes: {'path': '/'});
