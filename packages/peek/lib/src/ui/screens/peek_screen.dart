@@ -151,13 +151,23 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
         slivers: [
           SliverToBoxAdapter(child: _chrome(controller, strings)),
           PeekEntrySliver(
-            scrollController: _scroll,
             onTap: (entry) {
               controller.select(entry.id);
               unawaited(showPeekEntry(context, entry.id));
             },
           ),
         ],
+        // Clear of the navigation bar, which is pinned above it: the
+        // collapsed bar is as tall as the buttons it holds.
+        overlay: Positioned(
+          top:
+              MediaQuery.paddingOf(context).top +
+              theme.minTapTarget +
+              theme.rowSpacing,
+          left: 0,
+          right: 0,
+          child: Center(child: PeekArrivalsBar(scrollController: _scroll)),
+        ),
       );
     }
 

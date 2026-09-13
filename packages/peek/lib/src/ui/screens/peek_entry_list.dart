@@ -10,36 +10,19 @@ import '../peek_scope.dart';
 import '../theme/peek_theme.dart';
 import '../widgets/widgets.dart';
 
-/// The calls as slivers, for a screen that owns the scrolling.
+/// The calls as a sliver, for a screen that owns the scrolling.
 ///
-/// New calls arrive at the top. While the list is scrolled away from the
-/// top it stays put and pins a bar saying how many arrived, so reading an
-/// entry is not interrupted by the list moving under the finger.
-final class PeekEntrySliver extends StatefulWidget {
-  /// Creates the slivers.
-  const PeekEntrySliver({
-    required this.scrollController,
-    this.onTap,
-    this.selectedId,
-    super.key,
-  });
-
-  /// The position the list is scrolled to.
-  final ScrollController scrollController;
+/// What arrived while the list was scrolled away is [PeekArrivalsBar]'s to
+/// say: it is drawn over the list, not in it.
+final class PeekEntrySliver extends StatelessWidget {
+  /// Creates the sliver.
+  const PeekEntrySliver({this.onTap, this.selectedId, super.key});
 
   /// Called when a row is tapped.
   final void Function(PeekEntry entry)? onTap;
 
   /// Which row is open in the detail pane, if any.
   final PeekId? selectedId;
-
-  @override
-  State<PeekEntrySliver> createState() => _PeekEntrySliverState();
-}
-
-class _PeekEntrySliverState extends State<PeekEntrySliver> {
-  int _pendingAbove = 0;
-  PeekId? _topId;
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +32,6 @@ class _PeekEntrySliverState extends State<PeekEntrySliver> {
     final search = controller.filter.query;
     final highlight =
         search.scopes.contains(PeekSearchScope.url) ? search.text : '';
-
-    _trackArrivals(entries);
 
     if (entries.isEmpty) {
       return SliverFillRemaining(
@@ -73,36 +54,52 @@ class _PeekEntrySliverState extends State<PeekEntrySliver> {
       );
     }
 
-    return SliverMainAxisGroup(
-      slivers: [
-        if (_pendingAbove > 0)
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _ArrivalsHeader(
-              count: _pendingAbove,
-              onPressed: _jumpToTop,
-            ),
+    return SliverList.separated(
+      itemCount: entries.length,
+      separatorBuilder:
+          (context, index) => PeekSeparator(
+            indent: PeekEntryTile.textInset,
+            endIndent: PeekTheme.of(context).gutter,
           ),
-        SliverList.separated(
-          itemCount: entries.length,
-          separatorBuilder:
-              (context, index) => PeekSeparator(
-                indent: PeekEntryTile.textInset,
-                endIndent: PeekTheme.of(context).gutter,
-              ),
-          itemBuilder: (context, index) {
-            final entry = entries[index];
-            return PeekEntryTile(
-              entry,
-              key: ValueKey(entry.id),
-              selected: entry.id == widget.selectedId,
-              highlight: highlight,
-              onTap: widget.onTap == null ? null : () => widget.onTap!(entry),
-            );
-          },
-        ),
-      ],
+      itemBuilder: (context, index) {
+        final entry = entries[index];
+        return PeekEntryTile(
+          entry,
+          key: ValueKey(entry.id),
+          selected: entry.id == selectedId,
+          highlight: highlight,
+          onTap: onTap == null ? null : () => onTap!(entry),
+        );
+      },
     );
+  }
+}
+
+/// Says how many calls arrived above the list while it was scrolled away,
+/// and takes the reader back to them.
+///
+/// Drawn over the list rather than in it: a bar pinned inside the scroll
+/// view ends up under whatever the screen pins above it.
+final class PeekArrivalsBar extends StatefulWidget {
+  /// Creates the bar over the list at [scrollController].
+  const PeekArrivalsBar({required this.scrollController, super.key});
+
+  /// The position the list is scrolled to.
+  final ScrollController scrollController;
+
+  @override
+  State<PeekArrivalsBar> createState() => _PeekArrivalsBarState();
+}
+
+class _PeekArrivalsBarState extends State<PeekArrivalsBar> {
+  int _pendingAbove = 0;
+  PeekId? _topId;
+
+  @override
+  Widget build(BuildContext context) {
+    _trackArrivals(PeekScope.of(context).entries);
+    if (_pendingAbove == 0) return const SizedBox.shrink();
+    return _NewRequestsButton(count: _pendingAbove, onPressed: _jumpToTop);
   }
 
   /// Counts what arrived above the viewport while it was scrolled away.
@@ -165,51 +162,25 @@ class _PeekEntryListState extends State<PeekEntryList> {
   }
 
   @override
-  Widget build(BuildContext context) => CustomScrollView(
-    controller: _scroll,
-    slivers: [
-      PeekEntrySliver(
-        scrollController: _scroll,
-        onTap: widget.onTap,
-        selectedId: widget.selectedId,
+  Widget build(BuildContext context) => Stack(
+    children: [
+      CustomScrollView(
+        controller: _scroll,
+        slivers: [
+          PeekEntrySliver(onTap: widget.onTap, selectedId: widget.selectedId),
+        ],
+      ),
+      Positioned(
+        top: PeekTheme.of(context).rowSpacing,
+        left: 0,
+        right: 0,
+        child: Center(child: PeekArrivalsBar(scrollController: _scroll)),
       ),
     ],
   );
 }
 
 /// The bar that says how many calls arrived above where you are reading.
-class _ArrivalsHeader extends SliverPersistentHeaderDelegate {
-  const _ArrivalsHeader({required this.count, required this.onPressed});
-
-  final int count;
-  final VoidCallback onPressed;
-
-  @override
-  double get minExtent => 56;
-
-  @override
-  double get maxExtent => 56;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    final theme = PeekTheme.of(context);
-    return ColoredBox(
-      color: theme.background,
-      child: Center(
-        child: _NewRequestsButton(count: count, onPressed: onPressed),
-      ),
-    );
-  }
-
-  @override
-  bool shouldRebuild(_ArrivalsHeader oldDelegate) =>
-      oldDelegate.count != count || oldDelegate.onPressed != onPressed;
-}
-
 class _NewRequestsButton extends StatelessWidget {
   const _NewRequestsButton({required this.count, required this.onPressed});
 
