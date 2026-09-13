@@ -29,7 +29,9 @@ authored against it. The packages themselves promise less — Dart `^3.7.0`,
 Flutter `>=3.29.0` — and the `floor` job in CI checks each of them against
 that oldest SDK on its own, with every dependency downgraded to the oldest
 version its pubspec admits. A lower bound is a promise: raise it when the
-code starts using something newer.
+code starts using something newer. The tests are held to it too, so an
+assertion that needs a newer testing API belongs in a form both versions
+understand — `containsSemantics` over `matchesSemantics`, say.
 
 The scripts, all through `dart run melos run <name>`:
 

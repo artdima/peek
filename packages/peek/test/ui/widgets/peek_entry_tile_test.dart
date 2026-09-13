@@ -172,14 +172,16 @@ void main() {
       await pumpTile(tester, PeekEntryTile(e1, onTap: () {}, selected: true));
       expect(
         tester.getSemantics(find.byType(PeekEntryTile)),
-        matchesSemantics(
+        // `isSemantics` replaced this after Flutter 3.40 and the floor is 3.29,
+        // so until the floor passes 3.40 this is the matcher both have.
+        // ignore: deprecated_member_use
+        containsSemantics(
           label: 'GET, api.example.com, /users, Status 200, 120 ms',
           isButton: true,
           hasTapAction: true,
           hasLongPressAction: true,
           hasFocusAction: true,
           isFocusable: true,
-          hasSelectedState: true,
           isSelected: true,
         ),
       );

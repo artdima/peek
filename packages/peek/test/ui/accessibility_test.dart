@@ -331,17 +331,22 @@ void main() {
 
       // The segment carries its count, and reads as one line with it.
       final label = '${const PeekStrings().all}\n${controller.facets.total}';
+      // `containsSemantics`, not `matchesSemantics`: the exhaustive matcher
+      // would have to name every flag the framework sets, and which flags
+      // those are has changed across the Flutter versions Peek supports.
       expect(
         tester.getSemantics(
           find.widgetWithText(PeekPill, const PeekStrings().all),
         ),
-        matchesSemantics(
+        // `isSemantics` replaced this after Flutter 3.40 and the floor is 3.29,
+        // so until the floor passes 3.40 this is the matcher both have.
+        // ignore: deprecated_member_use
+        containsSemantics(
           label: label,
           isButton: true,
           isEnabled: true,
           hasEnabledState: true,
           isSelected: true,
-          hasSelectedState: true,
           isInMutuallyExclusiveGroup: true,
           hasTapAction: true,
           hasFocusAction: true,
