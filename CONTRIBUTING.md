@@ -46,6 +46,11 @@ The scripts, all through `dart run melos run <name>`:
 | `update:goldens`   | Rewrites the golden files (Linux only)                 |
 | `pana`             | Scores the publishable packages as pub.dev would       |
 
+`pana` resolves dependencies from pub.dev, so the adapters can only be scored
+once `peek` itself is released there; before that their reports fail on
+resolution and say nothing about the packages. `peek` is scored truthfully at
+any time.
+
 ## Goldens
 
 Rendering differs between platforms, so goldens are authored and compared on

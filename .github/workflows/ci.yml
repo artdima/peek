@@ -131,8 +131,9 @@ jobs:
   pana:
     name: pub.dev score (${{ matrix.package }})
     runs-on: ubuntu-latest
-    # Advisory until the packages are ready for pub.dev; then make it blocking.
-    continue-on-error: true
+    # An adapter resolves peek from pub.dev, where it is not yet published,
+    # so until the first release its score says nothing. peek's own is real.
+    continue-on-error: ${{ matrix.package != 'peek' }}
     strategy:
       matrix:
         package: [peek, peek_dio, peek_talker]

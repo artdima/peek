@@ -1,2 +1,3 @@
 analysis_options.yaml
+test/analysis_options.yaml
 test/**/goldens/
