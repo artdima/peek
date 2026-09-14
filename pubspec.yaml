@@ -78,8 +78,6 @@ melos:
         command: dart pub global run pana --no-warning --exit-code-threshold 0
       packageFilters:
         includePrivatePackages: false
-        ignore:
-          - '*_example'
 
     publish:dry:
       description: Dry-run publishing of the publishable packages.
