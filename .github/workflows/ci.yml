@@ -148,6 +148,13 @@ jobs:
           flutter-version-file: .fvmrc
           cache: true
 
+      # pana reads the screenshots through libwebp's tools; without them
+      # every screenshot is a file it cannot open.
+      - name: Install the image tools pana shells out to
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y webp gifsicle
+          which cwebp webpinfo img2webp gif2webp gifsicle
       - run: dart pub global activate pana
       # The workspace resolves an adapter's peek dependency from this
       # checkout; pana scores the package as pub.dev would see it, so an
