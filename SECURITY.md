@@ -2,8 +2,8 @@
 
 ## Supported versions
 
-Peek is pre-1.0: fixes land on `main` and go out in the next release. Once
-1.0 is out, the latest minor version is the supported one.
+The latest minor version is the supported one. Fixes land on `main` and go
+out in the next release.
 
 ## Reporting a vulnerability
 

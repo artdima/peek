@@ -11,8 +11,8 @@ this package listens there, so nothing has to be logged twice.
 
 ```yaml
 dependencies:
-  peek: ^0.1.0
-  peek_talker: ^0.1.0
+  peek: ^1.0.0
+  peek_talker: ^1.0.0
 ```
 
 ## Use

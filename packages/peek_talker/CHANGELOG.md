@@ -1,8 +1,6 @@
 # Changelog
 
-## Unreleased
-
-## 0.1.0
+## 1.0.0
 
 The first release: `PeekTalkerAdapter`, which lets Peek read the network
 calls Talker already logs.

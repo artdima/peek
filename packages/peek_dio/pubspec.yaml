@@ -1,7 +1,7 @@
 name: peek_dio
 description: >-
   Reports the calls Dio makes to Peek, so they can be read in the app.
-version: 0.1.0
+version: 1.0.0
 resolution: workspace
 
 repository: https://github.com/artdima/peek/tree/main/packages/peek_dio
@@ -14,7 +14,7 @@ environment:
 
 dependencies:
   dio: ^5.10.0
-  peek: ^0.1.0
+  peek: ^1.0.0
 
 dev_dependencies:
   flutter_test:

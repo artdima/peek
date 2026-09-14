@@ -1,8 +1,6 @@
 # Changelog
 
-## Unreleased
-
-## 0.1.0
+## 1.0.0
 
 The first release: `PeekDioInterceptor`, which reports the calls a Dio
 client makes into Peek.

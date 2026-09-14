@@ -1,8 +1,6 @@
 # Changelog
 
-## Unreleased
-
-## 0.1.0
+## 1.0.0
 
 The first release: a viewer for the network calls an app's own loggers
 already record. Peek never performs, intercepts or changes a request.

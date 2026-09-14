@@ -12,9 +12,9 @@ dependencies:
   dio: ^5.10.0
   flutter:
     sdk: flutter
-  peek: ^0.1.0
-  peek_dio: ^0.1.0
-  peek_talker: ^0.1.0
+  peek: ^1.0.0
+  peek_dio: ^1.0.0
+  peek_talker: ^1.0.0
   share_plus: ^10.1.0
   talker: ^5.0.0
   talker_dio_logger: ^5.1.6
