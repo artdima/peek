@@ -1,163 +1,179 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:chopper/chopper.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
+/// What Chopper hands an interceptor, pinned down.
+///
+/// The adapter is written against these answers rather than against the
+/// documentation, and a Chopper release that changes one of them breaks this
+/// file first — which is the point of it.
 final class Probe implements Interceptor {
-  Request? seen;
-  Object? thrown;
-  Object? returned;
+  /// The requests the chain handed over, in order.
+  final List<Request> requests = [];
+
+  /// What came back out of `proceed`, one way or the other.
+  final List<Response<dynamic>> responses = [];
+  final List<Object> errors = [];
+
+  /// The only call of the test.
+  Request get request => requests.single;
 
   @override
-  FutureOr<Response<BodyType>> intercept<BodyType>(Chain<BodyType> chain) async {
-    seen = chain.request;
+  FutureOr<Response<BodyType>> intercept<BodyType>(
+    Chain<BodyType> chain,
+  ) async {
+    requests.add(chain.request);
     try {
       final response = await chain.proceed(chain.request);
-      returned = response;
+      responses.add(response);
       return response;
     } on Object catch (error) {
-      thrown = error;
+      errors.add(error);
       rethrow;
     }
   }
 }
 
-void describe(String label, Probe probe, http.Request? got) {
-  final seen = probe.seen;
-  print('--- $label');
-  print('seen.method=${seen?.method}');
-  print('seen.url=${seen?.url}');
-  print('seen.uri=${seen?.uri} seen.baseUri=${seen?.baseUri}');
-  print('seen.headers=${seen?.headers}');
-  print('seen.body type=${seen?.body.runtimeType} value=${seen?.body}');
-  print('seen.multipart=${seen?.multipart} parts=${seen?.parts}');
-  print('returned=${probe.returned}');
-  print('thrown=${probe.thrown.runtimeType} / ${probe.thrown}');
-  if (got != null) {
-    print('wire.method=${got.method} wire.url=${got.url}');
-    print('wire.headers=${got.headers}');
-    print('wire.body=${got.body.length > 200 ? '${got.body.substring(0, 200)}…' : got.body}');
-  }
-}
-
 void main() {
   final base = Uri.parse('https://api.example.com');
+  late Probe probe;
+  late http.Request? wire;
 
-  test('discovery', () async {
-    // 1. body through the converter
-    var probe = Probe();
-    http.Request? got;
-    var client = ChopperClient(
-      baseUrl: base,
-      client: MockClient((request) async {
-        got = request;
-        return http.Response('{"ok":true}', 200, headers: {'content-type': 'application/json'});
-      }),
-      interceptors: [probe],
+  ChopperClient clientAnswering(
+    FutureOr<http.Response> Function(http.Request request) answer, {
+    Converter? converter,
+  }) => ChopperClient(
+    baseUrl: base,
+    client: MockClient((request) async {
+      wire = request;
+      return answer(request);
+    }),
+    interceptors: [probe],
+    converter: converter,
+  );
+
+  setUp(() {
+    probe = Probe();
+    wire = null;
+  });
+
+  test('the request is the one the converter produced', () async {
+    final client = clientAnswering(
+      (_) => http.Response('{"ok":true}', 200),
       converter: const JsonConverter(),
     );
+
     await client.send<dynamic, dynamic>(
       Request('POST', Uri.parse('/orders'), base, body: const {'sku': 'A-1'}),
     );
-    describe('1. body + converter', probe, got);
 
-    // 2. parameters and the final uri
-    probe = Probe();
-    got = null;
-    client = ChopperClient(
-      baseUrl: base,
-      client: MockClient((request) async {
-        got = request;
-        return http.Response('[]', 200);
-      }),
-      interceptors: [probe],
+    expect(probe.request.body, '{"sku":"A-1"}');
+    expect(
+      probe.request.headers['content-type'],
+      startsWith('application/json'),
     );
+    expect(wire!.body, probe.request.body);
+  });
+
+  test('the request carries the uri Chopper is about to call', () async {
+    final client = clientAnswering((_) => http.Response('[]', 200));
+
     await client.send<dynamic, dynamic>(
-      Request('GET', Uri.parse('/users'), base,
-          parameters: const {'page': 2, 'tag': ['a', 'b']},
-          headers: const {'X-Trace': 'abc'}),
+      Request(
+        'GET',
+        Uri.parse('/users'),
+        base,
+        parameters: const {
+          'page': 2,
+          'tag': ['a', 'b'],
+        },
+        headers: const {'X-Trace': 'abc'},
+      ),
     );
-    describe('2. parameters', probe, got);
 
-    // 3. a 404
-    probe = Probe();
-    client = ChopperClient(
-      baseUrl: base,
-      client: MockClient((request) async => http.Response('{"error":"gone"}', 404)),
-      interceptors: [probe],
+    expect(probe.request, isA<http.BaseRequest>());
+    expect(probe.request.url, Uri.parse('$base/users?page=2&tag=a&tag=b'));
+    expect(probe.request.url, wire!.url);
+    expect(probe.request.method, 'GET');
+    expect(probe.request.headers['X-Trace'], 'abc');
+  });
+
+  test('a failed status is a response, not an exception', () async {
+    final client = clientAnswering(
+      (_) => http.Response('{"error":"gone"}', 404),
       converter: const JsonConverter(),
     );
-    try {
-      final response = await client.send<dynamic, dynamic>(
-        Request('GET', Uri.parse('/missing'), base),
-      );
-      print('3. send returned: status=${response.statusCode} '
-          'isSuccessful=${response.isSuccessful} body=${response.body} '
-          'error=${response.error} errorType=${response.error.runtimeType}');
-    } on Object catch (error) {
-      print('3. send threw ${error.runtimeType}: $error');
-    }
-    describe('3. 404', probe, null);
 
-    // 4. a broken connection
-    probe = Probe();
-    client = ChopperClient(
-      baseUrl: base,
-      client: MockClient((request) async => throw http.ClientException('closed', request.url)),
-      interceptors: [probe],
+    final response = await client.send<dynamic, dynamic>(
+      Request('GET', Uri.parse('/missing'), base),
     );
-    try {
-      await client.send<dynamic, dynamic>(Request('GET', Uri.parse('/flaky'), base));
-    } on Object catch (error) {
-      print('4. send threw ${error.runtimeType}: $error');
-    }
-    describe('4. connection', probe, null);
 
-    // 5. an aborted call
-    probe = Probe();
-    final abort = Completer<void>();
-    client = ChopperClient(
-      baseUrl: base,
-      client: MockClient((request) async {
-        await Future<void>.delayed(const Duration(milliseconds: 200));
-        return http.Response('late', 200);
-      }),
-      interceptors: [probe],
-    );
-    try {
-      final call = client.send<dynamic, dynamic>(
-        Request('GET', Uri.parse('/slow'), base, abortTrigger: abort.future),
-      );
-      Future<void>.delayed(const Duration(milliseconds: 20), abort.complete);
-      await call;
-    } on Object catch (error) {
-      print('5. send threw ${error.runtimeType}: $error');
-    }
-    describe('5. abort', probe, null);
+    expect(probe.errors, isEmpty);
+    expect(response.isSuccessful, isFalse);
+    expect(response.statusCode, 404);
+    // The converted body is null on a failure; the payload moves to `error`,
+    // while `base` keeps what the server actually sent.
+    expect(response.body, isNull);
+    expect(response.error, '{"error":"gone"}');
+    expect((response.base as http.Response).body, '{"error":"gone"}');
+  });
 
-    // 6. multipart
-    probe = Probe();
-    got = null;
-    client = ChopperClient(
-      baseUrl: base,
-      client: MockClient((request) async {
-        got = request;
-        return http.Response('{}', 200);
-      }),
-      interceptors: [probe],
+  test('a broken connection reaches the interceptor as it is', () async {
+    final client = clientAnswering(
+      (request) => throw http.ClientException('closed', request.url),
     );
+
+    await expectLater(
+      client.send<dynamic, dynamic>(Request('GET', Uri.parse('/flaky'), base)),
+      throwsA(isA<http.ClientException>()),
+    );
+
+    expect(probe.errors.single, isA<http.ClientException>());
+    expect(probe.responses, isEmpty);
+  });
+
+  test('an aborted call arrives as a kind of ClientException', () async {
+    final client = clientAnswering(
+      (request) => throw http.RequestAbortedException(request.url),
+    );
+
+    await expectLater(
+      client.send<dynamic, dynamic>(Request('GET', Uri.parse('/slow'), base)),
+      throwsA(isA<http.RequestAbortedException>()),
+    );
+
+    // Cancellation is a ClientException too, so an adapter sorting errors by
+    // type has to look for it first or it will call every abort a connection
+    // failure.
+    expect(probe.errors.single, isA<http.ClientException>());
+  });
+
+  test('multipart parts arrive whole, the body stays empty', () async {
+    final client = clientAnswering((_) => http.Response('{}', 200));
+
     await client.send<dynamic, dynamic>(
-      Request('POST', Uri.parse('/upload'), base, multipart: true, parts: [
-        const PartValue<String>('note', 'a photo of a cat'),
-        PartValueFile<List<int>>('photo', utf8.encode('not really a png')),
-      ]),
+      Request(
+        'POST',
+        Uri.parse('/upload'),
+        base,
+        multipart: true,
+        parts: [
+          const PartValue<String>('note', 'a photo of a cat'),
+          PartValueFile<List<int>>('photo', List<int>.filled(16, 0)),
+        ],
+      ),
     );
-    describe('6. multipart', probe, got);
-    final part = probe.seen?.parts.last;
-    print('6. part type=${part.runtimeType} name=${part?.name} '
-        'valueType=${part?.value.runtimeType}');
+
+    final seen = probe.request;
+    expect(seen.multipart, isTrue);
+    expect(seen.body, isNull);
+    expect(seen.parts, hasLength(2));
+    expect(seen.parts.first.name, 'note');
+    expect(seen.parts.first.value, 'a photo of a cat');
+    expect(seen.parts.last, isA<PartValueFile<List<int>>>());
+    expect(wire!.headers['content-type'], startsWith('multipart/form-data'));
   });
 }
