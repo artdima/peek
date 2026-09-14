@@ -1,5 +1,10 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/artdima/peek/main/assets/peek-logo.png" width="320" alt="Peek">
+  <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://raw.githubusercontent.com/artdima/peek/main/assets/peek-logo-dark.png">
+    <img src="https://raw.githubusercontent.com/artdima/peek/main/assets/peek-logo.png" width="320" alt="Peek">
+  </picture>
 </p>
 
 <p align="center">
