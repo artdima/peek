@@ -1,0 +1,113 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  # Rehearses everything up to publishing, so the path can be walked before
+  # a tag exists.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The version to rehearse, without the leading v.
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  publish:
+    name: Publish to pub.dev
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      # pub.dev trusts this workflow itself; there is no token to leak.
+      id-token: write
+    env:
+      RELEASING: ${{ github.event_name == 'push' }}
+      VERSION: ${{ inputs.version || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: .fvmrc
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Check the tag against the packages
+        run: |
+          version="${VERSION#v}"
+          for package in peek peek_dio peek_talker; do
+            declared=$(awk '/^version:/ {print $2; exit}' \
+              "packages/$package/pubspec.yaml")
+            if [ "$declared" != "$version" ]; then
+              echo "::error::$package is $declared, the tag says $version"
+              exit 1
+            fi
+          done
+
+      - name: Authenticate to pub.dev
+        if: env.RELEASING == 'true'
+        run: |
+          token=$(curl -sSf \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://pub.dev" \
+            | jq -r .value)
+          echo '::add-mask::'"$token"
+          echo "PUB_TOKEN=$token" >> "$GITHUB_ENV"
+          PUB_TOKEN="$token" dart pub token add https://pub.dev \
+            --env-var PUB_TOKEN
+
+      # In order: an adapter is worth nothing until the package it adapts to
+      # is up. A rehearsal validates each package instead of sending it.
+      - name: Publish the packages
+        run: |
+          version="${VERSION#v}"
+          if [ "$RELEASING" = true ]; then
+            mode=--force
+          else
+            mode=--dry-run
+          fi
+          for package in peek peek_dio peek_talker; do
+            echo "::group::$package"
+            # A re-run after a partial release finishes it instead of
+            # failing on what already went out.
+            if curl -sfo /dev/null \
+              "https://pub.dev/api/packages/$package/versions/$version"; then
+              echo "$package $version is already on pub.dev"
+            else
+              (cd "packages/$package" && flutter pub publish "$mode")
+            fi
+            echo '::endgroup::'
+          done
+
+      - name: Announce the release
+        if: env.RELEASING == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          changelog=CHANGELOG.md
+          [ -f "$changelog" ] || changelog=packages/peek/CHANGELOG.md
+          notes=$(mktemp)
+          awk -v heading="## ${VERSION#v}" '
+            $0 == heading { inside = 1; next }
+            inside && /^## / { exit }
+            inside { print }
+          ' "$changelog" > "$notes"
+          if [ -s "$notes" ]; then
+            gh release create "$VERSION" --title "$VERSION" \
+              --notes-file "$notes"
+          else
+            gh release create "$VERSION" --title "$VERSION" --generate-notes
+          fi

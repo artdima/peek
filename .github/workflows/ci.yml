@@ -7,6 +7,8 @@ on:
   # A push made by a workflow does not start another one, so the run that
   # follows a golden rewrite has to be asked for.
   workflow_dispatch:
+  # Releasing runs the same checks rather than a copy of them.
+  workflow_call:
 
 permissions:
   contents: read

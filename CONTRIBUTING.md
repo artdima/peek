@@ -111,6 +111,32 @@ anything more specific is better as your own package, and Peek will happily
 link to it. Either way, follow `doc/adapters.md` — an adapter watches, and
 never intervenes.
 
+## Releasing
+
+All three packages carry the same version and go out together. `melos version`
+writes the numbers and the changelogs; `peekVersion` in
+`packages/peek/lib/src/core/version.dart` is written by hand, as it names Peek
+inside the HAR files it exports.
+
+Pushing a `vX.Y.Z` tag runs the **Release** workflow: the CI checks, then
+`peek`, `peek_dio` and `peek_talker` to pub.dev in that order, then a GitHub
+release with the section of the changelog that carries the version. Nothing is
+published unless a package's `version:` matches the tag, and a re-run after a
+partial release skips what already went out.
+
+Publishing needs no token: pub.dev trusts the workflow itself. That trust is
+granted once per package, by hand — on pub.dev open the package, then
+**Admin → Automated publishing**, enable publishing from GitHub Actions with
+the repository `artdima/peek` and the tag pattern `v{{version}}`. Until that
+is done for all three, the workflow fails at the first package it cannot
+publish. A package pub.dev has never seen has no admin page yet, so its first
+version goes out by hand — `flutter pub publish` inside the package — and the
+workflow takes over from the next one.
+
+To rehearse without releasing, run the workflow by hand from **Actions →
+Release** and give it a version: it walks the same path and validates every
+package instead of sending it.
+
 ## Reporting things
 
 Bugs and ideas go through the issue templates. Security reports do not:
