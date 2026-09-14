@@ -26,6 +26,20 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+screenshots:
+  - description: The calls an app has made, newest first.
+    path: screenshots/console-light.png
+  - description: The same list in the dark theme Peek follows from the app.
+    path: screenshots/console-dark.png
+  - description: One call in full, with what it sent and what came back.
+    path: screenshots/call.png
+  - description: A JSON response as a tree that folds, searches and copies.
+    path: screenshots/body-json.png
+  - description: A failed call, with the error the client raised.
+    path: screenshots/error.png
+  - description: Filters built from what is actually in the list.
+    path: screenshots/filters.png
+
 topics:
   - debugging
   - devtools
