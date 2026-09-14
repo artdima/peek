@@ -1,0 +1,31 @@
+name: peek_chopper
+description: >-
+  Reports the calls Chopper makes to Peek, so they can be read in the app.
+version: 1.0.0
+resolution: workspace
+
+repository: https://github.com/artdima/peek/tree/main/packages/peek_chopper
+issue_tracker: https://github.com/artdima/peek/issues
+homepage: https://github.com/artdima/peek
+
+environment:
+  sdk: ^3.7.0
+  flutter: '>=3.29.0'
+
+dependencies:
+  # 8.4.0 is the first release with both the `Interceptor`/`Chain` chain
+  # (8.0.0) and `abortTrigger`, and it asks for the same Dart this package does.
+  chopper: '>=8.4.0 <9.0.0'
+  peek: ^1.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  http: ^1.4.0
+
+topics:
+  - chopper
+  - debugging
+  - http
+  - logging
+  - network
