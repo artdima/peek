@@ -11,4 +11,5 @@
 /// and it stays clear of `dart:io`, because Chopper runs on the web too.
 library;
 
+export 'src/peek_chopper_interceptor.dart';
 export 'src/peek_chopper_mapper.dart';
