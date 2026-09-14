@@ -10,3 +10,5 @@
 /// so an adapter never drags the user interface — or Flutter — in with it,
 /// and it stays clear of `dart:io`, because Chopper runs on the web too.
 library;
+
+export 'src/peek_chopper_mapper.dart';

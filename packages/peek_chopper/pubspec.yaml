@@ -16,12 +16,14 @@ dependencies:
   # 8.4.0 is the first release with both the `Interceptor`/`Chain` chain
   # (8.0.0) and `abortTrigger`, and it asks for the same Dart this package does.
   chopper: '>=8.4.0 <9.0.0'
+  # Chopper's own request and response are `package:http` objects, and its
+  # transport errors are its exceptions, so the mapper names both directly.
+  http: ^1.4.0
   peek: ^1.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  http: ^1.4.0
 
 topics:
   - chopper
