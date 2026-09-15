@@ -48,7 +48,7 @@ jobs:
       - name: Check the tag against the packages
         run: |
           version="${VERSION#v}"
-          for package in peek peek_dio peek_talker; do
+          for package in peek peek_chopper peek_dio peek_talker; do
             declared=$(awk '/^version:/ {print $2; exit}' \
               "packages/$package/pubspec.yaml")
             if [ "$declared" != "$version" ]; then
@@ -70,7 +70,8 @@ jobs:
             --env-var PUB_TOKEN
 
       # In order: an adapter is worth nothing until the package it adapts to
-      # is up. A rehearsal validates each package instead of sending it.
+      # is up, and `peek_talker` adapts to `peek_dio` as well. A rehearsal
+      # validates each package instead of sending it.
       - name: Publish the packages
         run: |
           version="${VERSION#v}"
@@ -79,7 +80,7 @@ jobs:
           else
             mode=--dry-run
           fi
-          for package in peek peek_dio peek_talker; do
+          for package in peek peek_chopper peek_dio peek_talker; do
             echo "::group::$package"
             # A re-run after a partial release finishes it instead of
             # failing on what already went out.

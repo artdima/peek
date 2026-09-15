@@ -3,12 +3,16 @@
 Each package keeps its own changelog; this one says what a release is.
 Versions move together, so every package always carries the same number.
 
-## Unreleased
+## 1.1.0
 
-- [`peek_chopper`](packages/peek_chopper/CHANGELOG.md) — a new adapter:
-  `PeekChopperInterceptor` reports the calls a `ChopperClient` makes. A
-  status the server refused is recorded as the answer it is; only what the
-  chain throws ends a call as a failure.
+A fourth package: [`peek_chopper`](packages/peek_chopper/CHANGELOG.md) —
+`PeekChopperInterceptor` reports the calls a `ChopperClient` makes. Chopper
+hands an interceptor the rest of the chain, so a call is followed inside one
+method: no correlation, nothing written into the request, and a retry is the
+second call it looks like. A status the server refused is recorded as the
+answer it is; only what the chain throws ends a call as a failure.
+
+The other three packages are unchanged and carry the number to stay in step.
 
 ## 1.0.0
 

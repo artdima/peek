@@ -1,8 +1,8 @@
 # Changelog
 
-## Unreleased
+## 1.1.0
 
-The first release: `PeekChopperInterceptor`, which reports the calls a
+The first release — numbered with the rest of Peek, which moves as one: `PeekChopperInterceptor`, which reports the calls a
 `ChopperClient` makes into Peek.
 
 - A passive `Interceptor`: it returns the response the chain produced,

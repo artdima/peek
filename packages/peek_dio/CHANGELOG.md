@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.0
+
+Released alongside `peek_chopper`, the adapter for Chopper. Nothing in this
+package changed.
+
 ## 1.0.0
 
 The first release: `PeekDioInterceptor`, which reports the calls a Dio
