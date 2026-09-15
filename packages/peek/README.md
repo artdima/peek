@@ -65,6 +65,17 @@ dio.interceptors.add(TalkerDioLogger(talker: talker));
 showPeek(context, peek: peek);
 ```
 
+With Chopper, one interceptor in the chain:
+
+```dart
+final client = ChopperClient(
+  baseUrl: Uri.parse('https://api.example.com'),
+  interceptors: [PeekChopperInterceptor(Peek.instance)],
+);
+
+showPeek(context);
+```
+
 Prefer a floating button that is always there? Wrap the app once:
 
 ```dart
@@ -78,13 +89,14 @@ MaterialApp(
 
 These lines are compiled, not just quoted: they live in
 [`example`](https://github.com/artdima/peek/tree/main/packages/peek/example), an app that makes real
-calls both ways and drives every screen.
+calls all three ways and drives every screen.
 
 ## Packages
 
 | Package | What it is | Depends on |
 | --- | --- | --- |
 | [`peek`](https://github.com/artdima/peek/tree/main/packages/peek) | The core model, store and exporters (`package:peek/core.dart`, pure Dart) and the Flutter UI (`package:peek/peek.dart`) | `flutter`, `meta` |
+| [`peek_chopper`](https://github.com/artdima/peek/tree/main/packages/peek_chopper) | `PeekChopperInterceptor`: reports what a Chopper client does | `peek`, `chopper`, `http` |
 | [`peek_dio`](https://github.com/artdima/peek/tree/main/packages/peek_dio) | `PeekDioInterceptor`: reports what a Dio client does | `peek`, `dio` |
 | [`peek_talker`](https://github.com/artdima/peek/tree/main/packages/peek_talker) | `PeekTalkerAdapter`: reads what Talker logs, `talker_dio_logger` understood out of the box | `peek`, `peek_dio`, `talker`, `talker_dio_logger` |
 

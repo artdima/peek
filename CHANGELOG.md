@@ -1,8 +1,14 @@
 # Changelog
 
 Each package keeps its own changelog; this one says what a release is.
-Versions move together, so `peek`, `peek_dio` and `peek_talker` always
-carry the same number.
+Versions move together, so every package always carries the same number.
+
+## Unreleased
+
+- [`peek_chopper`](packages/peek_chopper/CHANGELOG.md) — a new adapter:
+  `PeekChopperInterceptor` reports the calls a `ChopperClient` makes. A
+  status the server refused is recorded as the answer it is; only what the
+  chain throws ends a call as a failure.
 
 ## 1.0.0
 

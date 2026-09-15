@@ -138,6 +138,39 @@ Correlate the response with its request through the object the logger hands
 you both times — an `Expando` keyed by that object costs nothing and leaves
 the request untouched.
 
+## When the logger hands you the chain
+
+Some clients do not call you twice. Chopper, and anything else shaped after
+OkHttp, gives an interceptor the rest of the chain and lets it make the
+call, so one method sees the whole thing:
+
+```dart
+@override
+Future<Response<BodyType>> intercept<BodyType>(Chain<BodyType> chain) async {
+  final id = PeekId.generate();
+  _guard(() => _sink.report(PeekRequestStarted(id: id, ...)));
+
+  try {
+    final response = await chain.proceed(chain.request);
+    _guard(() => _sink.report(PeekResponseReceived(id: id, ...)));
+    return response;
+  } on Object catch (error, stackTrace) {
+    _guard(() => _sink.report(PeekRequestFailed(id: id, ...)));
+    rethrow;
+  }
+}
+```
+
+Two things follow. The id lives in a local variable: no `Expando`, nothing
+written into the request, and a call that goes through the chain a second
+time is a second call reported as one.
+
+And the adapter now holds the continuation of the call, which a pair of
+callbacks never did. `proceed` therefore stays **outside** the `try` that
+guards the mapping — a guard wrapped around it would turn a mapper that
+raises into a request that never went out. Return the response that
+arrived, and `rethrow` the error as it was: not a copy, not a wrapper.
+
 ## Attaching it
 
 An adapter that implements `PeekAdapter` can be handed to Peek, which keeps
@@ -200,6 +233,8 @@ logger running.
 - [ ] Bodies you cannot read become `PeekBody.unavailable`.
 - [ ] Mapping errors reach `reportAdapterError`, never the app.
 - [ ] `dispose` is safe to call twice.
+- [ ] A chain-shaped adapter calls `proceed` outside its guard, returns the
+      response it was handed and rethrows the error it caught.
 - [ ] Tests run against a real `Peek` with a fake clock and check the
       resulting entries, not just the events.
 

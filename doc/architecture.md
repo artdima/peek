@@ -8,9 +8,9 @@ already runs have seen. Everything below follows from that.
 
 ```
 ┌──────────────────────────────┐   ┌──────────────────────────────┐
-│  Loggers the app already has │   │  peek_dio · peek_talker · …  │
-│  Dio interceptors, Talker,   ├──▶│  adapters: watch, map into   │
-│  http, chopper, …            │   │  PeekEvent                   │
+│  Loggers the app already has │   │  peek_dio · peek_chopper ·   │
+│  Dio interceptors, Talker,   ├──▶│  peek_talker · …  adapters:  │
+│  Chopper chains, http, …     │   │  watch, map into PeekEvent   │
 └──────────────────────────────┘   └───────────────┬──────────────┘
                                                    │ PeekSink.report
                                    ┌───────────────▼──────────────┐
@@ -44,7 +44,7 @@ frame and its own theme rather than borrowing the app's, so a log reads the
 same wherever it is embedded; the only thing it takes from the host's theme
 is the brightness.
 
-**Adapters** (`peek_dio`, `peek_talker`, yours) are separate packages, one
+**Adapters** (`peek_dio`, `peek_chopper`, `peek_talker`, yours) are separate packages, one
 per logger, each depending on `package:peek/core.dart` and its logger — never
 on the UI. Adding a logger adds a package; it changes nothing else.
 `doc/adapters.md` is the guide to writing one.

@@ -18,9 +18,13 @@ void main() {
 
   // Peek opens over the example's own list, so a scroll has to say which of
   // the two it means.
-  Finder listOf(Type screen) => find
-      .descendant(of: find.byType(screen), matching: find.byType(Scrollable))
-      .first;
+  Finder listOf(Type screen) =>
+      find
+          .descendant(
+            of: find.byType(screen),
+            matching: find.byType(Scrollable),
+          )
+          .first;
 
   testWidgets('fills the log, opens Peek and reads a call', (tester) async {
     app.main();
