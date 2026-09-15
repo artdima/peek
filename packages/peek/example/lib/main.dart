@@ -1,7 +1,7 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:peek/peek.dart';
 
+import 'chopper_scenarios.dart';
 import 'clients.dart';
 import 'demo_data.dart';
 import 'scenarios.dart';
@@ -9,7 +9,7 @@ import 'share.dart';
 
 void main() => runApp(const PeekExampleApp());
 
-/// Makes real calls, two ways, so Peek has something real to show.
+/// Makes real calls, three ways, so Peek has something real to show.
 class PeekExampleApp extends StatefulWidget {
   /// Creates the example app.
   const PeekExampleApp({super.key});
@@ -81,21 +81,42 @@ class _HomeState extends State<_Home> {
   ExampleRoute _route = ExampleRoute.dio;
   final Set<String> _running = {};
 
-  Future<void> _run(Scenario scenario) async {
-    if (_running.contains(scenario.name)) return;
-    setState(() => _running.add(scenario.name));
+  /// What the current route can do, as a name and a call.
+  List<({String name, String detail, Future<void> Function() call})>
+  get _scenarios => switch (_route) {
+    ExampleRoute.chopper => [
+      for (final scenario in chopperScenarios)
+        (
+          name: scenario.name,
+          detail: scenario.detail,
+          call: () => scenario.run(widget.clients.chopper),
+        ),
+    ],
+    _ => [
+      for (final scenario in scenarios)
+        (
+          name: scenario.name,
+          detail: scenario.detail,
+          call: () => scenario.run(widget.clients.dioOf(_route)),
+        ),
+    ],
+  };
+
+  Future<void> _run(String name, Future<void> Function() call) async {
+    if (_running.contains(name)) return;
+    setState(() => _running.add(name));
     try {
-      await scenario.run(widget.clients.of(_route));
-    } on DioException catch (_) {
+      await call();
+    } on Object catch (_) {
       // Failing is what several of these are for; Peek already has it.
     } finally {
-      if (mounted) setState(() => _running.remove(scenario.name));
+      if (mounted) setState(() => _running.remove(name));
     }
   }
 
   Future<void> _runAll() async {
-    for (final scenario in scenarios) {
-      await _run(scenario);
+    for (final scenario in _scenarios) {
+      await _run(scenario.name, scenario.call);
     }
   }
 
@@ -135,11 +156,11 @@ class _HomeState extends State<_Home> {
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 4, 16, 12),
             child: Text(
-              'Both routes report the same calls; only the way they reach '
-              'Peek differs. Run a few, then open Peek.',
+              'Every route reports the calls it makes; only the way they '
+              'reach Peek differs. Run a few, then open Peek.',
             ),
           ),
-          for (final scenario in scenarios)
+          for (final scenario in _scenarios)
             ListTile(
               title: Text(scenario.name),
               subtitle: Text(scenario.detail),
@@ -150,7 +171,7 @@ class _HomeState extends State<_Home> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                       : const Icon(Icons.play_arrow),
-              onTap: () => _run(scenario),
+              onTap: () => _run(scenario.name, scenario.call),
             ),
           const Divider(),
           ListTile(

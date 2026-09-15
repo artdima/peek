@@ -7,15 +7,20 @@ screenshots in the README come from, and what the integration test drives.
 flutter run
 ```
 
-Every button on the home screen is one scenario from `lib/scenarios.dart` —
-a JSON answer, a failure, a timeout, a redirect, an image, a body past the
-limit, a header with three values — chosen so each screen of Peek has
-something to show. The calls go out through Dio; a second route sends the
-same calls through Talker instead, so both adapters are exercised:
+Every button on the home screen is one scenario — a JSON answer, a failure,
+a timeout, a redirect, an image, a body past the limit, a header with three
+values — chosen so each screen of Peek has something to show. The switch at
+the top picks which adapter reports them:
 
-- `lib/dio_setup.dart` — `PeekDioInterceptor` on the client;
+- `lib/dio_setup.dart` — `PeekDioInterceptor` on a Dio client;
 - `lib/talker_setup.dart` — `PeekTalkerAdapter` next to a `TalkerDioLogger`;
+- `lib/chopper_setup.dart` — `PeekChopperInterceptor` in a Chopper chain,
+  with its own scenarios in `lib/chopper_scenarios.dart`;
 - `lib/share.dart` — the share delegate, wired to `share_plus`.
+
+The Dio routes share `lib/scenarios.dart`. Chopper has its own list because
+it takes the base of a call per request, and because a status the server
+refused is an answer there rather than a failure.
 
 A last row fills the store with made-up calls from `lib/demo_data.dart`,
 reported through Peek's public API the way an adapter would — for looking
