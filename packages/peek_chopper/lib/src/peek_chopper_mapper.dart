@@ -115,6 +115,9 @@ abstract final class PeekChopperMapper {
   }
 
   /// Describes multipart parts without opening a single file.
+  ///
+  /// The cases follow `Request.toMultipartRequest`, so an entry says what
+  /// Chopper is about to send rather than what the parts look like.
   static PeekBody _parts(
     List<PartValue<dynamic>> parts,
     PeekMediaType? contentType,
@@ -125,29 +128,46 @@ abstract final class PeekChopperMapper {
     for (final part in parts) {
       switch (part.value) {
         case final http.MultipartFile file:
-          files.add(
-            PeekFormFile(
-              part.name,
-              filename: file.filename,
-              contentType: PeekMediaType.tryParse('${file.contentType}'),
-              size: file.length,
-            ),
-          );
+          files.add(_file(part.name, file));
+        case final Iterable<http.MultipartFile> group:
+          files.addAll(group.map((file) => _file(part.name, file)));
         case final List<int> bytes when part is PartValueFile:
           files.add(PeekFormFile(part.name, size: bytes.length));
         case final String path when part is PartValueFile:
-          files.add(PeekFormFile(part.name, filename: path));
+          files.add(PeekFormFile(part.name, filename: _basename(path)));
+        case final Iterable<dynamic> values:
+          var index = 0;
+          for (final value in values) {
+            fields.add(PeekFormField('${part.name}[${index++}]', '$value'));
+          }
         case final value:
           fields.add(PeekFormField(part.name, '$value'));
       }
     }
 
     return PeekBody.form(
-      contentType: contentType ?? PeekMediaType.multipartFormData,
+      // A converter stamps `application/json` on a request it never encoded;
+      // what goes out is multipart whatever the header says.
+      contentType:
+          contentType != null && contentType.isMultipart
+              ? contentType
+              : PeekMediaType.multipartFormData,
       fields: fields,
       files: files,
     );
   }
+
+  static PeekFormFile _file(String name, http.MultipartFile file) =>
+      PeekFormFile(
+        name,
+        filename: file.filename,
+        contentType: PeekMediaType.tryParse('${file.contentType}'),
+        size: file.length,
+      );
+
+  // `MultipartFile.fromPath` sends the name of the file, not the path it was
+  // read from.
+  static String _basename(String path) => path.split(RegExp(r'[/\\]')).last;
 
   // Text is worth more than a hex dump, so bytes that decode as UTF-8 are
   // shown as text unless the media type says they are something else.

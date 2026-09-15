@@ -12,7 +12,7 @@ goes on as it arrived, and so does the response.
 ```yaml
 dependencies:
   peek: ^1.0.0
-  peek_chopper: ^1.0.0
+  peek_chopper: ^1.1.0
 ```
 
 ## Use
@@ -86,6 +86,8 @@ sees the exception.
   the app is about to use.
 - **File contents in a multipart part.** Only the part's name, file name,
   media type and size are kept.
+- **Redirects.** `package:http` hands over the answer, not the hops it took
+  to reach it, so an entry shows the final response alone.
 - **Anything past the limits.** A body larger than `PeekLimits.maxBodyBytes`
   is truncated, and the entry says so.
 

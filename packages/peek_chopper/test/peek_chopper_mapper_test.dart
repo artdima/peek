@@ -110,19 +110,24 @@ void main() {
   });
 
   group('multipart', () {
-    test('describes every part, and opens no file', () {
+    test('describes every part the way Chopper sends it', () {
       final body = PeekChopperMapper.requestBody(
         requestWith(
           multipart: true,
           parts: [
             const PartValue<String>('note', 'a photo of a cat'),
             const PartValue<int>('count', 2),
+            const PartValue<List<String>>('tags', ['beach', 'summer']),
             PartValueFile<List<int>>('bytes', utf8.encode('not a png')),
-            const PartValueFile<String>('path', '/tmp/cat.png'),
+            const PartValueFile<String>('path', '/tmp/photos/cat.png'),
             PartValue<http.MultipartFile>(
               'photo',
               http.MultipartFile.fromString('photo', 'x', filename: 'cat.txt'),
             ),
+            PartValue<List<http.MultipartFile>>('album', [
+              http.MultipartFile.fromString('a', 'x', filename: 'one.txt'),
+              http.MultipartFile.fromString('b', 'y', filename: 'two.txt'),
+            ]),
           ],
         ),
       );
@@ -131,14 +136,52 @@ void main() {
       expect(form.fields, [
         const PeekFormField('note', 'a photo of a cat'),
         const PeekFormField('count', '2'),
+        // An iterable goes out as one field per element, named by index.
+        const PeekFormField('tags[0]', 'beach'),
+        const PeekFormField('tags[1]', 'summer'),
       ]);
-      expect(form.files.map((file) => file.name), ['bytes', 'path', 'photo']);
+      expect(form.files.map((file) => file.name), [
+        'bytes',
+        'path',
+        'photo',
+        'album',
+        'album',
+      ]);
       expect(form.files[0].size, 9);
-      expect(form.files[1].filename, '/tmp/cat.png');
+      expect(form.files[0].filename, isNull);
+      // `MultipartFile.fromPath` sends the file's name, not the path.
+      expect(form.files[1].filename, 'cat.png');
       expect(form.files[1].size, isNull);
       expect(form.files[2].filename, 'cat.txt');
       expect(form.files[2].contentType?.isText, isTrue);
-      expect(form.contentType, PeekMediaType.multipartFormData);
+      expect(form.files.last.filename, 'two.txt');
+    });
+
+    test('is multipart whatever a converter wrote on it', () {
+      final body = PeekChopperMapper.requestBody(
+        requestWith(
+          multipart: true,
+          headers: const {'content-type': 'application/json'},
+          parts: [const PartValue<String>('note', 'a cat')],
+        ),
+      );
+
+      expect(
+        (body as PeekFormBody).contentType,
+        PeekMediaType.multipartFormData,
+      );
+    });
+
+    test('keeps a multipart type that says what it is', () {
+      final body = PeekChopperMapper.requestBody(
+        requestWith(
+          multipart: true,
+          headers: const {'content-type': 'multipart/form-data; boundary=x'},
+          parts: [const PartValue<String>('note', 'a cat')],
+        ),
+      );
+
+      expect((body as PeekFormBody).contentType?.isMultipart, isTrue);
     });
   });
 
