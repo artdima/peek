@@ -21,8 +21,7 @@ final class Recorder {
           this.stackTrace = stackTrace;
           _record('error', captured, received);
         },
-        onCancel: (captured, received) =>
-            _record('cancel', captured, received),
+        onCancel: (captured, received) => _record('cancel', captured, received),
       );
 
   void _record(String outcome, Uint8List captured, int received) {
@@ -42,9 +41,8 @@ void main() {
       final first = [1, 2];
       final second = [3];
 
-      final seen = await recorder
-          .wrap(Stream.fromIterable([first, second]))
-          .toList();
+      final seen =
+          await recorder.wrap(Stream.fromIterable([first, second])).toList();
 
       expect(seen, hasLength(2));
       expect(seen.first, same(first));
@@ -128,9 +126,7 @@ void main() {
     });
 
     test('keeps nothing at a limit of zero, but still counts', () async {
-      await recorder
-          .wrap(Stream.value([1, 2, 3]), limit: 0)
-          .drain<void>();
+      await recorder.wrap(Stream.value([1, 2, 3]), limit: 0).drain<void>();
 
       expect(recorder.captured, isEmpty);
       expect(recorder.received, 3);
@@ -147,39 +143,42 @@ void main() {
   });
 
   group('errors', () {
-    test('the first one ends the capture; the listener sees them all', () async {
-      final source = StreamController<List<int>>();
-      final errors = <Object>[];
-      final traces = <StackTrace>[];
-      final done = Completer<void>();
-      recorder
-          .wrap(source.stream)
-          .listen(
-            (_) {},
-            onError: (Object error, StackTrace stackTrace) {
-              errors.add(error);
-              traces.add(stackTrace);
-            },
-            onDone: done.complete,
-          );
-      final trace = StackTrace.current;
+    test(
+      'the first one ends the capture; the listener sees them all',
+      () async {
+        final source = StreamController<List<int>>();
+        final errors = <Object>[];
+        final traces = <StackTrace>[];
+        final done = Completer<void>();
+        recorder
+            .wrap(source.stream)
+            .listen(
+              (_) {},
+              onError: (Object error, StackTrace stackTrace) {
+                errors.add(error);
+                traces.add(stackTrace);
+              },
+              onDone: done.complete,
+            );
+        final trace = StackTrace.current;
 
-      source
-        ..add([1])
-        ..addError(StateError('cut'), trace)
-        ..addError(StateError('again'))
-        ..add([2]);
-      unawaited(source.close());
-      await done.future;
+        source
+          ..add([1])
+          ..addError(StateError('cut'), trace)
+          ..addError(StateError('again'))
+          ..add([2]);
+        unawaited(source.close());
+        await done.future;
 
-      expect(errors, hasLength(2));
-      expect(traces.first, same(trace));
-      expect(recorder.outcomes, ['error']);
-      expect(recorder.error, same(errors.first));
-      expect(recorder.stackTrace, same(trace));
-      expect(recorder.captured, [1]);
-      expect(recorder.received, 1);
-    });
+        expect(errors, hasLength(2));
+        expect(traces.first, same(trace));
+        expect(recorder.outcomes, ['error']);
+        expect(recorder.error, same(errors.first));
+        expect(recorder.stackTrace, same(trace));
+        expect(recorder.captured, [1]);
+        expect(recorder.received, 1);
+      },
+    );
 
     test('reach a handler that takes the error alone', () async {
       final errors = <Object>[];

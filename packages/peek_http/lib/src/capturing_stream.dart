@@ -20,7 +20,7 @@ typedef CaptureFailure =
 /// so the listener sets the pace, not this stream. Exactly one of [onDone],
 /// [onError] and [onCancel] is called, once; none of them may throw.
 final class CapturingStream extends Stream<List<int>> {
-  /// Wraps [source], keeping at most [limit] bytes.
+  /// Wraps a source stream, keeping at most [limit] bytes.
   CapturingStream(
     this._source, {
     required this.limit,
@@ -53,10 +53,11 @@ final class CapturingStream extends Stream<List<int>> {
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    final subscription = _CapturingSubscription(this, Zone.current)
-      ..onData(onData)
-      ..onError(onError)
-      ..onDone(onDone);
+    final subscription =
+        _CapturingSubscription(this, Zone.current)
+          ..onData(onData)
+          ..onError(onError)
+          ..onDone(onDone);
     subscription._source = _source.listen(
       subscription._data,
       onError: subscription._error,
