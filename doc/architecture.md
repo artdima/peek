@@ -1,16 +1,17 @@
 # Architecture
 
-Peek is a presentation layer. It never performs a request, never wraps a
-client and never sits in the path of one: it shows what the loggers an app
-already runs have seen. Everything below follows from that.
+Peek is a presentation layer. It never performs a request and never changes
+one: it shows what the loggers an app already runs have seen. Everything
+below follows from that.
 
 ## The shape
 
 ```
 ┌──────────────────────────────┐   ┌──────────────────────────────┐
 │  Loggers the app already has │   │  peek_dio · peek_chopper ·   │
-│  Dio interceptors, Talker,   ├──▶│  peek_talker · …  adapters:  │
-│  Chopper chains, http, …     │   │  watch, map into PeekEvent   │
+│  Dio interceptors, Talker,   ├──▶│  peek_http · peek_talker · … │
+│  Chopper chains, http        │   │  adapters: watch, map into   │
+│  clients, …                  │   │  PeekEvent                   │
 └──────────────────────────────┘   └───────────────┬──────────────┘
                                                    │ PeekSink.report
                                    ┌───────────────▼──────────────┐
@@ -44,10 +45,13 @@ frame and its own theme rather than borrowing the app's, so a log reads the
 same wherever it is embedded; the only thing it takes from the host's theme
 is the brightness.
 
-**Adapters** (`peek_dio`, `peek_chopper`, `peek_talker`, yours) are separate packages, one
-per logger, each depending on `package:peek/core.dart` and its logger — never
-on the UI. Adding a logger adds a package; it changes nothing else.
-`doc/adapters.md` is the guide to writing one.
+**Adapters** (`peek_dio`, `peek_chopper`, `peek_http`, `peek_talker`, yours)
+are separate packages, one per logger, each depending on
+`package:peek/core.dart` and its logger — never on the UI. Adding a logger
+adds a package; it changes nothing else. Most adapters watch from a hook the
+client offers; `package:http` offers none, so `peek_http` wraps the app's own
+client and passes each call through as it came. `doc/adapters.md` is the
+guide to writing one.
 
 ## Why the core is pure Dart
 

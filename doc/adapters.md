@@ -93,7 +93,10 @@ it has both timestamps.
 ## What an adapter must not do
 
 - Modify, delay or cancel the request or response it observes.
-- Read a streamed body. Report `PeekBody.unavailable(streamed)` instead.
+- Read a streamed body. Report `PeekBody.unavailable(streamed)` instead —
+  unless the body passes through the adapter on its way to the app, as it
+  does in a wrapping client (below). Then keep what passes; never drain the
+  stream yourself.
 - Redact or truncate. Peek applies its own policy to every event; doing it
   twice only loses information.
 - Let an exception escape into the client's code. Wrap the mapping in
@@ -171,6 +174,66 @@ guards the mapping — a guard wrapped around it would turn a mapper that
 raises into a request that never went out. Return the response that
 arrived, and `rethrow` the error as it was: not a copy, not a wrapper.
 
+## When there is nothing to watch from
+
+Some clients offer no hook at all. `package:http` has neither interceptors
+nor callbacks: the one place every call passes is `Client.send`. The adapter
+then wraps the client the app already has — the way `RetryClient` does — and
+hands each call on:
+
+```dart
+final class PeekFooClient extends http.BaseClient {
+  PeekFooClient(this._sink, this._inner);
+
+  final PeekSink _sink;
+  final http.Client _inner;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    final id = PeekId.generate();
+    _guard(() => _sink.report(PeekRequestStarted(id: id, ...)));
+
+    final http.StreamedResponse response;
+    try {
+      response = await _inner.send(request);
+    } on Object catch (error, stackTrace) {
+      _guard(() => _sink.report(PeekRequestFailed(id: id, ...)));
+      rethrow;
+    }
+
+    // The body is still on its way: pass it through a stream that keeps a
+    // prefix, and end the call from that stream's outcome.
+    return copyWithBody(response, capturing(id, response.stream));
+  }
+
+  @override
+  void close() => _inner.close();
+}
+```
+
+The chain rules hold — `_inner.send` stays outside the guard, the error is
+rethrown as it was — and a few more follow from standing in the path:
+
+- **The request goes on as the same object.** Do not finalize it and do not
+  read a multipart file: both belong to the client that sends it.
+- **The response is a copy only because its body must pass through you.**
+  Keep everything else — status, headers, the final url, and the type itself,
+  so a platform response keeps what it can do (`IOStreamedResponse` still
+  detaches its socket).
+- **The body passes at the listener's pace.** Pause, resume and cancel reach
+  the source subscription directly; nothing is buffered on the way. Keep the
+  first bytes, up to `PeekLimits.maxBodyBytes`, and only count the rest.
+- **A call ends with its body, not its headers.** Read to the end, it is a
+  response; failed part-way, a failure carrying what came before; dropped by
+  the app, a response with what was read. A body nobody reads leaves the call
+  pending — which is what it is.
+- **Where the wrapper sits decides what it sees.** Inside other wrapping
+  clients it sees their headers and each of their attempts; outside them, the
+  call as the app wrote it. Say which in the README rather than choosing for
+  the app.
+
+`peek_http` is the worked example.
+
 ## Attaching it
 
 An adapter that implements `PeekAdapter` can be handed to Peek, which keeps
@@ -235,6 +298,9 @@ logger running.
 - [ ] `dispose` is safe to call twice.
 - [ ] A chain-shaped adapter calls `proceed` outside its guard, returns the
       response it was handed and rethrows the error it caught.
+- [ ] A wrapping client passes the request on untouched, returns a response
+      of the same type, ends the call when the body ends and keeps no more of
+      the body than the limit.
 - [ ] Tests run against a real `Peek` with a fake clock and check the
       resulting entries, not just the events.
 

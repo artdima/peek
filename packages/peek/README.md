@@ -29,9 +29,11 @@ with export as cURL, HAR, Markdown or text.
 **What Peek is not.** Another network logger. Peek never performs,
 intercepts, delays or changes a request. It does not create an
 `HttpClient`, does not wrap `Dio`, does not touch `HttpOverrides`, and does
-not print to the console. An adapter is a pair of eyes, not a pair of
-hands — and if anything inside Peek fails, the failure reaches
-`PeekOptions.onError`, never your app.
+not print to the console. `package:http` is the one client with nowhere to
+watch from, so `peek_http` wraps the client the app already has — and hands
+every call to it as it came, the response back as it arrived. An adapter is
+a pair of eyes, not a pair of hands — and if anything inside Peek fails, the
+failure reaches `PeekOptions.onError`, never your app.
 
 **Inspired by Pulse.** Peek is inspired by
 [Pulse](https://github.com/kean/Pulse), the network logger for Apple
@@ -76,6 +78,15 @@ final client = ChopperClient(
 showPeek(context);
 ```
 
+With `package:http`, which has no interceptors, one client around the one you
+have:
+
+```dart
+final client = PeekHttpClient(Peek.instance, http.Client());
+
+showPeek(context);
+```
+
 Prefer a floating button that is always there? Wrap the app once:
 
 ```dart
@@ -89,7 +100,7 @@ MaterialApp(
 
 These lines are compiled, not just quoted: they live in
 [`example`](https://github.com/artdima/peek/tree/main/packages/peek/example), an app that makes real
-calls all three ways and drives every screen.
+calls all four ways and drives every screen.
 
 ## Packages
 
@@ -98,6 +109,7 @@ calls all three ways and drives every screen.
 | [`peek`](https://github.com/artdima/peek/tree/main/packages/peek) | The core model, store and exporters (`package:peek/core.dart`, pure Dart) and the Flutter UI (`package:peek/peek.dart`) | `flutter`, `meta` |
 | [`peek_chopper`](https://github.com/artdima/peek/tree/main/packages/peek_chopper) | `PeekChopperInterceptor`: reports what a Chopper client does | `peek`, `chopper`, `http` |
 | [`peek_dio`](https://github.com/artdima/peek/tree/main/packages/peek_dio) | `PeekDioInterceptor`: reports what a Dio client does | `peek`, `dio` |
+| [`peek_http`](https://github.com/artdima/peek/tree/main/packages/peek_http) | `PeekHttpClient`: reports what a `package:http` client does | `peek`, `http` |
 | [`peek_talker`](https://github.com/artdima/peek/tree/main/packages/peek_talker) | `PeekTalkerAdapter`: reads what Talker logs, `talker_dio_logger` understood out of the box | `peek`, `peek_dio`, `talker`, `talker_dio_logger` |
 
 ## Configuration

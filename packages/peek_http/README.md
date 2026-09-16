@@ -79,6 +79,13 @@ on the way, so an entry is complete once the app has read the body:
 A body nobody reads leaves its entry pending, which is the truth: the call
 is not over, and the connection is still held.
 
+A timeout the app puts on the future — `client.send(request).timeout(...)` —
+stops the app waiting, not the call: `package:http` has no way to be told.
+The entry stays pending until the client underneath gives up, and ends as
+whatever that client reports. A timeout set on the client itself, such as
+`HttpClient.connectionTimeout` for an `IOClient`, ends the call where it
+happens.
+
 ## Where it goes among other clients
 
 Clients that wrap clients run from the outside in, and Peek reports what it

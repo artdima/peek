@@ -3,6 +3,13 @@
 Each package keeps its own changelog; this one says what a release is.
 Versions move together, so every package always carries the same number.
 
+## Unreleased
+
+- [`peek_http`](packages/peek_http/CHANGELOG.md) — a new adapter:
+  `PeekHttpClient` wraps a `package:http` client and reports the calls it
+  makes. The response keeps its type and its bytes, and an entry ends when
+  the body has been read.
+
 ## 1.1.0
 
 A fourth package: [`peek_chopper`](packages/peek_chopper/CHANGELOG.md) —
