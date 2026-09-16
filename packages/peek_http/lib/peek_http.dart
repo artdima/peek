@@ -11,3 +11,5 @@
 /// `dart:io` is kept to one directory reached only through a conditional
 /// import, because `package:http` runs on the web too.
 library;
+
+export 'src/peek_http_mapper.dart';
