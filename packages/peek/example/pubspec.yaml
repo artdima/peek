@@ -1,5 +1,5 @@
 name: peek_example
-description: An app that makes real calls through Dio, Talker and Chopper and reads them in Peek.
+description: An app that makes real calls through Dio, Talker, Chopper and package:http and reads them in Peek.
 publish_to: none
 version: 1.0.0
 resolution: workspace
@@ -13,9 +13,11 @@ dependencies:
   dio: ^5.10.0
   flutter:
     sdk: flutter
+  http: ^1.5.0
   peek: ^1.0.0
   peek_chopper: ^1.0.0
   peek_dio: ^1.0.0
+  peek_http: ^1.1.0
   peek_talker: ^1.0.0
   share_plus: ^10.1.0
   talker: ^5.0.0

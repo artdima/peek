@@ -4,12 +4,13 @@ import 'package:peek/peek.dart';
 import 'chopper_scenarios.dart';
 import 'clients.dart';
 import 'demo_data.dart';
+import 'http_scenarios.dart';
 import 'scenarios.dart';
 import 'share.dart';
 
 void main() => runApp(const PeekExampleApp());
 
-/// Makes real calls, three ways, so Peek has something real to show.
+/// Makes real calls, four ways, so Peek has something real to show.
 class PeekExampleApp extends StatefulWidget {
   /// Creates the example app.
   const PeekExampleApp({super.key});
@@ -92,6 +93,14 @@ class _HomeState extends State<_Home> {
           call: () => scenario.run(widget.clients.chopper),
         ),
     ],
+    ExampleRoute.http => [
+      for (final scenario in httpScenarios)
+        (
+          name: scenario.name,
+          detail: scenario.detail,
+          call: () => scenario.run(widget.clients.httpClient),
+        ),
+    ],
     _ => [
       for (final scenario in scenarios)
         (
@@ -144,6 +153,8 @@ class _HomeState extends State<_Home> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: SegmentedButton<ExampleRoute>(
+              // Four labels are a tight fit on a phone without the tick.
+              showSelectedIcon: false,
               segments: [
                 for (final route in ExampleRoute.values)
                   ButtonSegment(value: route, label: Text(route.label)),

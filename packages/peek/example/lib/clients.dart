@@ -1,13 +1,15 @@
 import 'package:chopper/chopper.dart';
 import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
 import 'package:peek/peek.dart';
 import 'package:talker/talker.dart';
 
 import 'chopper_setup.dart';
 import 'dio_setup.dart';
+import 'http_setup.dart';
 import 'talker_setup.dart';
 
-/// Which of the three ways of reporting a call is in use.
+/// Which of the four ways of reporting a call is in use.
 enum ExampleRoute {
   /// Peek's own interceptor on a Dio client.
   dio('peek_dio'),
@@ -16,7 +18,10 @@ enum ExampleRoute {
   talker('peek_talker'),
 
   /// Peek's own interceptor in a Chopper chain.
-  chopper('peek_chopper');
+  chopper('peek_chopper'),
+
+  /// Peek's client wrapped around a `package:http` one.
+  http('peek_http');
 
   const ExampleRoute(this.label);
 
@@ -33,7 +38,8 @@ final class ExampleClients {
   ExampleClients(Peek peek)
     : talker = Talker(),
       _direct = buildDio(peek: peek),
-      chopper = buildChopperClient(peek: peek) {
+      chopper = buildChopperClient(peek: peek),
+      httpClient = buildHttpClient(peek: peek) {
     _logged = buildLoggedDio(peek: peek, talker: talker);
   }
 
@@ -43,10 +49,14 @@ final class ExampleClients {
   /// The client of the Chopper route.
   final ChopperClient chopper;
 
+  /// The client of the `package:http` route.
+  final http.Client httpClient;
+
   final Dio _direct;
   late final Dio _logged;
 
-  /// The Dio client behind [route]; the Chopper route has [chopper].
+  /// The Dio client behind [route]; the other routes have [chopper] and
+  /// [httpClient].
   Dio dioOf(ExampleRoute route) =>
       route == ExampleRoute.talker ? _logged : _direct;
 
@@ -55,5 +65,6 @@ final class ExampleClients {
     _direct.close();
     _logged.close();
     chopper.dispose();
+    httpClient.close();
   }
 }
