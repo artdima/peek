@@ -1,0 +1,30 @@
+name: peek_http
+description: >-
+  Reports the calls a package:http client makes to Peek, so they can be read
+  in the app.
+version: 1.1.0
+resolution: workspace
+
+repository: https://github.com/artdima/peek/tree/main/packages/peek_http
+issue_tracker: https://github.com/artdima/peek/issues
+homepage: https://github.com/artdima/peek
+
+environment:
+  sdk: ^3.7.0
+  flutter: '>=3.29.0'
+
+dependencies:
+  # 1.5.0 is where aborting a request — and its exception — arrived; the
+  # final URL of a response (`BaseResponseWithUrl`) is older, from 1.2.0.
+  http: ^1.5.0
+  peek: ^1.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+topics:
+  - debugging
+  - http
+  - logging
+  - network

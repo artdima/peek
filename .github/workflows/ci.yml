@@ -78,7 +78,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        package: [peek, peek_chopper, peek_dio, peek_talker]
+        package: [peek, peek_chopper, peek_dio, peek_http, peek_talker]
     steps:
       - uses: actions/checkout@v7
 
@@ -103,6 +103,7 @@ jobs:
             peek) siblings="" ;;
             peek_chopper) siblings="peek" ;;
             peek_dio) siblings="peek" ;;
+            peek_http) siblings="peek" ;;
             peek_talker) siblings="peek peek_dio" ;;
           esac
           if [ -n "$siblings" ]; then
@@ -139,7 +140,7 @@ jobs:
     continue-on-error: ${{ matrix.package != 'peek' }}
     strategy:
       matrix:
-        package: [peek, peek_chopper, peek_dio, peek_talker]
+        package: [peek, peek_chopper, peek_dio, peek_http, peek_talker]
     steps:
       - uses: actions/checkout@v7
 

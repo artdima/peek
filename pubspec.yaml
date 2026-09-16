@@ -10,6 +10,7 @@ workspace:
   - packages/peek/example
   - packages/peek_chopper
   - packages/peek_dio
+  - packages/peek_http
   - packages/peek_talker
 
 dev_dependencies:
