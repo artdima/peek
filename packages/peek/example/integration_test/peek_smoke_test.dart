@@ -10,8 +10,9 @@ import 'package:peek_example/main.dart' as app;
 ///
 /// The offline calls are used rather than the network ones, so the test
 /// says something about Peek rather than about the connection. A real call
-/// is made once, for the Chopper route, and only to see that it turns into
-/// an entry: whether it comes back or not, it is reported either way.
+/// is made once per route with a list of its own — Chopper and
+/// `package:http` — and only to see that it turns into an entry: whether it
+/// comes back or not, it is reported either way.
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   const strings = PeekStrings();
@@ -85,6 +86,21 @@ void main() {
     expect(find.text('Called off'), findsOneWidget);
   });
 
+  testWidgets('the package:http route brings its own scenarios', (
+    tester,
+  ) async {
+    app.main();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Body read later'), findsNothing);
+
+    await tester.tap(find.text('peek_http'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Timeout'), findsNothing);
+    expect(find.text('Body read later'), findsOneWidget);
+  });
+
   testWidgets('a call made through Chopper reaches the list', (tester) async {
     app.main();
     await tester.pumpAndSettle();
@@ -95,6 +111,27 @@ void main() {
     await tester.tap(find.text('GET JSON'));
     // The row spins while the call is in flight, so the frames are pumped by
     // hand: `pumpAndSettle` would wait for an animation that is the point.
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
+
+    await tester.tap(find.text('Open Peek'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byType(PeekScreen), findsOneWidget);
+    expect(find.byType(PeekEntryTile), findsWidgets);
+  });
+
+  testWidgets('a call made through package:http reaches the list', (
+    tester,
+  ) async {
+    app.main();
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('peek_http'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('GET JSON'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
 
