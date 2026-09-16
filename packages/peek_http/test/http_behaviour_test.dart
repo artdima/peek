@@ -166,6 +166,8 @@ void main() {
 
         expect(body, hasLength(text.length));
         expect(response.contentLength, zipped.length);
+        // The adapter tells a zipped body apart by this header staying put.
+        expect(response.headers['content-encoding'], 'gzip');
         expect(response.headers['content-length'], '${zipped.length}');
       },
     );

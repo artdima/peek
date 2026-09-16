@@ -94,7 +94,7 @@ final class _CapturingSubscription implements StreamSubscription<List<int>> {
   void _error(Object error, StackTrace stackTrace) {
     if (!_settled) {
       _settled = true;
-      _stream.onError(error, stackTrace, _captured.toBytes(), _received);
+      _stream.onError(error, stackTrace, _takeCaptured(), _received);
     }
     final handler = _onError;
     if (handler is void Function(Object, StackTrace)) {
@@ -109,7 +109,7 @@ final class _CapturingSubscription implements StreamSubscription<List<int>> {
   void _done() {
     if (!_settled) {
       _settled = true;
-      _stream.onDone(_captured.toBytes(), _received);
+      _stream.onDone(_takeCaptured(), _received);
     }
     _onDone?.call();
   }
@@ -148,10 +148,14 @@ final class _CapturingSubscription implements StreamSubscription<List<int>> {
   Future<void> cancel() {
     if (!_settled) {
       _settled = true;
-      _stream.onCancel(_captured.toBytes(), _received);
+      _stream.onCancel(_takeCaptured(), _received);
     }
     return _source.cancel();
   }
+
+  // The subscription may outlive the outcome by as long as the app holds
+  // it; the copy need not.
+  Uint8List _takeCaptured() => _captured.takeBytes();
 
   @override
   Future<E> asFuture<E>([E? futureValue]) {

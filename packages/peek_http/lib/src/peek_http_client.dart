@@ -144,7 +144,11 @@ final class PeekHttpClient extends http.BaseClient {
                   id: id,
                   timestamp: clock.now(),
                   failure: PeekHttpMapper.failure(error, stackTrace),
-                  response: _mapped(response, captured, received),
+                  response: _mapped(
+                    response,
+                    captured,
+                    _sizeOfCut(response, received),
+                  ),
                 ),
               ),
             ),
@@ -173,7 +177,7 @@ final class PeekHttpClient extends http.BaseClient {
     PeekHttpMapper.responseBody(response, captured, received: size),
   );
 
-  // A body read only in part is as long as the server said, unless it was
+  // A body that ended early is as long as the server said, unless it was
   // zipped: then Content-Length counts the wire, not what the app reads.
   static int _sizeOfCut(http.BaseResponse response, int received) {
     final length = response.contentLength;

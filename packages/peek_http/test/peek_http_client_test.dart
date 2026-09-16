@@ -166,7 +166,7 @@ void main() {
   test('ends a body that failed as a failure with what came before', () async {
     final body = StreamController<List<int>>();
     final client = clientAnswering(
-      (_) => http.StreamedResponse(body.stream, 200),
+      (_) => http.StreamedResponse(body.stream, 200, contentLength: 8),
     );
     final aborted = http.RequestAbortedException(url);
     final trace = StackTrace.current;
@@ -193,7 +193,10 @@ void main() {
     expect(traces, [same(trace)]);
     final failed = sink.events.last as PeekRequestFailed;
     expect(failed.failure.kind, PeekFailureKind.cancelled);
-    expect((failed.response?.body as PeekTextBody?)?.text, 'half');
+    final text = failed.response?.body as PeekTextBody?;
+    expect(text?.text, 'half');
+    expect(text?.size, 8);
+    expect(text?.isTruncated, isTrue);
   });
 
   test('closes a body the app walked away from with what it read', () async {
