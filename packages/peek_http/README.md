@@ -13,7 +13,7 @@ goes on as it arrived, and so do the response and its bytes.
 ```yaml
 dependencies:
   peek: ^1.0.0
-  peek_http: ^1.1.0
+  peek_http: ^1.2.0
 ```
 
 ## Use

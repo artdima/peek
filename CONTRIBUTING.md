@@ -119,8 +119,8 @@ writes the numbers and the changelogs; `peekVersion` in
 inside the HAR files it exports.
 
 Pushing a `vX.Y.Z` tag runs the **Release** workflow: the CI checks, then
-`peek`, `peek_chopper`, `peek_dio` and `peek_talker` to pub.dev in that
-order, then a GitHub release with the section of the changelog that carries the version. Nothing is
+`peek`, `peek_chopper`, `peek_dio`, `peek_http` and `peek_talker` to
+pub.dev in that order, then a GitHub release with the section of the changelog that carries the version. Nothing is
 published unless a package's `version:` matches the tag, and a re-run after a
 partial release skips what already went out.
 

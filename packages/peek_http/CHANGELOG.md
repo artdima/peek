@@ -1,9 +1,10 @@
 # Changelog
 
-## Unreleased
+## 1.2.0
 
-The first release: `PeekHttpClient`, which reports the calls a
-`package:http` client makes into Peek.
+The first release — numbered with the rest of Peek, which moves as one:
+`PeekHttpClient`, which reports the calls a `package:http` client makes into
+Peek.
 
 - Wraps the client the app already has and passes every call to it as it
   came; an error is rethrown as it was, and a mapping failure reaches

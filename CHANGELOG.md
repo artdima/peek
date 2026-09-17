@@ -3,12 +3,17 @@
 Each package keeps its own changelog; this one says what a release is.
 Versions move together, so every package always carries the same number.
 
-## Unreleased
+## 1.2.0
 
-- [`peek_http`](packages/peek_http/CHANGELOG.md) — a new adapter:
-  `PeekHttpClient` wraps a `package:http` client and reports the calls it
-  makes. The response keeps its type and its bytes, and an entry ends when
-  the body has been read.
+A fifth package: [`peek_http`](packages/peek_http/CHANGELOG.md) —
+`PeekHttpClient` reports the calls a `package:http` client makes.
+`package:http` has no interceptors, so the adapter wraps the client the app
+already has and passes each call through as it came: the response keeps its
+type and its bytes, and an entry ends when the body has been read. Where it
+sits among other wrapping clients, such as `RetryClient`, decides whether it
+sees every attempt or the request body — the README describes both.
+
+The other four packages are unchanged and carry the number to stay in step.
 
 ## 1.1.0
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0
+
+Released alongside `peek_http`, the adapter for `package:http`. Nothing in
+this package changed.
+
 ## 1.1.0
 
 Released alongside `peek_chopper`, the adapter for Chopper. Nothing in this

@@ -2,7 +2,7 @@ name: peek_http
 description: >-
   Reports the calls a package:http client makes to Peek, so they can be read
   in the app.
-version: 1.1.0
+version: 1.2.0
 resolution: workspace
 
 repository: https://github.com/artdima/peek/tree/main/packages/peek_http
