@@ -112,7 +112,6 @@ void main() {
         content.stream,
         3,
         filename: 'cat.png',
-        contentType: http.MediaType('image', 'png'),
       );
       final request =
           http.MultipartRequest('POST', url)
@@ -126,7 +125,10 @@ void main() {
       expect(body.files, hasLength(1));
       expect(body.files.single.name, 'photo');
       expect(body.files.single.filename, 'cat.png');
-      expect(body.files.single.contentType?.isImage, isTrue);
+      expect(
+        body.files.single.contentType?.mimeType,
+        'application/octet-stream',
+      );
       expect(body.files.single.size, 3);
       expect(request.finalized, isFalse);
       expect(file.isFinalized, isFalse);

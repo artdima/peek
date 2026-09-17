@@ -215,7 +215,11 @@ void main() {
 
       expect(text.headers['content-type'], 'text/plain; charset=utf-8');
       expect(text.contentLength, 2);
-      expect(form.headers['content-type'], 'application/x-www-form-urlencoded');
+      // A charset is added to forms too before http 1.6.0, the floor.
+      expect(
+        form.headers['content-type'],
+        startsWith('application/x-www-form-urlencoded'),
+      );
     });
 
     test('the body getter throws on a charset the bytes getter ignores', () {
