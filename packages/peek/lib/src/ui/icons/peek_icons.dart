@@ -217,6 +217,45 @@ abstract final class PeekIcons {
     paths: ['M18 6L6 18', 'M6 6L18 18'],
   );
 
+  /// How fast the call was: a dial with a needle.
+  static const PeekIconData gauge = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M3.34 19C1.553 15.906 1.553 12.094 3.34 9C5.126 5.906 8.427 4 12 4C15.573 4 18.874 5.906 20.66 9C22.447 12.094 22.447 15.906 20.66 19',
+      'M12 14L16 10',
+    ],
+  );
+
+  /// Largest value first.
+  static const PeekIconData sortDescending = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M3 16L7 20L11 16',
+      'M7 20L7 4',
+      'M11 4L21 4',
+      'M11 8L18 8',
+      'M11 12L15 12',
+    ],
+  );
+
+  /// Smallest value first.
+  static const PeekIconData sortAscending = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M3 8L7 4L11 8',
+      'M7 4L7 20',
+      'M11 12L15 12',
+      'M11 16L18 16',
+      'M11 20L21 20',
+    ],
+  );
+
   /// Everything else that can be done with a call.
   static const PeekIconData more = PeekIconData(
     width: 24,

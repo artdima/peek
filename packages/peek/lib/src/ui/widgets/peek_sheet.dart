@@ -212,6 +212,7 @@ class _Actions<T> extends StatelessWidget {
                 for (final action in group.actions)
                   _ActionRow(
                     action: action,
+                    muted: _muted(group.actions, action),
                     onTap: () => Navigator.of(context).pop(action.value),
                   ),
               ],
@@ -232,6 +233,11 @@ class _Actions<T> extends StatelessWidget {
     );
   }
 }
+
+/// Whether [action] is an option of a picker that chose another one:
+/// an option no one chose reads quieter than an action.
+bool _muted<T>(List<PeekAction<T>> group, PeekAction<T> action) =>
+    !action.selected && group.any((other) => other.selected);
 
 /// Neighbours with the same [PeekAction.section] as one group.
 List<({String? section, List<PeekAction<T>> actions})> _grouped<T>(
@@ -277,20 +283,30 @@ class _Group extends StatelessWidget {
 }
 
 class _ActionRow extends StatelessWidget {
-  const _ActionRow({required this.action, required this.onTap});
+  const _ActionRow({
+    required this.action,
+    required this.onTap,
+    this.muted = false,
+  });
 
   /// The glyph and the gap after it, so a hairline can start at the label.
   static const double iconWidth = 40;
 
   final PeekAction<Object?> action;
   final VoidCallback onTap;
+  final bool muted;
 
   @override
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
     final icon = action.icon;
     final color = action.destructive ? theme.failure : theme.label;
-    final tint = action.destructive ? theme.failure : theme.accent;
+    final tint =
+        action.destructive
+            ? theme.failure
+            : muted
+            ? theme.secondaryLabel
+            : theme.accent;
 
     return PeekListRow(
       title: action.label,

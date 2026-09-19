@@ -9,6 +9,8 @@ import '../../core/query/peek_filter.dart';
 import '../../core/query/peek_sort.dart';
 import '../peek_controller.dart';
 import '../peek_scope.dart';
+import '../icons/peek_icon_data.dart';
+import '../icons/peek_icons.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
 import 'peek_icon_button.dart';
@@ -23,6 +25,15 @@ const List<PeekSort> _sorts = [
   PeekSort.slowestFirst,
   PeekSort.largestFirst,
 ];
+
+/// The mark an order wears in the menu: what it sorts by, or which way
+/// it runs where the field has no mark of its own.
+PeekIconData _glyphFor(PeekSort sort) => switch (sort.field) {
+  PeekSortField.startedAt => PeekIcons.timing,
+  PeekSortField.duration => PeekIcons.gauge,
+  _ =>
+    sort.descending ? PeekIcons.sortDescending : PeekIcons.sortAscending,
+};
 
 /// The one-tap views of the list.
 ///
@@ -122,6 +133,7 @@ final class PeekQuickBar extends StatelessWidget {
           PeekAction(
             value: sort,
             label: strings.sortOption(sort.field, descending: sort.descending),
+            icon: _glyphFor(sort),
             selected: sort == controller.sort,
           ),
       ],

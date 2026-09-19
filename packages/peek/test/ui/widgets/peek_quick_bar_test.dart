@@ -98,6 +98,32 @@ void main() {
       expect(idsOf(controller.entries), ['e5', 'e6', 'e2', 'e1', 'e3', 'e4']);
     });
 
+    testWidgets('marks every order and the one in force', (tester) async {
+      await pumpBar(tester);
+      await tester.tap(find.byTooltip('Sort'));
+      for (var frame = 0; frame < 6; frame++) {
+        await tester.pump(const Duration(milliseconds: 60));
+      }
+
+      PeekIcon glyphOf(String label) => tester.widget<PeekIcon>(
+        find.descendant(
+          of: find.widgetWithText(PeekListRow, label),
+          matching: find.byType(PeekIcon),
+        ),
+      );
+
+      final theme = PeekTheme.of(tester.element(find.text('Oldest first')));
+      expect(find.byType(PeekIcon), findsNWidgets(4));
+      expect(glyphOf('Newest first').icon, PeekIcons.timing);
+      expect(glyphOf('Oldest first').icon, PeekIcons.timing);
+      expect(glyphOf('Slowest first').icon, PeekIcons.gauge);
+      expect(glyphOf('Largest first').icon, PeekIcons.sortDescending);
+      // The order in force reads in the accent; the rest stand back.
+      expect(glyphOf('Newest first').color, theme.accent);
+      expect(glyphOf('Oldest first').color, theme.secondaryLabel);
+      expect(find.byIcon(Icons.check), findsOneWidget);
+    });
+
     testWidgets('survives large text', (tester) async {
       await pumpBar(tester, textScale: 2);
       expect(tester.takeException(), isNull);
