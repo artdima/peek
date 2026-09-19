@@ -3,13 +3,13 @@ import 'package:flutter/widgets.dart';
 
 import '../icons/peek_icon.dart';
 import '../icons/peek_icon_data.dart';
-import '../icons/peek_icons.dart';
 import '../peek_scope.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
 import 'peek_list_row.dart';
 import 'peek_separator.dart';
 import 'peek_surface.dart';
+import 'peek_tappable.dart';
 
 /// One option of a [showPeekActions] sheet.
 @immutable
@@ -19,6 +19,7 @@ final class PeekAction<T> {
     required this.value,
     required this.label,
     this.icon,
+    this.section,
     this.selected = false,
     this.destructive = false,
   });
@@ -31,6 +32,10 @@ final class PeekAction<T> {
 
   /// The glyph before the label, when the option has one.
   final PeekIconData? icon;
+
+  /// The heading of the group it belongs to; neighbours sharing one share a
+  /// card. Without one, neighbours without one still share a card.
+  final String? section;
 
   /// Whether it is what is already in force.
   final bool selected;
@@ -76,17 +81,25 @@ Future<T?> showPeekSheet<T>(
 }
 
 /// Asks which of [actions] to take, in a sheet.
+///
+/// [header] names what the actions are about — a call, say — and takes the
+/// place of [title], a plain line that does the same for less.
 Future<T?> showPeekActions<T>(
   BuildContext context, {
   required List<PeekAction<T>> actions,
   String? title,
+  Widget? header,
 }) {
   final strings = PeekScope.stringsOf(context);
   return showPeekSheet<T>(
     context,
     builder:
-        (context) =>
-            _Actions<T>(actions: actions, title: title, strings: strings),
+        (context) => _Actions<T>(
+          actions: actions,
+          title: title,
+          header: header,
+          strings: strings,
+        ),
   );
 }
 
@@ -103,36 +116,36 @@ class _SheetFrame extends StatelessWidget {
     return PeekSurface(
       child: Align(
         alignment: Alignment.bottomCenter,
-        child: Padding(
-          padding: EdgeInsets.all(theme.rowSpacing),
-          child: SafeArea(
-            top: false,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: size.height * 0.85,
-                maxWidth: 560,
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(theme.radius * 1.4),
-                child: ColoredBox(
-                  color: theme.card,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8, bottom: 4),
-                        child: Container(
-                          width: 36,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: theme.separator,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: size.height * 0.85,
+            maxWidth: 560,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(theme.radius * 2),
+            ),
+            child: ColoredBox(
+              color: theme.groupedBackground,
+              child: SafeArea(
+                top: false,
+                minimum: EdgeInsets.only(bottom: theme.rowSpacing),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 4),
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: theme.separator,
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      Flexible(child: builder(context)),
-                    ],
-                  ),
+                    ),
+                    Flexible(child: builder(context)),
+                  ],
                 ),
               ),
             ),
@@ -144,45 +157,75 @@ class _SheetFrame extends StatelessWidget {
 }
 
 class _Actions<T> extends StatelessWidget {
-  const _Actions({required this.actions, required this.strings, this.title});
+  const _Actions({
+    required this.actions,
+    required this.strings,
+    this.title,
+    this.header,
+  });
 
   final List<PeekAction<T>> actions;
   final PeekStrings strings;
   final String? title;
+  final Widget? header;
 
   @override
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
     final title = this.title;
+    final header = this.header;
+    final caption = theme.caption.copyWith(
+      color: theme.secondaryLabel,
+      letterSpacing: 0.5,
+    );
 
     return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: theme.gutter),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (title != null)
+          if (header != null)
             Padding(
-              padding: EdgeInsets.fromLTRB(theme.gutter, 6, theme.gutter, 10),
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: theme.caption.copyWith(color: theme.secondaryLabel),
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: header,
+            )
+          else if (title != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(title, style: theme.headline),
             ),
-          for (final action in actions) ...[
-            const PeekSeparator(),
-            _ActionRow(
-              action: action,
-              onTap: () => Navigator.of(context).pop(action.value),
+          for (final group in _grouped(actions)) ...[
+            if (group.section case final section?)
+              Padding(
+                padding: EdgeInsets.only(top: theme.gutter, bottom: 6),
+                child: Text(section.toUpperCase(), style: caption),
+              )
+            else
+              SizedBox(height: theme.gutter),
+            _Group(
+              indent:
+                  group.actions.any((action) => action.icon != null)
+                      ? theme.gutter + _ActionRow.iconWidth
+                      : theme.gutter,
+              children: [
+                for (final action in group.actions)
+                  _ActionRow(
+                    action: action,
+                    onTap: () => Navigator.of(context).pop(action.value),
+                  ),
+              ],
             ),
           ],
-          const PeekSeparator(),
-          _ActionRow(
-            action: PeekAction<void>(
-              value: null,
-              label: strings.cancel,
-              icon: PeekIcons.close,
-            ),
-            onTap: () => Navigator.of(context).pop(),
+          SizedBox(height: theme.gutter),
+          _Group(
+            indent: 0,
+            children: [
+              _CancelRow(
+                label: strings.cancel,
+                onTap: () => Navigator.of(context).pop(),
+              ),
+            ],
           ),
         ],
       ),
@@ -190,8 +233,54 @@ class _Actions<T> extends StatelessWidget {
   }
 }
 
+/// Neighbours with the same [PeekAction.section] as one group.
+List<({String? section, List<PeekAction<T>> actions})> _grouped<T>(
+  List<PeekAction<T>> actions,
+) {
+  final groups = <({String? section, List<PeekAction<T>> actions})>[];
+  for (final action in actions) {
+    if (groups.isNotEmpty && groups.last.section == action.section) {
+      groups.last.actions.add(action);
+    } else {
+      groups.add((section: action.section, actions: [action]));
+    }
+  }
+  return groups;
+}
+
+/// Rows as one card, separated by hairlines that start at [indent].
+class _Group extends StatelessWidget {
+  const _Group({required this.children, required this.indent});
+
+  final List<Widget> children;
+  final double indent;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(theme.radius),
+      child: ColoredBox(
+        color: theme.card,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final (index, child) in children.indexed) ...[
+              if (index > 0) PeekSeparator(indent: indent),
+              child,
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ActionRow extends StatelessWidget {
   const _ActionRow({required this.action, required this.onTap});
+
+  /// The glyph and the gap after it, so a hairline can start at the label.
+  static const double iconWidth = 40;
 
   final PeekAction<Object?> action;
   final VoidCallback onTap;
@@ -201,16 +290,48 @@ class _ActionRow extends StatelessWidget {
     final theme = PeekTheme.of(context);
     final icon = action.icon;
     final color = action.destructive ? theme.failure : theme.label;
+    final tint = action.destructive ? theme.failure : theme.accent;
 
     return PeekListRow(
       title: action.label,
       titleStyle: TextStyle(color: color),
-      leading: icon == null ? null : PeekIcon(icon, color: color),
+      leading:
+          icon == null
+              ? null
+              : SizedBox(
+                width: iconWidth - 6,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: PeekIcon(icon, size: 22, color: tint),
+                ),
+              ),
       trailing:
           action.selected
               ? Icon(Icons.check, size: 18, color: theme.accent)
               : null,
       onTap: onTap,
+    );
+  }
+}
+
+class _CancelRow extends StatelessWidget {
+  const _CancelRow({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    return PeekTappable(
+      onTap: onTap,
+      child: Semantics(
+        button: true,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: theme.minTapTarget),
+          child: Center(child: Text(label, style: theme.headline)),
+        ),
+      ),
     );
   }
 }

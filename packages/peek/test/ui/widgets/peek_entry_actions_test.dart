@@ -5,6 +5,7 @@ import 'package:peek/peek.dart';
 
 import '../../support/entries.dart';
 import '../../support/fake_store.dart';
+import '../../support/pump.dart';
 
 void main() {
   late PeekController controller;
@@ -64,6 +65,30 @@ void main() {
   }
 
   group('entry actions', () {
+    testWidgets('names the call and groups what can be done', (
+      tester,
+    ) async {
+      await pumpScreen(
+        tester,
+        entries: [e1],
+        share: PeekShareDelegate.from((_) async {}),
+      );
+      await tester.longPress(find.byType(PeekEntryTile));
+      await settle(tester);
+
+      expect(find.text('COPY'), findsOneWidget);
+      expect(find.text('SHARE'), findsOneWidget);
+      expect(find.text('Pin'), findsOneWidget);
+      expect(find.text('Cancel'), findsOneWidget);
+      expect(find.text('api.example.com'), findsNWidgets(2));
+      expect(
+        tester.widget<PeekMethodBadge>(find.byType(PeekMethodBadge)).large,
+        isTrue,
+      );
+      expect(tester.takeException(), isNull);
+      await expectGolden(find.byType(MaterialApp), 'actions-light');
+    });
+
     testWidgets('copies a call four ways', (tester) async {
       final copied = mockClipboard(tester);
 

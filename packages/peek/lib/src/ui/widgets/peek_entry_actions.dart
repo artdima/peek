@@ -5,7 +5,9 @@ import '../../core/model/peek_entry.dart';
 import '../icons/peek_icons.dart';
 import '../peek_scope.dart';
 import '../peek_share.dart';
+import '../theme/peek_theme.dart';
 import 'peek_copy_button.dart';
+import 'peek_method_badge.dart';
 import 'peek_sheet.dart';
 import 'peek_toast.dart';
 
@@ -52,44 +54,50 @@ Future<void> showPeekEntryActions(
 
   final action = await showPeekActions<PeekEntryAction>(
     context,
-    title: '${request.method} ${request.path}',
+    header: _EntryHeader(entry),
     actions: [
-      if (includePin)
-        PeekAction(
-          value: PeekEntryAction.pin,
-          label: entry.isPinned ? strings.unpin : strings.pin,
-          icon: PeekIcons.pin,
-        ),
       PeekAction(
         value: PeekEntryAction.copyUrl,
         label: strings.copyUrl,
         icon: PeekIcons.link,
+        section: strings.copy,
       ),
       PeekAction(
         value: PeekEntryAction.copyCurl,
         label: strings.copyCurl,
         icon: PeekIcons.curl,
+        section: strings.copy,
       ),
       PeekAction(
         value: PeekEntryAction.copyText,
         label: strings.copyText,
         icon: PeekIcons.text,
+        section: strings.copy,
       ),
       PeekAction(
         value: PeekEntryAction.copyMarkdown,
         label: strings.copyMarkdown,
         icon: PeekIcons.markdown,
+        section: strings.copy,
       ),
       PeekAction(
         value: PeekEntryAction.copyHar,
         label: strings.exportHar,
         icon: PeekIcons.braces,
+        section: strings.copy,
       ),
       if (share != null)
         PeekAction(
           value: PeekEntryAction.shareHar,
           label: strings.shareHar,
           icon: PeekIcons.share,
+          section: strings.share,
+        ),
+      if (includePin)
+        PeekAction(
+          value: PeekEntryAction.pin,
+          label: entry.isPinned ? strings.unpin : strings.pin,
+          icon: PeekIcons.pin,
         ),
     ],
   );
@@ -134,12 +142,14 @@ Future<void> showPeekListActions(BuildContext context) async {
         value: PeekEntryAction.copyHar,
         label: strings.exportHar,
         icon: PeekIcons.braces,
+        section: strings.copy,
       ),
       if (share != null)
         PeekAction(
           value: PeekEntryAction.shareHar,
           label: strings.shareHar,
           icon: PeekIcons.share,
+          section: strings.share,
         ),
     ],
   );
@@ -152,6 +162,44 @@ Future<void> showPeekListActions(BuildContext context) async {
       await share?.share(peekHarContent(entries, 'peek', origin: origin));
     case _:
       await peekCopy(context, PeekExporters.har.export(entries, pretty: true));
+  }
+}
+
+/// The call a sheet is about: its method as a tile, its path and host.
+class _EntryHeader extends StatelessWidget {
+  const _EntryHeader(this.entry);
+
+  final PeekEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    final request = entry.request;
+    return Row(
+      children: [
+        PeekMethodBadge(request.method, large: true),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                request.path.isEmpty ? '/' : request.path,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.headline,
+              ),
+              Text(
+                request.host,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.footnote.copyWith(color: theme.secondaryLabel),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 

@@ -60,14 +60,43 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Export HAR'), findsOneWidget);
-    // One for the option, one for Cancel: a row of icons with a gap in it
-    // reads as a mistake.
-    expect(find.byType(PeekIcon), findsNWidgets(2));
+    expect(find.text('Entry'), findsOneWidget);
+    expect(find.text('Cancel'), findsOneWidget);
+    expect(find.byType(PeekIcon), findsOneWidget);
     expectOwnStyle(tester);
 
     await tester.tap(find.text('Export HAR'));
     await tester.pumpAndSettle();
     expect(await picked, 'har');
+  });
+
+  testWidgets('the actions sheet groups neighbours by section', (
+    tester,
+  ) async {
+    final context = await pumpHost(tester);
+
+    final picked = showPeekActions<String>(
+      context,
+      header: const Text('About this'),
+      actions: const [
+        PeekAction(value: 'a', label: 'First', section: 'Copy'),
+        PeekAction(value: 'b', label: 'Second', section: 'Copy'),
+        PeekAction(value: 'c', label: 'Third', section: 'Share'),
+        PeekAction(value: 'd', label: 'Alone'),
+      ],
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('About this'), findsOneWidget);
+    expect(find.text('COPY'), findsOneWidget);
+    expect(find.text('SHARE'), findsOneWidget);
+    // First and Second share a card, so one hairline sits between them;
+    // Third and Alone each stand alone.
+    expect(find.byType(PeekSeparator), findsOneWidget);
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(await picked, isNull);
   });
 
   testWidgets('the alert reads in Peek styles', (tester) async {
