@@ -1,5 +1,8 @@
 import 'package:flutter/widgets.dart';
 
+import 'share/peek_download.dart'
+    if (dart.library.js_interop) 'share/peek_download_web.dart';
+
 /// Something Peek would like handed to the rest of the system.
 @immutable
 final class PeekShareContent {
@@ -38,7 +41,9 @@ final class PeekShareContent {
 /// Hands exported content to the platform's share sheet.
 ///
 /// Peek does not depend on a sharing package: the app that embeds it
-/// wires up whichever one it already uses.
+/// wires up whichever one it already uses. On the web there is nothing to
+/// wire up — the browser saves the file — so a delegate is worth giving
+/// only where a share sheet exists, and one given there is used instead.
 ///
 /// ```dart
 /// PeekScreen(
@@ -51,8 +56,8 @@ final class PeekShareContent {
 /// )
 /// ```
 ///
-/// Without a delegate Peek offers copying and nothing else: an option
-/// that cannot work is worse than no option.
+/// Without a delegate, and off the web, Peek offers copying and nothing
+/// else: an option that cannot work is worse than no option.
 abstract interface class PeekShareDelegate {
   /// Creates a delegate from a function.
   factory PeekShareDelegate.from(
@@ -71,6 +76,12 @@ final class _CallbackShareDelegate implements PeekShareDelegate {
   @override
   Future<void> share(PeekShareContent content) => _share(content);
 }
+
+/// What the platform can hand an export to without a delegate.
+///
+/// A download on the web, nothing anywhere else: a share sheet belongs to
+/// a package, and Peek depends on none.
+PeekShareDelegate? peekPlatformShareDelegate() => peekPlatformShare();
 
 /// Where the widget at [context] sits on screen, in global coordinates.
 ///

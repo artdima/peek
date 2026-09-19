@@ -148,7 +148,8 @@ final peek = Peek(
   pass it to `showPeek(context, strings: ...)`.
 - **Sharing** — Peek depends on no sharing package. Hand it a
   `PeekShareDelegate` wired to the one you use; the example shows it with
-  `share_plus`.
+  `share_plus`. On the web there is nothing to hand over: the browser
+  saves the file, and a delegate given there is still used instead.
 
 ## Writing your own adapter
 

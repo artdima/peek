@@ -46,7 +46,8 @@ final class PeekScreen extends StatefulWidget {
   final PeekController? controller;
 
   /// What hands an export to the platform; without one, Peek offers
-  /// copying and nothing else.
+  /// copying and nothing else — except on the web, where the browser
+  /// saves the file.
   final PeekShareDelegate? share;
 
   /// The width from which the list and the call sit side by side.

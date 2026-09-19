@@ -37,8 +37,9 @@ enum PeekEntryAction {
 
 /// Offers what can be done with [entry], and does it.
 ///
-/// Sharing appears only when the app gave Peek a [PeekShareDelegate]: an
-/// option that cannot work is worse than no option.
+/// Sharing appears where something can carry it off — the app's
+/// [PeekShareDelegate], or the browser on the web: an option that cannot
+/// work is worse than no option.
 Future<void> showPeekEntryActions(
   BuildContext context,
   PeekEntry entry, {

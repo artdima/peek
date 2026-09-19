@@ -43,9 +43,11 @@ final class PeekScope extends InheritedNotifier<PeekController> {
   /// The instance the controller shows.
   static Peek peekOf(BuildContext context) => of(context).peek;
 
-  /// What shares content, or `null` when the app offered nothing.
+  /// What shares content: the app's delegate, or what the platform can do
+  /// on its own — a download on the web, nothing anywhere else.
   static PeekShareDelegate? shareOf(BuildContext context) =>
-      context.getInheritedWidgetOfExactType<PeekScope>()?.share;
+      context.getInheritedWidgetOfExactType<PeekScope>()?.share ??
+      peekPlatformShareDelegate();
 
   /// The words to show, without subscribing to the controller.
   static PeekStrings stringsOf(BuildContext context) {
