@@ -232,6 +232,25 @@ void main() {
       expect(peek.store.length, 1);
     });
 
+    test('says when recording pauses or resumes, once per change', () async {
+      final changes = <bool>[];
+      final subscription = peek.pauseChanges.listen(changes.add);
+      addTearDown(subscription.cancel);
+
+      peek.pause();
+      peek.pause();
+      peek.resume();
+      peek.resume();
+      await pumpEventQueue();
+      expect(changes, [true, false]);
+
+      peek.dispose();
+      expect(peek.pause, returnsNormally);
+      expect(peek.isPaused, isFalse);
+      await pumpEventQueue();
+      expect(changes, [true, false]);
+    });
+
     test('records nothing when disabled', () {
       final disabled = Peek(
         options: PeekOptions(

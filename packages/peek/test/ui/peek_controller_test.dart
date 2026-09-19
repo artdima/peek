@@ -179,6 +179,24 @@ void main() {
       expect(controller.selectedId, isNull);
     });
 
+    test('hears a pause the app asked for, once', () async {
+      build();
+      peek.pause();
+      await pumpEventQueue();
+      expect(controller.isPaused, isTrue);
+      expect(notifications, 1);
+
+      controller.pause();
+      await pumpEventQueue();
+      expect(notifications, 1);
+
+      controller.resume();
+      expect(controller.isPaused, isFalse);
+      expect(notifications, 2);
+      await pumpEventQueue();
+      expect(notifications, 2);
+    });
+
     test('pins, pauses and clears through Peek', () async {
       build();
       expect(controller.togglePin(e1.id), isTrue);
@@ -191,6 +209,11 @@ void main() {
       expect(controller.isPaused, isTrue);
       expect(peek.isPaused, isTrue);
       controller.togglePause();
+      expect(peek.isPaused, isFalse);
+      controller.pause();
+      controller.pause();
+      expect(peek.isPaused, isTrue);
+      controller.resume();
       expect(peek.isPaused, isFalse);
 
       controller.select(e2.id);

@@ -222,6 +222,7 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
     PeekController controller,
     PeekStrings strings,
   ) {
+    final paused = controller.isPaused;
     // The search has a field of its own, so it is not part of the badge.
     final filters =
         controller.filter.copyWith(query: PeekSearchQuery.none).activeCount;
@@ -240,6 +241,12 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
             controller.totalCount == 0
                 ? null
                 : () => unawaited(_confirmClear(context, controller)),
+      ),
+      PeekIconButton(
+        icon: Icons.pause,
+        tooltip: paused ? strings.resume : strings.pause,
+        selected: paused,
+        onPressed: controller.togglePause,
       ),
       PeekIconButton(
         icon: Icons.more_horiz,
@@ -263,11 +270,11 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Peek's own screen offers no pause button; this says so when the
-        // app around it has paused recording itself.
-        if (controller.isPaused) _PausedBanner(strings: strings),
         const PeekSearchBar(),
         const PeekQuickBar(),
+        // Says so in words, whether the bar's button or the app paused it.
+        if (controller.isPaused)
+          _PausedBanner(strings: strings, onResume: controller.resume),
         if (controller.isFiltered)
           Padding(
             padding: EdgeInsets.fromLTRB(theme.gutter, 0, theme.gutter, 6),
@@ -311,26 +318,93 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
 }
 
 class _PausedBanner extends StatelessWidget {
-  const _PausedBanner({required this.strings});
+  const _PausedBanner({required this.strings, required this.onResume});
 
   final PeekStrings strings;
+  final VoidCallback onResume;
 
   @override
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
-    return Container(
-      width: double.infinity,
-      color: theme.pending.withValues(alpha: 0.16),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Row(
-        children: [
-          Icon(Icons.pause_circle_outline, size: 14, color: theme.pending),
-          const SizedBox(width: 8),
-          Text(
-            strings.pausedBanner,
-            style: theme.caption.copyWith(color: theme.pending),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        theme.gutter,
+        theme.rowSpacing,
+        theme.gutter,
+        theme.rowSpacing,
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.accent.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(theme.radius),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: theme.accent.withValues(alpha: 0.16),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.pause, size: 20, color: theme.accent),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Text(strings.pausedBanner, style: theme.headline)),
+            const SizedBox(width: 12),
+            _ResumeButton(label: strings.resume, onPressed: onResume),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ResumeButton extends StatelessWidget {
+  const _ResumeButton({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    const onAccent = Color(0xFFFFFFFF);
+    final radius = BorderRadius.circular(theme.radius);
+    return MergeSemantics(
+      child: PeekTappable(
+        onTap: onPressed,
+        fade: true,
+        focusRadius: radius,
+        child: Semantics(
+          button: true,
+          child: Container(
+            constraints: BoxConstraints(
+              minWidth: theme.minTapTarget,
+              minHeight: theme.minTapTarget,
+            ),
+            padding: const EdgeInsets.fromLTRB(12, 0, 16, 0),
+            decoration: BoxDecoration(
+              color: theme.accent,
+              borderRadius: radius,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.play_arrow, size: 20, color: onAccent),
+                const SizedBox(width: 4),
+                Text(
+                  label,
+                  style: theme.body.copyWith(
+                    color: onAccent,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }

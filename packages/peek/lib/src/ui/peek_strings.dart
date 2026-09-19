@@ -70,6 +70,12 @@ class PeekStrings {
   /// Shown when recording is paused.
   String get pausedBanner => 'Recording is paused';
 
+  /// Tooltip of the button that stops recording.
+  String get pause => 'Pause';
+
+  /// Tooltip of the button that resumes recording.
+  String get resume => 'Resume';
+
   /// Empty state when nothing was recorded yet.
   String get noRequests => 'No requests yet';
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'limits/peek_body_truncator.dart';
 import 'model/peek_id.dart';
 import 'peek_options.dart';
@@ -62,6 +64,7 @@ final class Peek implements PeekSink {
   final PeekBodyTruncator _truncator;
   final PeekEventReducer _reducer = const PeekEventReducer();
   final List<PeekAdapter> _adapters = [];
+  final StreamController<bool> _pauseChanges = StreamController.broadcast();
   bool _paused = false;
   bool _disposed = false;
 
@@ -77,11 +80,15 @@ final class Peek implements PeekSink {
   /// Adapters attached with [attach], in order.
   List<PeekAdapter> get adapters => List.unmodifiable(_adapters);
 
+  /// Each change of [isPaused], whoever asked for it: a screen listening
+  /// here shows a pause the app itself requested.
+  Stream<bool> get pauseChanges => _pauseChanges.stream;
+
   /// Stops recording until [resume].
-  void pause() => _paused = true;
+  void pause() => _setPaused(true);
 
   /// Resumes recording after [pause].
-  void resume() => _paused = false;
+  void resume() => _setPaused(false);
 
   /// Registers [adapter] so it shows up in [adapters] and is disposed with
   /// this instance. Returns it, for chaining.
@@ -163,6 +170,7 @@ final class Peek implements PeekSink {
     }
     _adapters.clear();
     _guard(store.dispose);
+    unawaited(_pauseChanges.close());
     if (identical(_instance, this)) _instance = null;
   }
 
@@ -197,6 +205,12 @@ final class Peek implements PeekSink {
       _truncator.truncateEntry(_redactor.redactEntry(event.entry)),
     ),
   };
+
+  void _setPaused(bool paused) {
+    if (_disposed || paused == _paused) return;
+    _paused = paused;
+    _pauseChanges.add(paused);
+  }
 
   void _guard(void Function() action) {
     try {

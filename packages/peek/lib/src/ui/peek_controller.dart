@@ -23,9 +23,11 @@ final class PeekController extends ChangeNotifier {
   /// Creates a controller over [peek], optionally starting from [query].
   PeekController(this.peek, {PeekQuery query = PeekQuery.none})
     : _query = query,
-      _searchText = query.filter.query.text {
+      _searchText = query.filter.query.text,
+      _paused = peek.isPaused {
     _recompute();
     _subscription = peek.store.changes.listen(_onChange);
+    _pauses = peek.pauseChanges.listen(_onPause);
   }
 
   /// How long typing pauses before the list is filtered again.
@@ -35,12 +37,14 @@ final class PeekController extends ChangeNotifier {
   final Peek peek;
 
   late final StreamSubscription<PeekStoreChange> _subscription;
+  late final StreamSubscription<bool> _pauses;
   Timer? _debounce;
   PeekQuery _query;
   String _searchText;
   List<PeekEntry> _entries = const [];
   PeekFacets _facets = PeekFacets.empty;
   PeekId? _selectedId;
+  bool _paused;
   bool _disposed = false;
 
   /// What the list is filtered and sorted by.
@@ -79,8 +83,8 @@ final class PeekController extends ChangeNotifier {
     return id == null ? null : peek.store.find(id);
   }
 
-  /// Whether recording is paused.
-  bool get isPaused => peek.isPaused;
+  /// Whether recording is paused, by this controller or by the app.
+  bool get isPaused => _paused;
 
   /// Replaces the whole query and re-runs it.
   set query(PeekQuery value) {
@@ -131,11 +135,14 @@ final class PeekController extends ChangeNotifier {
   /// Pins or unpins [id]; returns whether it is pinned afterwards.
   bool togglePin(PeekId id) => peek.togglePin(id);
 
+  /// Stops recording; what arrives meanwhile is dropped, not queued.
+  void pause() => _setPaused(true);
+
+  /// Resumes recording after [pause].
+  void resume() => _setPaused(false);
+
   /// Stops or resumes recording.
-  void togglePause() {
-    peek.isPaused ? peek.resume() : peek.pause();
-    notifyListeners();
-  }
+  void togglePause() => _setPaused(!_paused);
 
   /// Empties the store and drops the selection.
   void clear() {
@@ -150,7 +157,19 @@ final class PeekController extends ChangeNotifier {
     _disposed = true;
     _debounce?.cancel();
     unawaited(_subscription.cancel());
+    unawaited(_pauses.cancel());
     super.dispose();
+  }
+
+  void _setPaused(bool paused) {
+    paused ? peek.pause() : peek.resume();
+    _onPause(peek.isPaused);
+  }
+
+  void _onPause(bool paused) {
+    if (paused == _paused) return;
+    _paused = paused;
+    notifyListeners();
   }
 
   void _onChange(PeekStoreChange change) {

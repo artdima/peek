@@ -29,6 +29,15 @@ void main() {
           )
           .badgeCount;
 
+  /// The bar's pause button.
+  PeekIconButton pauseButton(WidgetTester tester) =>
+      tester.widget<PeekIconButton>(
+        find.ancestor(
+          of: find.byIcon(Icons.pause),
+          matching: find.byType(PeekIconButton),
+        ),
+      );
+
   late Peek peek;
   late FakePeekStore store;
   late PeekController controller;
@@ -204,18 +213,53 @@ void main() {
       expect(find.text('/users'), findsOneWidget);
     });
 
-    testWidgets('says so while the app has recording paused', (tester) async {
+    testWidgets('pauses and resumes recording from the bar', (tester) async {
       await pumpScreen(tester, entries: fixtures);
       expect(find.text('Recording is paused'), findsNothing);
+      expect(find.byTooltip('Resume'), findsNothing);
+      expect(pauseButton(tester).selected, isFalse);
 
-      controller.togglePause();
+      await tester.tap(find.byTooltip('Pause'));
       await tester.pump();
       expect(peek.isPaused, isTrue);
+      expect(find.byTooltip('Pause'), findsNothing);
+      expect(pauseButton(tester).selected, isTrue);
       expect(find.text('Recording is paused'), findsOneWidget);
 
-      controller.togglePause();
+      await tester.tap(find.byTooltip('Resume'));
+      await tester.pump();
+      expect(peek.isPaused, isFalse);
+      expect(find.byTooltip('Pause'), findsOneWidget);
+      expect(pauseButton(tester).selected, isFalse);
+      expect(find.text('Recording is paused'), findsNothing);
+    });
+
+    testWidgets('resumes from the banner too', (tester) async {
+      await pumpScreen(tester, entries: fixtures);
+      await tester.tap(find.byTooltip('Pause'));
+      await tester.pump();
+      expect(peek.isPaused, isTrue);
+
+      await tester.tap(find.text('Resume'));
+      await tester.pump();
+      expect(peek.isPaused, isFalse);
+      expect(find.text('Recording is paused'), findsNothing);
+    });
+
+    testWidgets('says so when the app paused recording itself', (tester) async {
+      await pumpScreen(tester, entries: fixtures);
+
+      peek.pause();
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('Recording is paused'), findsOneWidget);
+      expect(find.byTooltip('Resume'), findsOneWidget);
+
+      peek.resume();
+      await tester.pump();
       await tester.pump();
       expect(find.text('Recording is paused'), findsNothing);
+      expect(find.byTooltip('Pause'), findsOneWidget);
     });
 
     testWidgets('asks before clearing and clears when confirmed', (
@@ -379,6 +423,14 @@ void main() {
     testWidgets('the empty screen', (tester) async {
       await pumpScreen(tester, size: const Size(420, 500));
       await expectGolden(find.byType(PeekScreen), 'screen-empty');
+    });
+
+    testWidgets('the paused screen', (tester) async {
+      await pumpScreen(tester, entries: uiFixtures, size: const Size(420, 720));
+      controller.pause();
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      await expectGolden(find.byType(PeekScreen), 'screen-paused');
     });
   });
 }

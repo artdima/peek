@@ -23,6 +23,7 @@ final class PeekIconButton extends StatelessWidget {
     this.onPressed,
     this.color,
     this.badgeCount = 0,
+    this.selected = false,
     this.size = 22,
     super.key,
   }) : assert(
@@ -51,6 +52,10 @@ final class PeekIconButton extends StatelessWidget {
   /// A number to show over the icon; hidden when zero.
   final int badgeCount;
 
+  /// Whether the mode it toggles is on, shown as a tinted disc behind
+  /// the glyph.
+  final bool selected;
+
   /// How large the glyph is drawn; the tap target does not change.
   final double size;
 
@@ -76,6 +81,15 @@ final class PeekIconButton extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
+                  if (selected)
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: theme.accent.withValues(alpha: 0.16),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
                   if (glyph case final glyph?)
                     PeekIcon(glyph, size: size, color: tint)
                   else

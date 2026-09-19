@@ -266,6 +266,33 @@ void main() {
         lessThanOrEqualTo(44),
       );
     });
+
+    testWidgets('wears a disc while the mode it toggles is on', (tester) async {
+      bool isDisc(Widget widget) =>
+          widget is Container &&
+          widget.decoration is BoxDecoration &&
+          (widget.decoration! as BoxDecoration).shape == BoxShape.circle;
+
+      await pumpInScope(
+        tester,
+        const PeekIconButton(icon: Icons.pause, tooltip: 'Pause'),
+      );
+      expect(find.byWidgetPredicate(isDisc), findsNothing);
+
+      await pumpInScope(
+        tester,
+        const PeekIconButton(
+          icon: Icons.pause,
+          tooltip: 'Resume',
+          selected: true,
+        ),
+      );
+      expect(find.byWidgetPredicate(isDisc), findsOneWidget);
+      expect(
+        tester.getSize(find.byWidgetPredicate(isDisc)),
+        const Size(36, 36),
+      );
+    });
   });
 
   group('PeekScaffold', () {
