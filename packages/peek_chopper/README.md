@@ -3,9 +3,9 @@
 Reports the calls [Chopper](https://pub.dev/packages/chopper) makes to
 [Peek](https://pub.dev/packages/peek), so they can be read inside the app.
 
-Peek never performs, intercepts or modifies a request of its own. This
-package hands Chopper's view of a call over and nothing more: the request
-goes on as it arrived, and so does the response.
+Peek records the call, it does not take part in it. This package hands
+Chopper's view of a call over and nothing more: the request goes on as it
+arrived, and so does the response.
 
 ## Install
 

@@ -1,9 +1,9 @@
 # Writing a Peek adapter
 
-An adapter connects a logger you already use to Peek. It watches what the
-logger sees, turns each network call into Peek's model and reports it into a
-`PeekSink`. It never performs, delays or changes a request — Peek is a
-presentation layer, and an adapter is a pair of eyes, not a pair of hands.
+An adapter connects Peek to the client an app already builds, or to a logger
+that has already seen the call. It watches, turns each network call into
+Peek's model and reports it into a `PeekSink`. It never performs, delays or
+changes a request: an adapter is a pair of eyes, not a pair of hands.
 
 Everything an adapter needs comes from one import:
 

@@ -4,9 +4,9 @@ Reports the calls a [`package:http`](https://pub.dev/packages/http) client
 makes to [Peek](https://pub.dev/packages/peek), so they can be read inside
 the app.
 
-Peek never performs, intercepts or modifies a request of its own. This
-package hands the client's view of a call over and nothing more: the request
-goes on as it arrived, and so do the response and its bytes.
+Peek records the call, it does not take part in it. This package hands the
+client's view of a call over and nothing more: the request goes on as it
+arrived, and so do the response and its bytes.
 
 ## Install
 

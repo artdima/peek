@@ -1,7 +1,7 @@
 name: peek
 description: >-
-  A beautiful in-app viewer for the network logs your Flutter app already
-  collects.
+  A beautiful in-app network inspector for Flutter: records the calls your
+  client makes and shows them — searchable, filterable, exportable.
 version: 1.3.0
 resolution: workspace
 

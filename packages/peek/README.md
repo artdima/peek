@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <em>A beautiful in-app viewer for the network logs your Flutter app already collects.</em>
+  <em>A beautiful in-app network inspector for Flutter: every call your app makes, as it happened.</em>
 </p>
 
 <p align="center">
@@ -20,20 +20,22 @@
 
 ---
 
-**What Peek is.** A presentation layer. Your app already has a logger —
-Dio's interceptors, Talker — and that logger already sees every call. Peek
-takes what it sees and turns it into a console you can open inside the
-app: searchable, filterable, one call at a time down to the last header,
-with export as cURL, HAR, Markdown or text.
+**What Peek is.** A network inspector that lives inside the app. An adapter
+sits beside the client you already build — Dio, Chopper, `package:http` — and
+reports every call it makes; with Talker, where the calls are logged already,
+it reads them instead of recording them twice. What arrives is a console you
+open on the device: searchable, filterable, one call at a time down to the
+last header, with export as cURL, HAR, Markdown or text.
 
-**What Peek is not.** Another network logger. Peek never performs,
-intercepts, delays or changes a request. It does not create an
-`HttpClient`, does not wrap `Dio`, does not touch `HttpOverrides`, and does
-not print to the console. `package:http` is the one client with nowhere to
-watch from, so `peek_http` wraps the client the app already has — and hands
-every call to it as it came, the response back as it arrived. An adapter is
-a pair of eyes, not a pair of hands — and if anything inside Peek fails, the
-failure reaches `PeekOptions.onError`, never your app.
+**What Peek is not.** A participant in the request, or a second console
+logger. Peek does not create a client, does not wrap `Dio`, does not touch
+`HttpOverrides` and does not print a line anywhere — keep the console logger
+you like. A call goes out as the app built it and comes back as it arrived:
+nothing is delayed, retried, rewritten or dropped along the way, and
+`package:http`, the one client with nowhere to watch from, is wrapped only to
+pass every byte straight through. An adapter is a pair of eyes, not a pair of
+hands — and if anything inside Peek fails, the failure reaches
+`PeekOptions.onError`, never your app.
 
 **Inspired by Pulse.** Peek is inspired by
 [Pulse](https://github.com/kean/Pulse), the network logger for Apple

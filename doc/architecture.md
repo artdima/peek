@@ -1,17 +1,18 @@
 # Architecture
 
-Peek is a presentation layer. It never performs a request and never changes
-one: it shows what the loggers an app already runs have seen. Everything
-below follows from that.
+Peek records network calls and shows them. It never performs one and never
+changes one: an adapter watches the client an app already builds, or the
+logger that has already seen the call, and what the app sent is what goes
+out. Everything below follows from that.
 
 ## The shape
 
 ```
 ┌──────────────────────────────┐   ┌──────────────────────────────┐
-│  Loggers the app already has │   │  peek_dio · peek_chopper ·   │
-│  Dio interceptors, Talker,   ├──▶│  peek_http · peek_talker · … │
-│  Chopper chains, http        │   │  adapters: watch, map into   │
-│  clients, …                  │   │  PeekEvent                   │
+│  The clients the app builds  │   │  peek_dio · peek_chopper ·   │
+│  Dio, Chopper, http — and    ├──▶│  peek_http · peek_talker · … │
+│  the loggers it runs, such   │   │  adapters: watch, map into   │
+│  as Talker                   │   │  PeekEvent                   │
 └──────────────────────────────┘   └───────────────┬──────────────┘
                                                    │ PeekSink.report
                                    ┌───────────────▼──────────────┐
