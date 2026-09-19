@@ -65,9 +65,7 @@ void main() {
   }
 
   group('entry actions', () {
-    testWidgets('names the call and groups what can be done', (
-      tester,
-    ) async {
+    testWidgets('names the call and groups what can be done', (tester) async {
       await pumpScreen(
         tester,
         entries: [e1],

@@ -364,4 +364,3 @@ class _PausedBanner extends StatelessWidget {
     );
   }
 }
-

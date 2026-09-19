@@ -23,7 +23,7 @@ final class PeekIconButton extends StatelessWidget {
     this.onPressed,
     this.color,
     this.badgeCount = 0,
-    this.selected = false,
+    this.selected,
     this.size = 22,
     super.key,
   }) : assert(
@@ -53,8 +53,9 @@ final class PeekIconButton extends StatelessWidget {
   final int badgeCount;
 
   /// Whether the mode it toggles is on, shown as a tinted disc behind
-  /// the glyph.
-  final bool selected;
+  /// the glyph; `null` where the button toggles nothing, so it says
+  /// nothing about selection to assistive tech either.
+  final bool? selected;
 
   /// How large the glyph is drawn; the tap target does not change.
   final double size;
@@ -75,13 +76,14 @@ final class PeekIconButton extends StatelessWidget {
           child: Semantics(
             button: true,
             enabled: onPressed != null,
+            selected: selected,
             child: SizedBox(
               width: PeekIconButton.width,
               height: theme.minTapTarget,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  if (selected)
+                  if (selected ?? false)
                     Container(
                       width: 36,
                       height: 36,

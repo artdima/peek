@@ -295,10 +295,7 @@ abstract final class PeekIcons {
     width: 24,
     height: 24,
     strokeWidth: 2,
-    paths: [
-      'M3 3L11 3L21 13L13 21L3 11Z',
-      'M7.5 7.5L7.51 7.5',
-    ],
+    paths: ['M3 3L11 3L21 13L13 21L3 11Z', 'M7.5 7.5L7.51 7.5'],
   );
 
   /// How far a call got: its state.

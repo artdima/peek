@@ -7,10 +7,10 @@ import '../../core/model/peek_entry.dart';
 import '../../core/query/peek_facets.dart';
 import '../../core/query/peek_filter.dart';
 import '../../core/query/peek_sort.dart';
-import '../peek_controller.dart';
-import '../peek_scope.dart';
 import '../icons/peek_icon_data.dart';
 import '../icons/peek_icons.dart';
+import '../peek_controller.dart';
+import '../peek_scope.dart';
 import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
 import 'peek_icon_button.dart';
@@ -31,8 +31,7 @@ const List<PeekSort> _sorts = [
 PeekIconData _glyphFor(PeekSort sort) => switch (sort.field) {
   PeekSortField.startedAt => PeekIcons.timing,
   PeekSortField.duration => PeekIcons.gauge,
-  _ =>
-    sort.descending ? PeekIcons.sortDescending : PeekIcons.sortAscending,
+  _ => sort.descending ? PeekIcons.sortDescending : PeekIcons.sortAscending,
 };
 
 /// The one-tap views of the list.

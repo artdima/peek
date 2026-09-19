@@ -70,9 +70,7 @@ void main() {
     expect(await picked, 'har');
   });
 
-  testWidgets('the actions sheet groups neighbours by section', (
-    tester,
-  ) async {
+  testWidgets('the actions sheet groups neighbours by section', (tester) async {
     final context = await pumpHost(tester);
 
     final picked = showPeekActions<String>(

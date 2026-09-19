@@ -43,7 +43,9 @@ void main() {
 
   /// Opens the sheet [title] names and waits for it.
   Future<void> openRow(WidgetTester tester, String title) async {
-    await tester.tap(find.widgetWithText(PeekListRow, title));
+    await tester.ensureVisible(find.widgetWithText(PeekListRow, title));
+    await tester.pump();
+    await tester.tap(find.text(title));
     await settle(tester);
   }
 
@@ -119,8 +121,8 @@ void main() {
       await pumpSheet(tester);
       await openRow(tester, 'Status');
 
-      expect(find.text('Class'), findsOneWidget);
-      expect(find.text('Code'), findsOneWidget);
+      expect(find.text('CLASS'), findsOneWidget);
+      expect(find.text('CODE'), findsOneWidget);
       expect(find.text('2xx'), findsOneWidget);
       expect(find.text('200'), findsOneWidget);
 
@@ -150,14 +152,13 @@ void main() {
       expect(controller.entries, isEmpty);
 
       await openRow(tester, 'Started');
+      expect(find.text('Last 5 min'), findsOneWidget);
       await tester.tap(find.text('Last 15 min'));
       await settle(tester);
       expect(controller.entries, hasLength(6));
     });
 
-    testWidgets('says how many are left once something is set', (
-      tester,
-    ) async {
+    testWidgets('says how many are left once something is set', (tester) async {
       await pumpSheet(tester);
       controller.filter = const PeekFilter(onlyErrors: true);
       await tester.pump();
@@ -198,10 +199,7 @@ void main() {
 
     testWidgets('clears everything at once', (tester) async {
       await pumpSheet(tester);
-      controller.filter = const PeekFilter(
-        onlyErrors: true,
-        methods: {'GET'},
-      );
+      controller.filter = const PeekFilter(onlyErrors: true, methods: {'GET'});
       await tester.pump();
       expect(controller.filter.activeCount, 2);
 

@@ -45,7 +45,10 @@ class _PeekExampleAppState extends State<PeekExampleApp> {
       ),
       scaffoldBackgroundColor: const Color(0xFFFFFFFF),
     ),
-    darkTheme: ThemeData(colorSchemeSeed: const Color(0xFF3DDC84), brightness: Brightness.dark),
+    darkTheme: ThemeData(
+      colorSchemeSeed: const Color(0xFF3DDC84),
+      brightness: Brightness.dark,
+    ),
     home: _Home(
       peek: _peek,
       clients: _clients,
@@ -80,14 +83,23 @@ class _HomeState extends State<_Home> {
   final Set<String> _running = {};
 
   /// What the current route can do, as a name and a call.
-  List<({String name, String detail, Future<void> Function() call})> get _scenarios => switch (_route) {
+  List<({String name, String detail, Future<void> Function() call})>
+  get _scenarios => switch (_route) {
     ExampleRoute.chopper => [
       for (final scenario in chopperScenarios)
-        (name: scenario.name, detail: scenario.detail, call: () => scenario.run(widget.clients.chopper)),
+        (
+          name: scenario.name,
+          detail: scenario.detail,
+          call: () => scenario.run(widget.clients.chopper),
+        ),
     ],
     ExampleRoute.http => [
       for (final scenario in httpScenarios)
-        (name: scenario.name, detail: scenario.detail, call: () => scenario.run(widget.clients.httpClient)),
+        (
+          name: scenario.name,
+          detail: scenario.detail,
+          call: () => scenario.run(widget.clients.httpClient),
+        ),
     ],
     _ => [
       for (final scenario in scenarios)
@@ -127,7 +139,10 @@ class _HomeState extends State<_Home> {
         actions: [
           IconButton(
             tooltip: 'Toggle theme',
-            onPressed: () => widget.onModeChanged(dark ? ThemeMode.light : ThemeMode.dark),
+            onPressed:
+                () => widget.onModeChanged(
+                  dark ? ThemeMode.light : ThemeMode.dark,
+                ),
             icon: Icon(dark ? Icons.light_mode : Icons.dark_mode),
           ),
         ],
@@ -145,7 +160,8 @@ class _HomeState extends State<_Home> {
                   ButtonSegment(value: route, label: Text(route.label)),
               ],
               selected: {_route},
-              onSelectionChanged: (selected) => setState(() => _route = selected.single),
+              onSelectionChanged:
+                  (selected) => setState(() => _route = selected.single),
             ),
           ),
           const Padding(
@@ -161,7 +177,10 @@ class _HomeState extends State<_Home> {
               subtitle: Text(scenario.detail),
               trailing:
                   _running.contains(scenario.name)
-                      ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                      ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
                       : const Icon(Icons.play_arrow),
               onTap: () => _run(scenario.name, scenario.call),
             ),
@@ -180,7 +199,8 @@ class _HomeState extends State<_Home> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => showPeek(context, peek: widget.peek, share: widget.share),
+        onPressed:
+            () => showPeek(context, peek: widget.peek, share: widget.share),
         label: const Text('Open Peek'),
       ),
     );

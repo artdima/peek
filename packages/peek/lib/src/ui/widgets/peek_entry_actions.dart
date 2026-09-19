@@ -47,7 +47,6 @@ Future<void> showPeekEntryActions(
   final controller = PeekScope.read(context);
   final strings = PeekScope.stringsOf(context);
   final share = PeekScope.shareOf(context);
-  final request = entry.request;
   // Measured before the sheet opens: by the time it closes, the widget
   // that was tapped may have scrolled or gone.
   final origin = peekShareOrigin(context);

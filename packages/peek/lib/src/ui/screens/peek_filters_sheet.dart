@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_entry.dart';
 import '../../core/model/peek_status_class.dart';
+import '../../core/query/peek_facets.dart';
 import '../../core/query/peek_filter.dart';
 import '../icons/peek_icon.dart';
 import '../icons/peek_icon_data.dart';
@@ -131,7 +132,6 @@ class _Criterion {
 
 List<_Criterion> _criteria(PeekController controller, PeekStrings strings) {
   final filter = controller.filter;
-  final facets = controller.facets;
 
   return [
     _Criterion(
@@ -147,38 +147,41 @@ List<_Criterion> _criteria(PeekController controller, PeekStrings strings) {
                 statusClasses: const {},
                 statusCodes: const {},
               ),
-      open: (context) => showPeekSheet<void>(
-        context,
-        builder: (context) => const _StatusSheet(),
-      ),
+      open:
+          (context) => showPeekSheet<void>(
+            context,
+            builder: (context) => const _StatusSheet(),
+          ),
     ),
     _Criterion(
       glyph: PeekIcons.method,
       title: strings.method,
       chosen: filter.methods.toList(),
       onClear: () => controller.filter = filter.copyWith(methods: const {}),
-      open: (context) => _pickValues<String>(
-        context,
-        title: strings.method,
-        values: facets.methods,
-        label: (method) => method,
-        read: (filter) => filter.methods,
-        write: (filter, values) => filter.copyWith(methods: values),
-      ),
+      open:
+          (context) => _pickValues<String>(
+            context,
+            title: strings.method,
+            values: (facets) => facets.methods,
+            label: (method) => method,
+            read: (filter) => filter.methods,
+            write: (filter, values) => filter.copyWith(methods: values),
+          ),
     ),
     _Criterion(
       glyph: PeekIcons.host,
       title: strings.host,
       chosen: filter.hosts.toList(),
       onClear: () => controller.filter = filter.copyWith(hosts: const {}),
-      open: (context) => _pickValues<String>(
-        context,
-        title: strings.host,
-        values: facets.hosts,
-        label: (host) => host,
-        read: (filter) => filter.hosts,
-        write: (filter, values) => filter.copyWith(hosts: values),
-      ),
+      open:
+          (context) => _pickValues<String>(
+            context,
+            title: strings.host,
+            values: (facets) => facets.hosts,
+            label: (host) => host,
+            read: (filter) => filter.hosts,
+            write: (filter, values) => filter.copyWith(hosts: values),
+          ),
     ),
     _Criterion(
       glyph: PeekIcons.contentType,
@@ -186,42 +189,45 @@ List<_Criterion> _criteria(PeekController controller, PeekStrings strings) {
       chosen: filter.contentTypes.toList(),
       onClear:
           () => controller.filter = filter.copyWith(contentTypes: const {}),
-      open: (context) => _pickValues<String>(
-        context,
-        title: strings.contentType,
-        values: facets.contentTypes,
-        label: (type) => type,
-        read: (filter) => filter.contentTypes,
-        write: (filter, values) => filter.copyWith(contentTypes: values),
-      ),
+      open:
+          (context) => _pickValues<String>(
+            context,
+            title: strings.contentType,
+            values: (facets) => facets.contentTypes,
+            label: (type) => type,
+            read: (filter) => filter.contentTypes,
+            write: (filter, values) => filter.copyWith(contentTypes: values),
+          ),
     ),
     _Criterion(
       glyph: PeekIcons.state,
       title: strings.state,
       chosen: filter.states.map(strings.entryState).toList(),
       onClear: () => controller.filter = filter.copyWith(states: const {}),
-      open: (context) => _pickValues<PeekEntryState>(
-        context,
-        title: strings.state,
-        values: facets.states,
-        label: strings.entryState,
-        read: (filter) => filter.states,
-        write: (filter, values) => filter.copyWith(states: values),
-      ),
+      open:
+          (context) => _pickValues<PeekEntryState>(
+            context,
+            title: strings.state,
+            values: (facets) => facets.states,
+            label: strings.entryState,
+            read: (filter) => filter.states,
+            write: (filter, values) => filter.copyWith(states: values),
+          ),
     ),
     _Criterion(
       glyph: PeekIcons.source,
       title: strings.source,
       chosen: filter.sources.toList(),
       onClear: () => controller.filter = filter.copyWith(sources: const {}),
-      open: (context) => _pickValues<String>(
-        context,
-        title: strings.source,
-        values: facets.sources,
-        label: (source) => source,
-        read: (filter) => filter.sources,
-        write: (filter, values) => filter.copyWith(sources: values),
-      ),
+      open:
+          (context) => _pickValues<String>(
+            context,
+            title: strings.source,
+            values: (facets) => facets.sources,
+            label: (source) => source,
+            read: (filter) => filter.sources,
+            write: (filter, values) => filter.copyWith(sources: values),
+          ),
     ),
     _Criterion(
       glyph: PeekIcons.duration,
@@ -235,7 +241,7 @@ List<_Criterion> _criteria(PeekController controller, PeekStrings strings) {
               controller.filter = filter.copyWith(
                 duration: PeekDurationRange.any,
               ),
-      open: (context) => _pickDuration(context),
+      open: _pickDuration,
     ),
     _Criterion(
       glyph: PeekIcons.timing,
@@ -246,7 +252,7 @@ List<_Criterion> _criteria(PeekController controller, PeekStrings strings) {
               : [strings.dateFilter(filter.dates)],
       onClear:
           () => controller.filter = filter.copyWith(dates: PeekDateRange.any),
-      open: (context) => _pickStarted(context),
+      open: _pickStarted,
     ),
   ];
 }
@@ -263,11 +269,7 @@ class _CriterionRow extends StatelessWidget {
     final chosen = criterion.chosen;
 
     return PeekListRow(
-      leading: PeekIcon(
-        criterion.glyph,
-        size: 22,
-        color: theme.secondaryLabel,
-      ),
+      leading: PeekIcon(criterion.glyph, size: 22, color: theme.secondaryLabel),
       title: criterion.title,
       value: chosen.isEmpty ? strings.any : null,
       trailing:
@@ -318,7 +320,11 @@ class _ChosenChip extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 140),
+                    // A share of the width rather than a number, so a
+                    // long value gives way on a narrow screen.
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.sizeOf(context).width * 0.4,
+                    ),
                     child: Text(
                       label,
                       maxLines: 1,
@@ -341,29 +347,58 @@ class _ChosenChip extends StatelessWidget {
   }
 }
 
-/// Offers [values], counted, and toggles them in the live filter.
+/// Offers what [values] picks out of the facets, counted, and toggles
+/// them in the live filter.
+///
+/// The facets are read as the sheet builds, not as it opens: a call
+/// arriving while it is open brings its host along with it.
 Future<void> _pickValues<T>(
   BuildContext context, {
   required String title,
-  required Map<T, int> values,
+  required Map<T, int> Function(PeekFacets facets) values,
   required String Function(T value) label,
   required Set<T> Function(PeekFilter filter) read,
   required PeekFilter Function(PeekFilter filter, Set<T> values) write,
 }) => showPeekSheet<void>(
   context,
   builder:
-      (context) => _PickerSheet(
+      (context) => _FacetPicker<T>(
         title: title,
-        children: [
-          _FacetGroup<T>(
-            values: values,
-            label: label,
-            read: read,
-            write: write,
-          ),
-        ],
+        values: values,
+        label: label,
+        read: read,
+        write: write,
       ),
 );
+
+class _FacetPicker<T> extends StatelessWidget {
+  const _FacetPicker({
+    required this.title,
+    required this.values,
+    required this.label,
+    required this.read,
+    required this.write,
+  });
+
+  final String title;
+  final Map<T, int> Function(PeekFacets facets) values;
+  final String Function(T value) label;
+  final Set<T> Function(PeekFilter filter) read;
+  final PeekFilter Function(PeekFilter filter, Set<T> values) write;
+
+  @override
+  Widget build(BuildContext context) => _PickerSheet(
+    title: title,
+    children: [
+      _FacetGroup<T>(
+        values: values(PeekScope.of(context).facets),
+        label: label,
+        read: read,
+        write: write,
+      ),
+    ],
+  );
+}
 
 /// The status classes and the codes themselves, in one sheet.
 class _StatusSheet extends StatelessWidget {
@@ -467,8 +502,7 @@ class _FacetGroup<T> extends StatelessWidget {
         _PickerRow(
           label: strings.any,
           selected: selected.isEmpty,
-          onTap:
-              () => controller.filter = write(controller.filter, const {}),
+          onTap: () => controller.filter = write(controller.filter, const {}),
         ),
         for (final value in values.entries)
           _PickerRow(
@@ -521,8 +555,7 @@ Future<void> _pickDuration(BuildContext context) async {
       for (final range in _durations)
         PeekAction(
           value: range,
-          label:
-              range.isUnbounded ? strings.any : strings.durationFilter(range),
+          label: strings.durationFilter(range),
           selected: controller.filter.duration == range,
         ),
     ],
