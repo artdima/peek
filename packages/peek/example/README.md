@@ -18,7 +18,8 @@ the top picks which adapter reports them:
   with its own scenarios in `lib/chopper_scenarios.dart`;
 - `lib/http_setup.dart` — `PeekHttpClient` around a `package:http` client,
   with its own scenarios in `lib/http_scenarios.dart`;
-- `lib/share.dart` — the share delegate, wired to `share_plus`.
+- `lib/share.dart` — the share delegate, wired to `share_plus`; on the web
+  it hands back nothing, and Peek saves the file through the browser.
 
 The Dio routes share `lib/scenarios.dart`. Chopper has its own list because
 it takes the base of a call per request, and because a status the server

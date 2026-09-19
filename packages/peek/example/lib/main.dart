@@ -22,7 +22,7 @@ class PeekExampleApp extends StatefulWidget {
 class _PeekExampleAppState extends State<PeekExampleApp> {
   final Peek _peek = Peek();
   late final ExampleClients _clients = ExampleClients(_peek);
-  late final PeekShareDelegate _share = buildShareDelegate();
+  late final PeekShareDelegate? _share = buildShareDelegate();
   ThemeMode _mode = ThemeMode.system;
 
   @override
@@ -70,7 +70,7 @@ class _Home extends StatefulWidget {
 
   final Peek peek;
   final ExampleClients clients;
-  final PeekShareDelegate share;
+  final PeekShareDelegate? share;
   final ThemeMode mode;
   final ValueChanged<ThemeMode> onModeChanged;
 
