@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.3.0
+
+The screen catches up with the work done on it every day.
+
+- Recording pauses and resumes from the bar, and a card under the quick
+  bar says so while it is paused. `Peek.pauseChanges` reports every change,
+  so a pause the app asks for reaches the screen too.
+- The actions sheet sits flush against the bottom edge and groups what it
+  offers into cards under their own headings; a call's sheet opens with
+  the method as a tile beside its path and host.
+- Each order in the sort menu wears a glyph, and an option no one chose
+  reads quieter than an action.
+- The filters sheet is one row per criterion: it says what it is narrowed
+  to and opens a sheet of its own to change it, where values toggle with
+  their counts. The button at the foot says how many requests are left.
+- New in the public API: `PeekFilledButton`, `PeekAction.section` and
+  `header` on `showPeekActions`, `PeekIconButton.selected`,
+  `PeekMethodBadge.large`, `PeekController.pause`/`resume`, nine glyphs in
+  `PeekIcons` and the strings that name all of it.
+
 ## 1.2.0
 
 Released alongside `peek_http`, the adapter for `package:http`. The library

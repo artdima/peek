@@ -3,6 +3,16 @@
 Each package keeps its own changelog; this one says what a release is.
 Versions move together, so every package always carries the same number.
 
+## 1.3.0
+
+A release about the screen rather than the packages. Peek pauses and
+resumes recording from its own bar, the actions sheet groups what it
+offers, the sort menu marks each order, and the filters sheet is now one
+row per criterion, each opening a sheet of its own. The four adapters are
+unchanged and move with the version.
+
+See [`peek`](packages/peek/CHANGELOG.md) for the details.
+
 ## 1.2.0
 
 A fifth package: [`peek_http`](packages/peek_http/CHANGELOG.md) —

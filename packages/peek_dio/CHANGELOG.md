@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.0
+
+Released alongside `peek` 1.3.0, which rebuilt its screens. Nothing in this
+package changed.
+
 ## 1.2.0
 
 Released alongside `peek_http`, the adapter for `package:http`. Nothing in
