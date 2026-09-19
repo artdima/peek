@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peek/peek.dart';
@@ -33,84 +35,174 @@ void main() {
     );
   }
 
-  /// Scrolls [label] into view and taps it.
-  Future<void> tapChip(WidgetTester tester, String label) async {
-    final chip = find.widgetWithText(PeekPill, label);
-    await tester.ensureVisible(chip);
+  Future<void> settle(WidgetTester tester) async {
+    for (var frame = 0; frame < 8; frame++) {
+      await tester.pump(const Duration(milliseconds: 60));
+    }
+  }
+
+  /// Opens the sheet [title] names and waits for it.
+  Future<void> openRow(WidgetTester tester, String title) async {
+    await tester.tap(find.widgetWithText(PeekListRow, title));
+    await settle(tester);
+  }
+
+  /// Taps a row of the picker that is open.
+  Future<void> tapRow(WidgetTester tester, String label) async {
+    final row = find.widgetWithText(PeekListRow, label).last;
+    await tester.ensureVisible(row);
     await tester.pump();
-    await tester.tap(chip);
-    await tester.pump();
+    await tester.tap(row);
+    await settle(tester);
+  }
+
+  /// What the row for [title] says it is narrowed to.
+  String valueOf(WidgetTester tester, String title) {
+    final row = tester.widget<PeekListRow>(
+      find.widgetWithText(PeekListRow, title).first,
+    );
+    return row.value ?? '';
   }
 
   group('PeekFiltersSheet', () {
-    testWidgets('offers what the entries contain, counted', (tester) async {
+    testWidgets('names every criterion and says what is set', (tester) async {
       await pumpSheet(tester);
-      expect(find.text('2xx'), findsOneWidget);
-      expect(find.text('4xx'), findsOneWidget);
-      expect(find.text('200'), findsOneWidget);
-      expect(find.text('GET'), findsOneWidget);
-      expect(find.text('api.example.com'), findsOneWidget);
-      expect(find.text('application/json'), findsOneWidget);
-      expect(find.text('dio'), findsOneWidget);
-      expect(find.text('Pending'), findsOneWidget);
+
+      for (final title in [
+        'Status',
+        'Method',
+        'Host',
+        'Content type',
+        'State',
+        'Source',
+        'Duration',
+        'Started',
+      ]) {
+        expect(
+          find.widgetWithText(PeekListRow, title),
+          findsOneWidget,
+          reason: title,
+        );
+        expect(valueOf(tester, title), 'Any', reason: title);
+      }
+
+      expect(find.text('Close'), findsOneWidget);
     });
 
-    testWidgets('applies a status class as it is picked', (tester) async {
+    testWidgets('picks values from a criterion of its own', (tester) async {
       await pumpSheet(tester);
-      await tapChip(tester, '4xx');
+      await openRow(tester, 'Method');
 
+      expect(find.text('GET'), findsOneWidget);
+      await tapRow(tester, 'GET');
+      expect(controller.filter.methods, {'GET'});
+
+      await tapRow(tester, 'Any');
+      expect(controller.filter.methods, isEmpty);
+    });
+
+    testWidgets('shows the chosen value on the row and drops it', (
+      tester,
+    ) async {
+      await pumpSheet(tester);
+      controller.filter = const PeekFilter(methods: {'GET', 'POST'});
+      await tester.pump();
+
+      expect(find.text('GET +1'), findsOneWidget);
+      await tester.tap(find.text('GET +1'));
+      await tester.pump();
+      expect(controller.filter.methods, isEmpty);
+      expect(valueOf(tester, 'Method'), 'Any');
+    });
+
+    testWidgets('offers classes and codes under status', (tester) async {
+      await pumpSheet(tester);
+      await openRow(tester, 'Status');
+
+      expect(find.text('Class'), findsOneWidget);
+      expect(find.text('Code'), findsOneWidget);
+      expect(find.text('2xx'), findsOneWidget);
+      expect(find.text('200'), findsOneWidget);
+
+      await tapRow(tester, '4xx');
       expect(controller.filter.statusClasses, {PeekStatusClass.clientError});
       expect(idsOf(controller.entries), ['e2']);
-
-      await tapChip(tester, '4xx');
-      expect(controller.filter.statusClasses, isEmpty);
-      expect(controller.entries, hasLength(6));
-    });
-
-    testWidgets('keeps only errors, then only pinned', (tester) async {
-      await pumpSheet(tester);
-      await tapChip(tester, 'Errors');
-      expect(controller.filter.onlyErrors, isTrue);
-      expect(idsOf(controller.entries), ['e6', 'e5', 'e2']);
-
-      await tapChip(tester, 'Pinned');
-      expect(idsOf(controller.entries), ['e5']);
     });
 
     testWidgets('narrows by how long a call took', (tester) async {
       await pumpSheet(tester);
-      await tapChip(tester, 'Over 1 s');
+      await openRow(tester, 'Duration');
+
+      await tester.tap(find.text('Over 1 s'));
+      await settle(tester);
 
       expect(controller.filter.duration.min, const Duration(seconds: 1));
       expect(idsOf(controller.entries), ['e5']);
+      expect(valueOf(tester, 'Duration'), '');
+      expect(find.text('Over 1 s'), findsOneWidget);
     });
 
     testWidgets('looks back over a window', (tester) async {
       await pumpSheet(tester);
-      await tapChip(tester, 'Last 5 min');
+      await openRow(tester, 'Started');
+      await tester.tap(find.text('Last 5 min'));
+      await settle(tester);
       expect(controller.entries, isEmpty);
 
-      await tapChip(tester, 'Last 15 min');
+      await openRow(tester, 'Started');
+      await tester.tap(find.text('Last 15 min'));
+      await settle(tester);
       expect(controller.entries, hasLength(6));
     });
 
-    testWidgets('shows a cut-off it can no longer offer', (tester) async {
+    testWidgets('says how many are left once something is set', (
+      tester,
+    ) async {
       await pumpSheet(tester);
-      controller.filter = PeekFilter(dates: PeekDateRange(from: fixtureStart));
+      controller.filter = const PeekFilter(onlyErrors: true);
       await tester.pump();
 
-      final chip = find.widgetWithText(PeekPill, 'Since 12:00');
-      expect(chip, findsOneWidget);
-      expect(tester.widget<PeekPill>(chip).selected, isTrue);
+      expect(idsOf(controller.entries), ['e6', 'e5', 'e2']);
+      expect(find.text('Show 3 requests'), findsOneWidget);
+      expect(find.text('Close'), findsNothing);
+    });
 
-      await tapChip(tester, 'Since 12:00');
-      expect(controller.filter.dates.isUnbounded, isTrue);
+    testWidgets('closes with the button', (tester) async {
+      late BuildContext host;
+      final wired = fakePeek(entries: fixtures);
+      controller = PeekController(wired.peek);
+      addTearDown(controller.dispose);
+      addTearDown(wired.peek.dispose);
+
+      await pumpPeek(
+        tester,
+        PeekScope(
+          controller: controller,
+          child: Builder(
+            builder: (context) {
+              host = context;
+              return const SizedBox.expand();
+            },
+          ),
+        ),
+      );
+
+      unawaited(showPeekFilters(host));
+      await settle(tester);
+      expect(find.byType(PeekFiltersSheet), findsOneWidget);
+
+      await tester.tap(find.text('Close'));
+      await settle(tester);
+      expect(find.byType(PeekFiltersSheet), findsNothing);
     });
 
     testWidgets('clears everything at once', (tester) async {
       await pumpSheet(tester);
-      await tapChip(tester, 'Errors');
-      await tapChip(tester, 'GET');
+      controller.filter = const PeekFilter(
+        onlyErrors: true,
+        methods: {'GET'},
+      );
+      await tester.pump();
       expect(controller.filter.activeCount, 2);
 
       await tester.tap(find.text('Clear filters'));
@@ -124,7 +216,8 @@ void main() {
       final reset = find.widgetWithText(PeekTextButton, 'Clear filters');
       expect(tester.widget<PeekTextButton>(reset).onPressed, isNull);
 
-      await tapChip(tester, 'Errors');
+      controller.filter = const PeekFilter(onlyErrors: true);
+      await tester.pump();
       expect(tester.widget<PeekTextButton>(reset).onPressed, isNotNull);
     });
 

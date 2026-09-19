@@ -256,6 +256,75 @@ abstract final class PeekIcons {
     ],
   );
 
+  /// What came back, as a status: a trace with a spike in it.
+  static const PeekIconData status = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: ['M2 12L6.5 12L9 4L15 20L17.5 12L22 12'],
+  );
+
+  /// What was asked of the server: the method.
+  static const PeekIconData method = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M14 3L6 3L6 21L18 21L18 7Z',
+      'M14 3L14 7L18 7',
+      'M9 13L15 13',
+      'M9 17L13 17',
+    ],
+  );
+
+  /// Where the call went: the host.
+  static const PeekIconData host = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M3 4L21 4L21 10L3 10Z',
+      'M3 14L21 14L21 20L3 20Z',
+      'M7 7L7.01 7',
+      'M7 17L7.01 17',
+    ],
+  );
+
+  /// What a body is made of: its media type.
+  static const PeekIconData contentType = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M3 3L11 3L21 13L13 21L3 11Z',
+      'M7.5 7.5L7.51 7.5',
+    ],
+  );
+
+  /// How far a call got: its state.
+  static const PeekIconData state = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M2 12C2 6.477 6.477 2 12 2C17.523 2 22 6.477 22 12C22 17.523 17.523 22 12 22C6.477 22 2 17.523 2 12Z',
+      'M12 16L12 12',
+      'M12 8L12.01 8',
+    ],
+  );
+
+  /// How long a call took, as a stopwatch.
+  static const PeekIconData duration = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M4 14C4 9.582 7.582 6 12 6C16.418 6 20 9.582 20 14C20 18.418 16.418 22 12 22C7.582 22 4 18.418 4 14Z',
+      'M10 2L14 2',
+      'M12 14L15 11',
+    ],
+  );
+
   /// Everything else that can be done with a call.
   static const PeekIconData more = PeekIconData(
     width: 24,

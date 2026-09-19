@@ -404,6 +404,19 @@ class PeekStrings {
   String requestCount(int shown, int total) =>
       shown == total ? '$total' : '$shown of $total';
 
+  /// The button that closes the filters, saying what is left.
+  String showRequests(int count) =>
+      count == 1 ? 'Show 1 request' : 'Show $count requests';
+
+  /// One chosen value and how many more there are.
+  String moreValues(String first, int others) => '$first +$others';
+
+  /// Heading of the status classes in the status picker.
+  String get statusClass => 'Class';
+
+  /// Heading of the status codes in the status picker.
+  String get statusCode => 'Code';
+
   /// How many filters are active.
   String activeFilters(int count) => '$count active';
 

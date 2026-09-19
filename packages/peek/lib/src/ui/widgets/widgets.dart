@@ -6,6 +6,7 @@ export 'peek_empty_state.dart';
 export 'peek_entry_actions.dart';
 export 'peek_entry_tile.dart';
 export 'peek_error_view.dart';
+export 'peek_filled_button.dart';
 export 'peek_highlighted_text.dart';
 export 'peek_icon_button.dart';
 export 'peek_json_node.dart';

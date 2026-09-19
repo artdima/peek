@@ -353,7 +353,11 @@ class _PausedBanner extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(child: Text(strings.pausedBanner, style: theme.headline)),
             const SizedBox(width: 12),
-            _ResumeButton(label: strings.resume, onPressed: onResume),
+            PeekFilledButton(
+              label: strings.resume,
+              icon: Icons.play_arrow,
+              onPressed: onResume,
+            ),
           ],
         ),
       ),
@@ -361,51 +365,3 @@ class _PausedBanner extends StatelessWidget {
   }
 }
 
-class _ResumeButton extends StatelessWidget {
-  const _ResumeButton({required this.label, required this.onPressed});
-
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = PeekTheme.of(context);
-    const onAccent = Color(0xFFFFFFFF);
-    final radius = BorderRadius.circular(theme.radius);
-    return MergeSemantics(
-      child: PeekTappable(
-        onTap: onPressed,
-        fade: true,
-        focusRadius: radius,
-        child: Semantics(
-          button: true,
-          child: Container(
-            constraints: BoxConstraints(
-              minWidth: theme.minTapTarget,
-              minHeight: theme.minTapTarget,
-            ),
-            padding: const EdgeInsets.fromLTRB(12, 0, 16, 0),
-            decoration: BoxDecoration(
-              color: theme.accent,
-              borderRadius: radius,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.play_arrow, size: 20, color: onAccent),
-                const SizedBox(width: 4),
-                Text(
-                  label,
-                  style: theme.body.copyWith(
-                    color: onAccent,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

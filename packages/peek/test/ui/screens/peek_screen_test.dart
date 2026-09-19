@@ -146,7 +146,9 @@ void main() {
       await settle(tester);
 
       expect(find.byType(PeekFiltersSheet), findsOneWidget);
-      await tester.tap(find.widgetWithText(PeekPill, '4xx'));
+      await tester.tap(find.widgetWithText(PeekListRow, 'Status'));
+      await settle(tester);
+      await tester.tap(find.widgetWithText(PeekListRow, '4xx'));
       await settle(tester);
       expect(controller.entries, hasLength(1));
     });
