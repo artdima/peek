@@ -42,7 +42,7 @@ final class PeekEntryScreen extends StatelessWidget {
         if (entry != null)
           PeekIconButton(
             icon: Icons.more_horiz,
-            tooltip: strings.more,
+            tooltip: strings.requestActions,
             onPressed: () => unawaited(showPeekEntryActions(context, entry)),
           ),
       ],

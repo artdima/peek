@@ -53,6 +53,13 @@ final class PeekScreen extends StatefulWidget {
   /// The width from which the list and the call sit side by side.
   static const double wideLayout = 720;
 
+  /// How much of a wide layout the list keeps for itself.
+  ///
+  /// Wide enough for the four quick modes and the order beside them on one
+  /// line: the pills come to 308 at the counts a list usually shows, and
+  /// the gutter, the order button and the trailing space take 68 more.
+  static const double listPaneWidth = 420;
+
   /// Whether a screen is showing anywhere; `PeekOverlay` watches this to
   /// get out of its own way.
   static ValueListenable<bool> get isOpen => _isOpen;
@@ -115,9 +122,6 @@ class _OpenScreens extends ChangeNotifier implements ValueListenable<bool> {
   }
 }
 
-/// How much of a wide layout the list keeps for itself.
-const double _listPaneWidth = 360;
-
 class _PeekScaffold extends StatefulWidget {
   const _PeekScaffold();
 
@@ -172,36 +176,30 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
       );
     }
 
-    return PeekScaffold(
+    return _WidePanes(
       title: strings.console,
-      actions: actions,
       leading: leading,
-      child: Row(
+      actions: actions,
+      list: Column(
         children: [
-          SizedBox(
-            width: _listPaneWidth,
-            child: Column(
-              children: [
-                _chrome(controller, strings),
-                Expanded(
-                  child: PeekEntryList(
-                    selectedId: controller.selectedId,
-                    onTap: (entry) => controller.select(entry.id),
-                  ),
-                ),
-              ],
+          _chrome(controller, strings),
+          Expanded(
+            child: PeekEntryList(
+              selectedId: controller.selectedId,
+              onTap: (entry) => controller.select(entry.id),
             ),
           ),
-          SizedBox(
-            width: theme.hairline,
-            child: ColoredBox(
-              color: theme.separator,
-              child: const SizedBox(height: double.infinity),
-            ),
-          ),
-          Expanded(child: _detail(controller, strings)),
         ],
       ),
+      detail: _detail(controller, strings),
+      detailActions: [
+        if (controller.selected case final entry?)
+          PeekIconButton(
+            icon: Icons.more_horiz,
+            tooltip: strings.requestActions,
+            onPressed: () => unawaited(showPeekEntryActions(context, entry)),
+          ),
+      ],
     );
   }
 
@@ -361,6 +359,135 @@ class _PausedBanner extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// The list and the call side by side, each pane under a bar of its own.
+///
+/// Not a [PeekScaffold]: one bar across both panes would push the rule
+/// between them down below it, and the rule is what tells the two panes
+/// apart — it runs the whole height of the window, through the status bar
+/// and past the home indicator.
+class _WidePanes extends StatelessWidget {
+  const _WidePanes({
+    required this.title,
+    required this.actions,
+    required this.list,
+    required this.detail,
+    required this.detailActions,
+    this.leading,
+  });
+
+  final String title;
+  final List<Widget> actions;
+  final List<Widget> detailActions;
+  final Widget list;
+  final Widget detail;
+  final Widget? leading;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    // Which pane touches which edge of the screen follows the text
+    // direction, because so does the row they sit in.
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+
+    return ColoredBox(
+      color: theme.background,
+      child: PeekSurface(
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.viewInsetsOf(context).bottom,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: PeekScreen.listPaneWidth,
+                child: SafeArea(
+                  left: !rtl,
+                  right: rtl,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _PaneBar(leading: leading, actions: actions),
+                      _PaneTitle(title: title),
+                      Expanded(child: list),
+                    ],
+                  ),
+                ),
+              ),
+              const PeekSeparator.vertical(),
+              Expanded(
+                child: ColoredBox(
+                  color: theme.groupedBackground,
+                  child: SafeArea(
+                    left: rtl,
+                    right: !rtl,
+                    child: Column(
+                      children: [
+                        _PaneBar(actions: detailActions),
+                        Expanded(child: detail),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The strip at the top of a pane: the way out on one side, the buttons
+/// on the other.
+///
+/// As tall as a button whether or not it holds one, so both panes start
+/// their content at the same height.
+class _PaneBar extends StatelessWidget {
+  const _PaneBar({this.leading, this.actions = const []});
+
+  final Widget? leading;
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    final leading = this.leading;
+
+    return SizedBox(
+      height: theme.minTapTarget,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: theme.gutter - 10),
+        child: Row(
+          children: [if (leading != null) leading, const Spacer(), ...actions],
+        ),
+      ),
+    );
+  }
+}
+
+/// A pane's name, under the bar and across the whole pane.
+class _PaneTitle extends StatelessWidget {
+  const _PaneTitle({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(theme.gutter, 2, theme.gutter, 10),
+      child: Text(
+        title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: theme.largeTitle,
       ),
     );
   }

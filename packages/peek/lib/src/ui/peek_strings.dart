@@ -250,8 +250,12 @@ class PeekStrings {
   /// Shares an HTTP Archive of everything the list shows.
   String get shareHar => 'Share as HAR';
 
-  /// Names the menu of everything else a screen can do.
+  /// Names the menu of everything else the list can do.
   String get more => 'More';
+
+  /// Names the menu of everything else one call can do; apart from [more]
+  /// because a wide layout shows both menus at once.
+  String get requestActions => 'Request actions';
 
   /// Shares the exported content.
   String get share => 'Share';

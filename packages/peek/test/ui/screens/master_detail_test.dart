@@ -120,6 +120,68 @@ void main() {
       expect(tile.selected, isTrue);
     });
 
+    testWidgets('lifts the bar to the line the way out sits on', (
+      tester,
+    ) async {
+      await pumpScreen(tester, size: const Size(960, 720));
+
+      final line = tester.getCenter(find.byTooltip('Filters')).dy;
+      for (final tooltip in ['Filters', 'Clear', 'Pause', 'More']) {
+        final button = find.byTooltip(tooltip);
+        expect(
+          tester.getBottomRight(button).dx,
+          lessThanOrEqualTo(PeekScreen.listPaneWidth),
+          reason: '$tooltip belongs over the list, not over the call',
+        );
+        expect(
+          tester.getCenter(button).dy,
+          line,
+          reason: '$tooltip belongs on the bar, not beside the name',
+        );
+      }
+      expect(line, lessThan(tester.getTopLeft(find.text('Console')).dy));
+    });
+
+    testWidgets('fits the quick bar on one line', (tester) async {
+      await pumpScreen(tester, size: const Size(960, 720));
+
+      final line = tester.getCenter(find.text('All')).dy;
+      for (final label in ['Errors', 'Pending', 'Pinned']) {
+        expect(
+          tester.getCenter(find.text(label)).dy,
+          line,
+          reason: '$label wrapped onto a line of its own',
+        );
+      }
+      expect(tester.getCenter(find.byTooltip('Sort')).dy, line);
+    });
+
+    testWidgets('rules the panes apart over the whole window', (tester) async {
+      await pumpScreen(tester, size: const Size(960, 720));
+
+      final rule = find.byWidgetPredicate(
+        (widget) => widget is PeekSeparator && widget.axis == Axis.vertical,
+      );
+      expect(tester.getRect(rule).top, 0);
+      expect(tester.getRect(rule).bottom, 720);
+    });
+
+    testWidgets('gives the call a button of its own', (tester) async {
+      await pumpScreen(tester, size: const Size(960, 720));
+      expect(find.byTooltip('Request actions'), findsNothing);
+
+      await openUsers(tester);
+      final list = tester.getCenter(find.byTooltip('More'));
+      final call = tester.getCenter(find.byTooltip('Request actions'));
+      expect(list.dx, lessThan(PeekScreen.listPaneWidth));
+      expect(call.dx, greaterThan(PeekScreen.listPaneWidth));
+      expect(call.dy, list.dy);
+
+      await tester.tap(find.byTooltip('Request actions'));
+      await settle(tester);
+      expect(find.text('Copy as cURL'), findsOneWidget);
+    });
+
     testWidgets('keeps the selection across a change of layout', (
       tester,
     ) async {

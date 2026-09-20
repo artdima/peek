@@ -152,7 +152,7 @@ void main() {
     await tester.tap(find.byTooltip(strings.back));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byTooltip(strings.more));
+    await tester.tap(find.byTooltip(strings.requestActions));
     await tester.pumpAndSettle();
     await tester.tap(find.text(strings.copyUrl));
     await tester.pumpAndSettle();
