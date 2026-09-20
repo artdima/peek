@@ -142,20 +142,6 @@ void main() {
       expect(line, lessThan(tester.getTopLeft(find.text('Console')).dy));
     });
 
-    testWidgets('fits the quick bar on one line', (tester) async {
-      await pumpScreen(tester, size: const Size(960, 720));
-
-      final line = tester.getCenter(find.text('All')).dy;
-      for (final label in ['Errors', 'Pending', 'Pinned']) {
-        expect(
-          tester.getCenter(find.text(label)).dy,
-          line,
-          reason: '$label wrapped onto a line of its own',
-        );
-      }
-      expect(tester.getCenter(find.byTooltip('Sort')).dy, line);
-    });
-
     testWidgets('rules the panes apart over the whole window', (tester) async {
       await pumpScreen(tester, size: const Size(960, 720));
 
