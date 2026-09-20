@@ -50,7 +50,6 @@ class _PeekExampleAppState extends State<PeekExampleApp> {
       peek: _peek,
       clients: _clients,
       share: _share,
-      mode: _mode,
       onModeChanged: (mode) => setState(() => _mode = mode),
     ),
   );
@@ -61,14 +60,12 @@ class _Home extends StatefulWidget {
     required this.peek,
     required this.clients,
     required this.share,
-    required this.mode,
     required this.onModeChanged,
   });
 
   final Peek peek;
   final ExampleClients clients;
   final PeekShareDelegate? share;
-  final ThemeMode mode;
   final ValueChanged<ThemeMode> onModeChanged;
 
   @override
@@ -119,7 +116,7 @@ class _HomeState extends State<_Home> {
 
   @override
   Widget build(BuildContext context) {
-    final dark = widget.mode == ThemeMode.dark;
+    final dark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
