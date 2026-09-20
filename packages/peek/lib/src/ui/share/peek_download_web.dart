@@ -30,8 +30,8 @@ final class _DownloadShareDelegate implements PeekShareDelegate {
     // anchor is not enough everywhere.
     final anchor =
         _Anchor._(_document.createElement('a'))
-          ..href = url
-          ..download = content.filename;
+          ..setAttribute('href', url)
+          ..setAttribute('download', content.filename);
     _document.body.append(anchor);
     anchor
       ..click()
@@ -59,13 +59,11 @@ extension type _Element._(JSObject _) implements JSObject {
   external void append(JSObject node);
 
   external void remove();
+
+  external void setAttribute(String name, String value);
 }
 
 extension type _Anchor._(JSObject _) implements _Element {
-  external set href(String value);
-
-  external set download(String value);
-
   external void click();
 }
 

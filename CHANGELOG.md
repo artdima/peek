@@ -3,6 +3,16 @@
 Each package keeps its own changelog; this one says what a release is.
 Versions move together, so every package always carries the same number.
 
+## 1.4.0
+
+A release about the console again; the adapters only carry the number. On
+the web an export saves itself through the browser, so a HAR reaches the
+disk without the app wiring up a sharing package. Where the screen is wide
+enough for both panes, the list and the call each wear a bar of their own
+and the rule between them runs the full height of the window.
+
+See [`peek`](packages/peek/CHANGELOG.md) for the details.
+
 ## 1.3.0
 
 A release about the screen rather than the packages. Peek pauses and

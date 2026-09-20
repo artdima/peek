@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.0
+
+Released alongside `peek` 1.4.0, which saves exports from a browser and
+rebuilt its wide layout. The README says more plainly what Peek does; the
+code in this package is unchanged.
+
 ## 1.3.0
 
 Released alongside `peek` 1.3.0, which rebuilt its screens. Nothing in this

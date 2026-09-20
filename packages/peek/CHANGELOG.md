@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.4.0
+
+Exports save themselves in a browser, and a wide layout gives the list and
+the call a bar each.
+
+- On the web an export no longer needs a `PeekShareDelegate`: without one
+  Peek hands the file to the browser, which puts it where downloads go. An
+  app that brings its own delegate still wins, and
+  `peekPlatformShareDelegate()` returns whatever the platform offers. The
+  URL behind the file now outlives the click that started the download, so
+  a large export arrives whole.
+- Side by side, each pane wears a bar of its own. The filters, the
+  clearing, the pause and the list's menu sit on the line the way out is
+  on, above the name; the call carries its own menu at the top of its
+  pane; and the rule between the panes runs the full height of the window
+  instead of starting below a bar that spanned both. The list pane is
+  wider, so the four quick modes and the order fit on one line.
+- A call's menu is named apart from the list's, in both layouts: 'Request
+  actions' rather than a second 'More'.
+- New in the public API: `peekPlatformShareDelegate()`,
+  `PeekSeparator.vertical()`, `PeekScreen.listPaneWidth` and
+  `PeekStrings.requestActions`.
+- The README and the package description say plainly that Peek records the
+  calls it shows, rather than describing it as a layer over someone else's
+  logger.
+
 ## 1.3.0
 
 The screen catches up with the work done on it every day.
