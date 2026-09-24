@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- New in the public API: `PeekCodec` writes every part of a call as
+  JSON-ready values and reads it back. Unlike HAR it loses nothing Peek
+  knows — pending calls, the kind of a failure and its stack trace, pins,
+  truncation, why a body is missing — and it reads leniently, so a newer
+  writer's unknown keys and kinds do not break an older reader. Session
+  files and remote viewing will be built on it.
+
 ## 1.4.0
 
 Exports save themselves in a browser, and a wide layout gives the list and

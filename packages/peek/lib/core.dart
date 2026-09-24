@@ -5,6 +5,7 @@
 /// on Flutter.
 library;
 
+export 'src/core/codec/peek_codec.dart';
 export 'src/core/export/peek_curl_exporter.dart';
 export 'src/core/export/peek_exporters.dart';
 export 'src/core/export/peek_har_exporter.dart';
