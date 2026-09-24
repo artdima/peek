@@ -18,6 +18,7 @@ final class PeekOptions {
     this.clock = const PeekSystemClock(),
     this.onError,
     this.enabled = true,
+    this.name,
   });
 
   /// How much is kept.
@@ -45,6 +46,12 @@ final class PeekOptions {
   /// off in release builds without touching the adapters.
   final bool enabled;
 
+  /// What the app calls itself in a saved session and on a desktop viewer.
+  ///
+  /// Pure Dart cannot read the app's name, so Peek only knows it if told;
+  /// without it a viewer shows the platform instead.
+  final String? name;
+
   /// A copy with the given fields replaced.
   PeekOptions copyWith({
     PeekLimits? limits,
@@ -52,14 +59,18 @@ final class PeekOptions {
     PeekClock? clock,
     PeekErrorHandler? onError,
     bool? enabled,
+    String? name,
   }) => PeekOptions(
     limits: limits ?? this.limits,
     redaction: redaction ?? this.redaction,
     clock: clock ?? this.clock,
     onError: onError ?? this.onError,
     enabled: enabled ?? this.enabled,
+    name: name ?? this.name,
   );
 
   @override
-  String toString() => 'PeekOptions($limits, $redaction, enabled: $enabled)';
+  String toString() =>
+      'PeekOptions(${name == null ? '' : '$name, '}$limits, $redaction, '
+      'enabled: $enabled)';
 }

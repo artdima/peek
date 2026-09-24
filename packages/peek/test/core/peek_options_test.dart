@@ -13,6 +13,7 @@ void main() {
       expect(const PeekRedactionPolicy().isEmpty, isFalse);
       expect(options.clock, isA<PeekSystemClock>());
       expect(options.onError, isNull);
+      expect(options.name, isNull);
     });
 
     test('copies with replaced fields', () {
@@ -26,6 +27,12 @@ void main() {
       expect(copy.limits.maxEntries, 5);
       expect(copy.onError, handler);
       expect(copy.redaction, PeekRedactionPolicy.none);
+      expect(copy.name, isNull);
+      expect(copy.copyWith(name: 'My App').name, 'My App');
+      expect(
+        const PeekOptions(name: 'My App').copyWith(enabled: false).name,
+        'My App',
+      );
     });
 
     test('prints the parts that matter', () {
@@ -34,6 +41,10 @@ void main() {
         'PeekOptions(PeekLimits(1000 entries, 1048576 body bytes, 50 pinned), '
         'PeekRedactionPolicy(0 headers, 0 query keys, 0 body keys), '
         'enabled: false)',
+      );
+      expect(
+        const PeekOptions(name: 'My App').toString(),
+        startsWith('PeekOptions(My App, PeekLimits('),
       );
     });
   });

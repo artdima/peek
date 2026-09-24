@@ -8,6 +8,15 @@
   truncation, why a body is missing — and it reads leniently, so a newer
   writer's unknown keys and kinds do not break an older reader. Session
   files and remote viewing will be built on it.
+- New in the public API: a session file. `PeekSessionWriter` writes a
+  `PeekSessionHeader` and then one line of JSON per call; `PeekSessionReader`
+  reads it back into a `PeekSession`. A broken line costs that line, not the
+  file, and is counted in `skipped`; a later line of the same call replaces
+  the earlier one, so a file can be appended to with
+  `PeekSessionCodec.encodeEntry` as calls complete. Peek hands over text and
+  never writes a file itself — where the lines go is up to the app.
+- `PeekOptions.name` says what the app calls itself in a saved session. Pure
+  Dart cannot read an app's name, so without it a viewer shows the platform.
 
 ## 1.4.0
 

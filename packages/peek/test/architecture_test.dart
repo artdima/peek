@@ -13,6 +13,11 @@ final RegExp _flutterDirective = RegExp(
 
 bool importsFlutter(String source) => _flutterDirective.hasMatch(source);
 
+final RegExp _dartIoImport = RegExp(
+  r'''^\s*import\s+['"]dart:io['"]''',
+  multiLine: true,
+);
+
 List<String> dartFilesImportingFlutter(Directory directory) =>
     directory
         .listSync(recursive: true)
@@ -32,6 +37,27 @@ void main() {
     );
 
     expect(dartFilesImportingFlutter(directory), isEmpty);
+  });
+
+  test('core reaches dart:io in one file, behind a conditional import', () {
+    final importers =
+        Directory(coreDirectory)
+            .listSync(recursive: true)
+            .whereType<File>()
+            .where((file) => file.path.endsWith('.dart'))
+            .where((file) => _dartIoImport.hasMatch(file.readAsStringSync()))
+            .map((file) => file.path)
+            .toList();
+    expect(importers, [endsWith('internal/host_platform_io.dart')]);
+
+    final header =
+        File(
+          '$coreDirectory/session/peek_session_header.dart',
+        ).readAsStringSync();
+    expect(
+      header,
+      contains("if (dart.library.io) '../internal/host_platform_io.dart'"),
+    );
   });
 
   test('the scan finds a planted Flutter import', () {
