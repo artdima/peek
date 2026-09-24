@@ -119,6 +119,18 @@ abstract final class PeekIcons {
     ],
   );
 
+  /// Saves something as a file.
+  static const PeekIconData download = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M21 15L21 19C21 20.105 20.105 21 19 21L5 21C3.895 21 3 20.105 3 19L3 15',
+      'M7 10L12 15L17 10',
+      'M12 15L12 3',
+    ],
+  );
+
   /// Keeps a call where eviction cannot reach it.
   static const PeekIconData pin = PeekIconData(
     width: 24,

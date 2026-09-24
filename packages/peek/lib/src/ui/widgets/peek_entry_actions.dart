@@ -2,6 +2,9 @@ import 'package:flutter/widgets.dart';
 
 import '../../core/export/peek_exporters.dart';
 import '../../core/model/peek_entry.dart';
+import '../../core/peek.dart';
+import '../../core/session/peek_session.dart';
+import '../../core/session/peek_session_header.dart';
 import '../icons/peek_icons.dart';
 import '../peek_scope.dart';
 import '../peek_share.dart';
@@ -126,6 +129,8 @@ Future<void> showPeekEntryActions(
   }
 }
 
+enum _ListAction { copyHar, shareHar, saveSession }
+
 /// Offers what can be done with the list as it stands, and does it.
 Future<void> showPeekListActions(BuildContext context) async {
   final controller = PeekScope.read(context);
@@ -134,34 +139,43 @@ Future<void> showPeekListActions(BuildContext context) async {
   final entries = controller.entries;
   final origin = peekShareOrigin(context);
 
-  final action = await showPeekActions<PeekEntryAction>(
+  final action = await showPeekActions<_ListAction>(
     context,
     title: strings.requestCount(entries.length, controller.totalCount),
     actions: [
       PeekAction(
-        value: PeekEntryAction.copyHar,
+        value: _ListAction.copyHar,
         label: strings.exportHar,
         icon: PeekIcons.braces,
         section: strings.copy,
       ),
-      if (share != null)
+      if (share != null) ...[
         PeekAction(
-          value: PeekEntryAction.shareHar,
+          value: _ListAction.shareHar,
           label: strings.shareHar,
           icon: PeekIcons.share,
           section: strings.share,
         ),
+        PeekAction(
+          value: _ListAction.saveSession,
+          label: strings.saveSession,
+          icon: PeekIcons.download,
+          section: strings.share,
+        ),
+      ],
     ],
   );
   if (action == null || !context.mounted) return;
 
-  // What the list shows is what gets exported: the filter is part of the
-  // question being asked.
+  // A HAR holds what the list shows — the filter is part of the question
+  // being asked. A session holds everything: it is the record itself.
   switch (action) {
-    case PeekEntryAction.shareHar:
-      await share?.share(peekHarContent(entries, 'peek', origin: origin));
-    case _:
+    case _ListAction.copyHar:
       await peekCopy(context, PeekExporters.har.export(entries, pretty: true));
+    case _ListAction.shareHar:
+      await share?.share(peekHarContent(entries, 'peek', origin: origin));
+    case _ListAction.saveSession:
+      await share?.share(peekSessionContent(controller.peek, origin: origin));
   }
 }
 
@@ -216,3 +230,48 @@ PeekShareContent peekHarContent(
   origin: origin,
   text: PeekExporters.har.export(entries, pretty: true),
 );
+
+/// A `.peek` session of everything [peek] holds, whatever a list shows,
+/// shared from [origin] where the platform wants to know.
+///
+/// The file is named after the app — `PeekOptions.name`, or the platform
+/// when the app gave none — and the local time it was saved:
+/// `peek-acme-shop-20260925-093012.peek`.
+PeekShareContent peekSessionContent(Peek peek, {Rect? origin}) {
+  final entries = peek.store.entries;
+  final now = peek.options.clock.now();
+  final header = PeekSessionHeader.current(
+    name: peek.options.name,
+    startedAt:
+        entries.isEmpty
+            ? now
+            : entries
+                .map((entry) => entry.startedAt)
+                .reduce((a, b) => a.isBefore(b) ? a : b),
+  );
+  final filename =
+      'peek-${_fileNamePart(header.name ?? header.platform)}-'
+      '${_fileTimestamp(now)}.peek';
+  return PeekShareContent(
+    filename: filename,
+    mimeType: 'application/x-ndjson',
+    subject: header.name ?? 'peek',
+    origin: origin,
+    text: const PeekSessionWriter().write(header, entries),
+  );
+}
+
+String _fileNamePart(String name) {
+  final part = name
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^\p{L}\p{N}]+', unicode: true), '-')
+      .replaceAll(RegExp(r'^-+|-+$'), '');
+  return part.isEmpty ? 'app' : part;
+}
+
+String _fileTimestamp(DateTime time) {
+  final local = time.toLocal();
+  String two(int value) => value.toString().padLeft(2, '0');
+  return '${local.year}${two(local.month)}${two(local.day)}-'
+      '${two(local.hour)}${two(local.minute)}${two(local.second)}';
+}

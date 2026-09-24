@@ -250,6 +250,9 @@ class PeekStrings {
   /// Shares an HTTP Archive of everything the list shows.
   String get shareHar => 'Share as HAR';
 
+  /// Saves everything recorded as a session file.
+  String get saveSession => 'Save session';
+
   /// Names the menu of everything else the list can do.
   String get more => 'More';
 

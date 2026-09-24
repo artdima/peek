@@ -17,6 +17,12 @@
   never writes a file itself — where the lines go is up to the app.
 - `PeekOptions.name` says what the app calls itself in a saved session. Pure
   Dart cannot read an app's name, so without it a viewer shows the platform.
+- The list's menu saves a session: everything recorded, not only what the
+  list shows, as a `.peek` file named after the app and the time. It sits
+  beside Share as HAR and appears where that does — with the app's
+  `PeekShareDelegate`, or as a download on the web. `peekSessionContent`
+  builds the same file for an app's own menu; `PeekIcons.download` and
+  `PeekStrings.saveSession` are new.
 
 ## 1.4.0
 

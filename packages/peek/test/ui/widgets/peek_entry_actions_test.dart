@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,8 +16,12 @@ void main() {
     WidgetTester tester, {
     PeekShareDelegate? share,
     List<PeekEntry> entries = const [],
+    PeekOptions? options,
   }) async {
-    final wired = fakePeek(entries: entries.isEmpty ? fixtures : entries);
+    final wired = fakePeek(
+      entries: entries.isEmpty ? fixtures : entries,
+      options: options,
+    );
     controller = PeekController(wired.peek);
     addTearDown(controller.dispose);
     addTearDown(wired.peek.dispose);
@@ -167,6 +173,74 @@ void main() {
       await settle(tester);
       expect(find.text('Export HAR'), findsOneWidget);
       expect(find.text('Share as HAR'), findsNothing);
+      expect(find.text('Save session'), findsNothing);
+    });
+
+    testWidgets('saves everything recorded, not what the list shows', (
+      tester,
+    ) async {
+      final shared = <PeekShareContent>[];
+      await pumpScreen(
+        tester,
+        options: const PeekOptions(name: 'Acme Shop'),
+        share: PeekShareDelegate.from((content) async => shared.add(content)),
+      );
+      controller.filter = const PeekFilter(methods: {'POST'});
+      await tester.pump();
+
+      await tester.tap(find.byTooltip('More'));
+      await settle(tester);
+      expect(find.text('SHARE'), findsOneWidget);
+      await tester.tap(find.text('Save session'));
+      await settle(tester);
+
+      final content = shared.single;
+      expect(
+        content.filename,
+        matches(RegExp(r'^peek-acme-shop-\d{8}-\d{6}\.peek$')),
+      );
+      expect(content.mimeType, 'application/x-ndjson');
+
+      final session = const PeekSessionReader().readString(content.text);
+      expect(session.header.name, 'Acme Shop');
+      expect(session.header.startedAt, fixtureStart);
+      expect(session.skipped, 0);
+      expect(session.entries, fixtures);
+    });
+  });
+
+  group('peekSessionContent', () {
+    test('names the file after the platform when the app gave no name', () {
+      final wired = fakePeek(entries: [e1]);
+      addTearDown(wired.peek.dispose);
+
+      expect(
+        peekSessionContent(wired.peek).filename,
+        matches(RegExp('^peek-${Platform.operatingSystem}-\\d{8}-\\d{6}')),
+      );
+    });
+
+    test('keeps the letters and digits of a name in any script', () {
+      final wired = fakePeek(
+        entries: [e1],
+        options: const PeekOptions(name: '  Моё Приложение 2!  '),
+      );
+      addTearDown(wired.peek.dispose);
+
+      expect(
+        peekSessionContent(wired.peek).filename,
+        startsWith('peek-моё-приложение-2-'),
+      );
+    });
+
+    test('writes a session with no calls when nothing was recorded', () {
+      final wired = fakePeek();
+      addTearDown(wired.peek.dispose);
+
+      final content = peekSessionContent(wired.peek);
+      final session = const PeekSessionReader().readString(content.text);
+      expect(session.entries, isEmpty);
+      expect(session.header.startedAt, wired.clock.now());
     });
   });
 }
