@@ -74,6 +74,14 @@ melos:
       packageFilters:
         dirExists: test
 
+    spec:update:
+      description: >-
+        Rewrite the reference files of doc/spec from what Peek writes today.
+      exec:
+        command: flutter test --dart-define=PEEK_UPDATE_SPEC=true test/spec
+      packageFilters:
+        scope: peek
+
     pana:
       description: Score the publishable packages the way pub.dev does.
       exec:
