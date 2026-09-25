@@ -76,3 +76,22 @@ final Map<String, PeekRemoteFrame> referenceFrames = {
   'ping': const PeekRemotePing(),
   'pong': const PeekRemotePong(),
 };
+
+/// A call named [id], with [body] sent and, when given, [response] back.
+PeekEntry call(
+  String id, {
+  PeekBody body = const PeekBody.empty(),
+  PeekResponse? response,
+}) {
+  final entry = PeekEntry(
+    id: PeekId(id),
+    request: PeekRequest(
+      method: 'POST',
+      uri: Uri.parse('https://api.example.com/$id'),
+      body: body,
+    ),
+    startedAt: frameStart,
+    source: 'dio',
+  );
+  return response == null ? entry : entry.complete(response, at: frameStart);
+}

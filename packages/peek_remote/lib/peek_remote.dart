@@ -12,5 +12,8 @@
 /// import.
 library;
 
+export 'src/client/peek_remote.dart';
+export 'src/client/peek_remote_endpoint.dart';
 export 'src/protocol/peek_remote_codec.dart';
 export 'src/protocol/peek_remote_frame.dart';
+export 'src/transport/peek_remote_transport.dart';

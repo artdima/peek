@@ -5,6 +5,7 @@ import 'chopper_scenarios.dart';
 import 'clients.dart';
 import 'demo_data.dart';
 import 'http_scenarios.dart';
+import 'remote_setup.dart';
 import 'scenarios.dart';
 import 'share.dart';
 
@@ -24,6 +25,12 @@ class _PeekExampleAppState extends State<PeekExampleApp> {
   late final ExampleClients _clients = ExampleClients(_peek);
   late final PeekShareDelegate? _share = buildShareDelegate();
   ThemeMode _mode = ThemeMode.system;
+
+  @override
+  void initState() {
+    super.initState();
+    startRemote(_peek);
+  }
 
   @override
   void dispose() {
