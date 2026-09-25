@@ -11,6 +11,7 @@ workspace:
   - packages/peek_chopper
   - packages/peek_dio
   - packages/peek_http
+  - packages/peek_remote
   - packages/peek_talker
 
 dev_dependencies:
@@ -80,7 +81,9 @@ melos:
       exec:
         command: flutter test --dart-define=PEEK_UPDATE_SPEC=true test/spec
       packageFilters:
-        scope: peek
+        scope:
+          - peek
+          - peek_remote
 
     pana:
       description: Score the publishable packages the way pub.dev does.
