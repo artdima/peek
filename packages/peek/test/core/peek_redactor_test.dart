@@ -163,13 +163,15 @@ void main() {
       expect(identical(redactor.redactBody(clean), clean), isTrue);
     });
 
-    test('leaves bytes, empty and unavailable bodies untouched', () {
+    test('leaves bytes, empty, unavailable and remote bodies untouched', () {
       final bytes = PeekBytesBody(Uint8List.fromList([1, 2]));
       const empty = PeekBody.empty();
       const missing = PeekBody.unavailable(PeekBodyUnavailableReason.streamed);
+      const remote = PeekBody.remote(size: 10);
       expect(identical(redactor.redactBody(bytes), bytes), isTrue);
       expect(identical(redactor.redactBody(empty), empty), isTrue);
       expect(identical(redactor.redactBody(missing), missing), isTrue);
+      expect(identical(redactor.redactBody(remote), remote), isTrue);
     });
 
     test('uses the configured replacement', () {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' show Icons, MaterialPageRoute;
 import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_body.dart';
+import '../../core/model/peek_body_loader.dart';
 import '../../core/model/peek_id.dart';
 import '../peek_scope.dart';
 import '../theme/peek_theme.dart';
@@ -74,6 +75,7 @@ Future<void> showPeekDetail(
   final controller = PeekScope.read(context);
   final strings = PeekScope.stringsOf(context);
   final share = PeekScope.shareOf(context);
+  final bodyLoader = PeekScope.bodyLoaderOf(context);
   return Navigator.of(context).push(
     MaterialPageRoute<void>(
       builder:
@@ -81,6 +83,7 @@ Future<void> showPeekDetail(
             controller: controller,
             strings: strings,
             share: share,
+            bodyLoader: bodyLoader,
             child: _PeekDetailScreen(title: title, builder: builder),
           ),
     ),
@@ -88,14 +91,19 @@ Future<void> showPeekDetail(
 }
 
 /// Pushes [body] over [context], titled [title].
+///
+/// [entryId] and [side] say where the body came from, so one held elsewhere
+/// can be loaded; see [PeekRemoteBodyView].
 Future<void> showPeekBody(
   BuildContext context, {
   required PeekBody body,
   required String title,
+  PeekId? entryId,
+  PeekBodySide? side,
 }) => showPeekDetail(
   context,
   title: title,
-  builder: (context) => PeekBodyView(body),
+  builder: (context) => PeekBodyView(body, entryId: entryId, side: side),
 );
 
 class _PeekDetailScreen extends StatelessWidget {
@@ -132,6 +140,7 @@ Future<void> showPeekEntry(BuildContext context, PeekId id) {
   final controller = PeekScope.read(context);
   final strings = PeekScope.stringsOf(context);
   final share = PeekScope.shareOf(context);
+  final bodyLoader = PeekScope.bodyLoaderOf(context);
   return Navigator.of(context).push(
     MaterialPageRoute<void>(
       builder:
@@ -139,6 +148,7 @@ Future<void> showPeekEntry(BuildContext context, PeekId id) {
             controller: controller,
             strings: strings,
             share: share,
+            bodyLoader: bodyLoader,
             child: PeekEntryScreen(id),
           ),
     ),

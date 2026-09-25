@@ -261,10 +261,30 @@ void main() {
       );
     });
 
+    test('writes a body held elsewhere and reads it back', () {
+      const body = PeekBody.remote(size: 2048, contentType: PeekMediaType.json);
+      expect(codec.encodeBody(body), {
+        'kind': 'remote',
+        'size': 2048,
+        'type': 'application/json',
+      });
+      expect(bodyRoundTrip(body), body);
+
+      const cut = PeekBody.remote(size: 9, isTruncated: true);
+      expect(codec.encodeBody(cut), {
+        'kind': 'remote',
+        'size': 9,
+        'truncated': true,
+      });
+      expect(bodyRoundTrip(cut), cut);
+
+      expect(() => codec.decodeBody({'kind': 'remote'}), throwsFormatException);
+    });
+
     test('reads a body kind from a newer writer as not captured', () {
       expect(
         codec.decodeBody({
-          'kind': 'remote',
+          'kind': 'hologram',
           'type': 'application/json',
           'size': 2048,
         }),

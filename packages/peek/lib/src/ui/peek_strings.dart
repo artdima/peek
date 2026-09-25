@@ -470,6 +470,21 @@ class PeekStrings {
   /// Says how many characters are hidden.
   String moreCharacters(int count) => '$count more characters';
 
+  /// Title of a body held elsewhere, such as on the device.
+  String get remoteBody => 'Body is on the device';
+
+  /// Loads a body held elsewhere.
+  String get loadBody => 'Load body';
+
+  /// Shown on the button while a body loads.
+  String get loadingBody => 'Loading…';
+
+  /// Title shown when a body could not be loaded.
+  String get loadBodyFailed => "Couldn't load the body";
+
+  /// Tries a failed action again.
+  String get retry => 'Retry';
+
   /// Describes a body Peek could not capture.
   String unavailableBody(PeekBodyUnavailableReason reason) => switch (reason) {
     PeekBodyUnavailableReason.streamed => 'Body was streamed and not kept',

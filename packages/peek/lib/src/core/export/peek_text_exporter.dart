@@ -105,5 +105,7 @@ final class PeekTextExporter {
       for (final file in files) _describeFile(file),
     ].join('\n'),
     PeekUnavailableBody(:final reason) => '<body not captured: ${reason.name}>',
+    PeekRemoteBody(:final size) =>
+      '<body still on the device: ${formatBytes(size)}>',
   };
 }

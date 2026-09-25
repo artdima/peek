@@ -106,6 +106,16 @@ void main() {
       );
     });
 
+    test('says when the body is still on the device', () {
+      expect(
+        exporter.exportRequest(
+          request(method: 'POST', body: const PeekBody.remote(size: 10)),
+        ),
+        "curl -X POST 'https://api.example.com/users?page=1&q=a%20b'\n"
+        '# body still on the device; load it to include it',
+      );
+    });
+
     test('asks for headers only on HEAD', () {
       expect(
         exporter.exportRequest(request(method: 'HEAD')),

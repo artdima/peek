@@ -55,6 +55,7 @@ Future<T?> showPeekSheet<T>(
   final controller = PeekScope.read(context);
   final strings = PeekScope.stringsOf(context);
   final share = PeekScope.shareOf(context);
+  final bodyLoader = PeekScope.bodyLoaderOf(context);
 
   return showGeneralDialog<T>(
     context: context,
@@ -67,6 +68,7 @@ Future<T?> showPeekSheet<T>(
           controller: controller,
           strings: strings,
           share: share,
+          bodyLoader: bodyLoader,
           child: _SheetFrame(builder: builder),
         ),
     transitionBuilder:

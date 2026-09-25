@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_body.dart';
+import '../../core/model/peek_body_loader.dart';
 import '../../core/model/peek_entry.dart';
 import '../../core/model/peek_status_class.dart';
 import '../icons/icons.dart';
@@ -299,6 +300,8 @@ class _Contents extends StatelessWidget {
                                               context,
                                               body: response.body,
                                               title: strings.responseBody,
+                                              entryId: entry.id,
+                                              side: PeekBodySide.response,
                                             ),
                                           ),
                                 ),
@@ -324,6 +327,8 @@ class _Contents extends StatelessWidget {
                           context,
                           body: request.body,
                           title: strings.requestBody,
+                          entryId: entry.id,
+                          side: PeekBodySide.request,
                         ),
                       ),
             ),
@@ -391,6 +396,8 @@ class _Contents extends StatelessWidget {
                           context,
                           body: response.body,
                           title: strings.responseBody,
+                          entryId: entry.id,
+                          side: PeekBodySide.response,
                         ),
                       ),
             ),

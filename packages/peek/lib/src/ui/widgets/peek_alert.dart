@@ -19,6 +19,7 @@ Future<bool> showPeekAlert(
   final controller = PeekScope.read(context);
   final strings = PeekScope.stringsOf(context);
   final share = PeekScope.shareOf(context);
+  final bodyLoader = PeekScope.bodyLoaderOf(context);
 
   final confirmed = await showGeneralDialog<bool>(
     context: context,
@@ -31,6 +32,7 @@ Future<bool> showPeekAlert(
           controller: controller,
           strings: strings,
           share: share,
+          bodyLoader: bodyLoader,
           child: _Alert(
             title: title,
             message: message,

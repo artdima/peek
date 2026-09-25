@@ -1,15 +1,19 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart' show Icons, SelectableText;
 import 'package:flutter/widgets.dart';
 
 import '../../core/model/peek_body.dart';
+import '../../core/model/peek_body_loader.dart';
 import '../../core/model/peek_form_data.dart';
+import '../../core/model/peek_id.dart';
 import '../icons/peek_icons.dart';
 import '../peek_scope.dart';
 import '../theme/peek_theme.dart';
 import 'peek_copy_button.dart';
 import 'peek_empty_state.dart';
+import 'peek_filled_button.dart';
 import 'peek_icon_button.dart';
 import 'peek_json_tree_view.dart';
 import 'peek_key_value_row.dart';
@@ -34,13 +38,28 @@ enum PeekBodyMode {
 /// ways, so only JSON offers the choice.
 final class PeekBodyView extends StatefulWidget {
   /// Creates a view over [body], opened in [mode] where that applies.
-  const PeekBodyView(this.body, {this.mode = PeekBodyMode.tree, super.key});
+  ///
+  /// [entryId] and [side] say where the body came from; a body held
+  /// elsewhere needs them to be loaded.
+  const PeekBodyView(
+    this.body, {
+    this.mode = PeekBodyMode.tree,
+    this.entryId,
+    this.side,
+    super.key,
+  });
 
   /// What to show.
   final PeekBody body;
 
   /// How to show a body that can be read either way.
   final PeekBodyMode mode;
+
+  /// The call the body belongs to.
+  final PeekId? entryId;
+
+  /// Which half of the call it is.
+  final PeekBodySide? side;
 
   @override
   State<PeekBodyView> createState() => _PeekBodyViewState();
@@ -103,7 +122,110 @@ class _PeekBodyViewState extends State<PeekBodyView> {
       final PeekBytesBody bytes when bytes.contentType?.isImage ?? false =>
         PeekImageBodyView(bytes),
       final PeekBytesBody bytes => PeekBinaryBodyView(bytes),
+      final PeekRemoteBody remote => PeekRemoteBodyView(
+        remote,
+        entryId: widget.entryId,
+        side: widget.side,
+      ),
     };
+  }
+}
+
+/// A body held elsewhere: its type and size and, when the scope has a
+/// [PeekBodyLoader], a button that loads it.
+///
+/// What comes back is shown here and put into the store in place of this
+/// body, so the call shows it from then on and it is loaded once. A failure
+/// says so and offers to try again; the body stays where it was.
+final class PeekRemoteBodyView extends StatefulWidget {
+  /// Creates a view over [body], which belongs to the call with [entryId]
+  /// on [side]; without them there is nothing to load.
+  const PeekRemoteBodyView(this.body, {this.entryId, this.side, super.key});
+
+  /// What is known of the body.
+  final PeekRemoteBody body;
+
+  /// The call the body belongs to.
+  final PeekId? entryId;
+
+  /// Which half of the call it is.
+  final PeekBodySide? side;
+
+  @override
+  State<PeekRemoteBodyView> createState() => _PeekRemoteBodyViewState();
+}
+
+class _PeekRemoteBodyViewState extends State<PeekRemoteBodyView> {
+  PeekBody? _loaded;
+  bool _loading = false;
+  bool _failed = false;
+
+  Future<void> _load(
+    PeekBodyLoader loader,
+    PeekId id,
+    PeekBodySide side,
+  ) async {
+    final store = PeekScope.read(context).peek.store;
+    setState(() {
+      _loading = true;
+      _failed = false;
+    });
+    try {
+      final body = await loader.load(id, side);
+      // A loader that answers with the marker again has loaded nothing.
+      if (body is PeekRemoteBody) throw StateError('$body is not loaded');
+      if (store.find(id) case final entry?) {
+        store.upsert(entry.withBody(side, body));
+      }
+      if (!mounted) return;
+      setState(() {
+        _loaded = body;
+        _loading = false;
+      });
+    } on Object {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _failed = true;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loaded case final body?) {
+      return PeekBodyView(body, entryId: widget.entryId, side: widget.side);
+    }
+
+    final strings = PeekScope.stringsOf(context);
+    final body = widget.body;
+    final loader = PeekScope.bodyLoaderOf(context);
+    final id = widget.entryId;
+    final side = widget.side;
+    final facts = [
+      if (body.contentType case final type?) type.mimeType,
+      strings.bytes(body.size),
+    ].join(' · ');
+
+    return PeekEmptyState(
+      title: _failed ? strings.loadBodyFailed : strings.remoteBody,
+      message: facts,
+      icon: _failed ? Icons.error_outline : Icons.cloud_outlined,
+      action:
+          loader == null || id == null || side == null
+              ? null
+              : PeekFilledButton(
+                label:
+                    _loading
+                        ? strings.loadingBody
+                        : _failed
+                        ? strings.retry
+                        : strings.loadBody,
+                icon: Icons.cloud_download_outlined,
+                onPressed:
+                    _loading ? null : () => unawaited(_load(loader, id, side)),
+              ),
+    );
   }
 }
 

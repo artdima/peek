@@ -99,7 +99,7 @@ final class PeekHarExporter {
             },
         ],
       },
-      PeekEmptyBody() || PeekUnavailableBody() => null,
+      PeekEmptyBody() || PeekUnavailableBody() || PeekRemoteBody() => null,
     };
   }
 
@@ -151,6 +151,7 @@ final class PeekHarExporter {
         PeekUnavailableBody(:final reason) => {
           'comment': 'not captured by Peek (${reason.name})',
         },
+        PeekRemoteBody() => {'comment': 'not loaded from the device'},
         PeekFormBody() || PeekEmptyBody() => <String, Object?>{},
       },
     };

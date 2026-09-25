@@ -301,6 +301,27 @@ void main() {
       });
     });
 
+    test('leaves a body still on the device out, saying so', () {
+      final remote = rich.copyWith(
+        request: rich.request.copyWith(body: const PeekBody.remote(size: 12)),
+        response: rich.response!.copyWith(
+          body: const PeekBody.remote(
+            size: 40,
+            contentType: PeekMediaType.json,
+          ),
+        ),
+      );
+      final entry = single(remote);
+      final request = entry['request']! as Map<String, Object?>;
+      final response = entry['response']! as Map<String, Object?>;
+      expect(request.containsKey('postData'), isFalse);
+      expect(response['content'], {
+        'size': 40,
+        'mimeType': 'application/json',
+        'comment': 'not loaded from the device',
+      });
+    });
+
     test('exports valid JSON, compact or pretty', () {
       final compact = exporter.export(fixtures);
       final pretty = exporter.export(fixtures, pretty: true);

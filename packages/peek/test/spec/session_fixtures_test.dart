@@ -28,7 +28,8 @@ final PeekSessionHeader _header = PeekSessionHeader(
 );
 
 // What the UI fixtures do not show: a cut-off body, timing phases, a failure
-// with details and a stack trace, and extra request data.
+// with details and a stack trace, extra request data, and a body held on the
+// device.
 final PeekEntry _truncated = PeekEntry(
   id: const PeekId('spec-truncated'),
   request: PeekRequest(
@@ -114,7 +115,33 @@ final PeekEntry _crashed = PeekEntry(
   completedAt: fixtureStart.add(const Duration(seconds: 25)),
 );
 
-final List<PeekEntry> _basic = [...uiFixtures, _truncated, _timed, _crashed];
+final PeekEntry _remote = PeekEntry(
+  id: const PeekId('spec-remote'),
+  request: PeekRequest(
+    method: 'GET',
+    uri: Uri.parse('https://api.example.com/catalog'),
+  ),
+  startedAt: fixtureStart.add(const Duration(seconds: 26)),
+  source: 'dio',
+  response: PeekResponse(
+    statusCode: 200,
+    headers: PeekHeaders.fromMap({'Content-Type': 'application/json'}),
+    body: const PeekBody.remote(
+      size: 5242880,
+      contentType: PeekMediaType.json,
+      isTruncated: true,
+    ),
+  ),
+  completedAt: fixtureStart.add(const Duration(seconds: 26, milliseconds: 420)),
+);
+
+final List<PeekEntry> _basic = [
+  ...uiFixtures,
+  _truncated,
+  _timed,
+  _crashed,
+  _remote,
+];
 
 String _text(Iterable<String> lines) => lines.map((line) => '$line\n').join();
 
@@ -190,7 +217,7 @@ Map<String, String> _files() {
         ...jsonDecode(_codec.encodeEntry(e3)) as Map<String, Object?>,
         'response': {
           'status': 200,
-          'body': {'kind': 'remote', 'type': 'image/png', 'size': 48213},
+          'body': {'kind': 'hologram', 'type': 'image/png', 'size': 48213},
         },
       }),
       jsonEncode({

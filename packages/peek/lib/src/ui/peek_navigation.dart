@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' show MaterialPageRoute;
 import 'package:flutter/widgets.dart';
 
+import '../core/model/peek_body_loader.dart';
 import '../core/peek.dart';
 import 'peek_share.dart';
 import 'peek_strings.dart';
@@ -22,6 +23,7 @@ Future<void> showPeek(
   Peek? peek,
   PeekStrings strings = const PeekStrings(),
   PeekShareDelegate? share,
+  PeekBodyLoader? bodyLoader,
   bool fullscreenDialog = true,
   bool rootNavigator = true,
 }) => _navigatorFor(context, rootNavigator).push(
@@ -29,6 +31,7 @@ Future<void> showPeek(
     peek: peek,
     strings: strings,
     share: share,
+    bodyLoader: bodyLoader,
     fullscreenDialog: fullscreenDialog,
   ),
 );
@@ -73,10 +76,17 @@ final class PeekRoute extends MaterialPageRoute<void> {
     Peek? peek,
     PeekStrings strings = const PeekStrings(),
     PeekShareDelegate? share,
+    PeekBodyLoader? bodyLoader,
     super.fullscreenDialog = true,
     super.settings,
   }) : super(
-         builder: (_) => PeekScreen(peek: peek, strings: strings, share: share),
+         builder:
+             (_) => PeekScreen(
+               peek: peek,
+               strings: strings,
+               share: share,
+               bodyLoader: bodyLoader,
+             ),
        );
 
   /// The name this route is usually registered under.
@@ -94,6 +104,7 @@ extension PeekNavigation on Peek {
     BuildContext context, {
     PeekStrings strings = const PeekStrings(),
     PeekShareDelegate? share,
+    PeekBodyLoader? bodyLoader,
     bool fullscreenDialog = true,
     bool rootNavigator = true,
   }) => showPeek(
@@ -101,6 +112,7 @@ extension PeekNavigation on Peek {
     peek: this,
     strings: strings,
     share: share,
+    bodyLoader: bodyLoader,
     fullscreenDialog: fullscreenDialog,
     rootNavigator: rootNavigator,
   );

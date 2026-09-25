@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../core/model/peek_body_loader.dart';
 import '../core/peek.dart';
 import 'peek_controller.dart';
 import 'peek_share.dart';
@@ -16,6 +17,7 @@ final class PeekScope extends InheritedNotifier<PeekController> {
     required super.child,
     this.strings = const PeekStrings(),
     this.share,
+    this.bodyLoader,
     super.key,
   }) : super(notifier: controller);
 
@@ -24,6 +26,9 @@ final class PeekScope extends InheritedNotifier<PeekController> {
 
   /// What hands exported content to the platform, when the app gave one.
   final PeekShareDelegate? share;
+
+  /// What fetches a body held elsewhere, when the app gave one.
+  final PeekBodyLoader? bodyLoader;
 
   /// The controller above [context], rebuilding on every change.
   static PeekController of(BuildContext context) {
@@ -49,6 +54,11 @@ final class PeekScope extends InheritedNotifier<PeekController> {
       context.getInheritedWidgetOfExactType<PeekScope>()?.share ??
       peekPlatformShareDelegate();
 
+  /// What fetches a body held elsewhere; `null` when nothing can, and then
+  /// such a body shows what is known of it and no button.
+  static PeekBodyLoader? bodyLoaderOf(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<PeekScope>()?.bodyLoader;
+
   /// The words to show, without subscribing to the controller.
   static PeekStrings stringsOf(BuildContext context) {
     final scope = context.getInheritedWidgetOfExactType<PeekScope>();
@@ -60,5 +70,6 @@ final class PeekScope extends InheritedNotifier<PeekController> {
   bool updateShouldNotify(PeekScope oldWidget) =>
       strings != oldWidget.strings ||
       share != oldWidget.share ||
+      bodyLoader != oldWidget.bodyLoader ||
       super.updateShouldNotify(oldWidget);
 }

@@ -87,7 +87,10 @@ final class PeekRedactor {
   PeekBody redactBody(PeekBody body) => switch (body) {
     PeekTextBody() => _redactText(body),
     PeekFormBody() => _redactForm(body),
-    PeekBytesBody() || PeekEmptyBody() || PeekUnavailableBody() => body,
+    PeekBytesBody() ||
+    PeekEmptyBody() ||
+    PeekUnavailableBody() ||
+    PeekRemoteBody() => body,
   };
 
   String _maskHeader(String name, String value) => switch (name.toLowerCase()) {

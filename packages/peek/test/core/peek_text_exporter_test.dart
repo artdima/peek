@@ -132,6 +132,11 @@ void main() {
       );
       expect(missing, contains('<body not captured: streamed>'));
 
+      final remote = exporter.export(
+        entry(requestBody: const PeekBody.remote(size: 3072)),
+      );
+      expect(remote, contains('<body still on the device: 3 KB>'));
+
       final form = exporter.export(
         entry(
           requestBody: PeekBody.form(

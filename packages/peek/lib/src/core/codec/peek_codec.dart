@@ -200,6 +200,11 @@ final class PeekCodec {
         'reason': reason.name,
         if (size != null) 'size': size,
       },
+      PeekRemoteBody(:final size, :final isTruncated) => {
+        'kind': 'remote',
+        'size': size,
+        if (isTruncated) 'truncated': true,
+      },
     },
     if (body.contentType case final type?) 'type': encodeMediaType(type),
   };
@@ -236,6 +241,11 @@ final class PeekCodec {
             PeekBodyUnavailableReason.notCaptured,
         contentType: type,
         size: size,
+      ),
+      'remote' => PeekBody.remote(
+        size: _int(map, 'size'),
+        contentType: type,
+        isTruncated: _optionalBool(map, 'truncated') ?? false,
       ),
       // A kind from a newer writer: the body exists, but not in a form this
       // reader can hold.

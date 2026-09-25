@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- **Breaking:** `PeekBody` has a sixth kind, `PeekRemoteBody`
+  (`PeekBody.remote`) — a body that exists and can be had, but is held
+  elsewhere: on the device, when a desktop viewer shows the calls. It knows
+  its size and type and holds nothing else. A `switch` over `PeekBody` that
+  names every kind stops compiling; add a case for it (or a `_` case) —
+  treating it like `PeekUnavailableBody` is a safe start. The codec writes it
+  as the `remote` body kind, which readers before this one take for a body
+  that was not captured.
+- New in the public API: `PeekBodyLoader` fetches a `PeekRemoteBody`, and
+  `PeekBodySide` says which half of a call a body is. Hand a loader to
+  `PeekScreen` (or `showPeek`, `PeekRoute`, `Peek.open`, `PeekOverlay`,
+  `PeekScope`) and such a body shows its size and type with a Load body
+  button; what the loader returns replaces the body in the store, so it is
+  loaded once, and a failure offers Retry. Without a loader there is no
+  button. `PeekEntry.bodyOn` and `PeekEntry.withBody` reach a body by its
+  side; `PeekRemoteBodyView` and five `PeekStrings` (`remoteBody`,
+  `loadBody`, `loadingBody`, `loadBodyFailed`, `retry`) are new.
 - New in the public API: `PeekCodec` writes every part of a call as
   JSON-ready values and reads it back. Unlike HAR it loses nothing Peek
   knows — pending calls, the kind of a failure and its stack trace, pins,

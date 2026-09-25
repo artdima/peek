@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
+import '../core/model/peek_body_loader.dart';
 import '../core/model/peek_entry.dart';
 import '../core/peek.dart';
 import '../core/store/peek_store.dart';
@@ -43,6 +44,7 @@ final class PeekOverlay extends StatefulWidget {
     this.alignment = Alignment.bottomRight,
     this.strings = const PeekStrings(),
     this.share,
+    this.bodyLoader,
     super.key,
   });
 
@@ -64,6 +66,9 @@ final class PeekOverlay extends StatefulWidget {
 
   /// What hands an export to the platform; see [PeekScreen.share].
   final PeekShareDelegate? share;
+
+  /// What fetches a body held elsewhere; see [PeekScreen.bodyLoader].
+  final PeekBodyLoader? bodyLoader;
 
   /// How wide and tall the button's tap target is.
   static const double buttonSize = 52;
@@ -257,6 +262,7 @@ class _PeekOverlayState extends State<PeekOverlay> {
       peek: widget.peek,
       strings: widget.strings,
       share: widget.share,
+      bodyLoader: widget.bodyLoader,
     ),
   );
 }

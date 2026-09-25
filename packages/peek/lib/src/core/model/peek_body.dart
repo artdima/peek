@@ -26,7 +26,8 @@ enum PeekBodyUnavailableReason {
 /// The body of a request or response — as much of it as Peek could capture.
 ///
 /// Match on the subtypes to render it: [PeekTextBody], [PeekBytesBody],
-/// [PeekFormBody], [PeekEmptyBody] and [PeekUnavailableBody].
+/// [PeekFormBody], [PeekEmptyBody], [PeekUnavailableBody] and
+/// [PeekRemoteBody].
 @immutable
 sealed class PeekBody {
   const PeekBody();
@@ -60,6 +61,16 @@ sealed class PeekBody {
     PeekMediaType? contentType,
     int? size,
   }) = PeekUnavailableBody;
+
+  /// A body that exists and can be had, but is held elsewhere — on the
+  /// device, when the calls are viewed from a desktop. [size] is the full
+  /// size in bytes; [isTruncated] says the holder kept only a prefix, so
+  /// loading it gives a cut-off body.
+  const factory PeekBody.remote({
+    required int size,
+    PeekMediaType? contentType,
+    bool isTruncated,
+  }) = PeekRemoteBody;
 
   /// Encodes an already decoded JSON value — the `data` of a Dio response,
   /// say — as compact JSON text. `null` becomes [PeekBody.empty]; values JSON
@@ -292,4 +303,43 @@ final class PeekUnavailableBody extends PeekBody {
 
   @override
   String toString() => 'PeekUnavailableBody(${reason.name})';
+}
+
+/// A body held elsewhere, to be loaded on request.
+///
+/// Core does not know how to fetch it: whoever shows the call does, through
+/// a `PeekBodyLoader`. A loaded body replaces this one in the store.
+final class PeekRemoteBody extends PeekBody {
+  /// See [PeekBody.remote].
+  const PeekRemoteBody({
+    required this.size,
+    this.contentType,
+    this.isTruncated = false,
+  });
+
+  @override
+  final PeekMediaType? contentType;
+
+  @override
+  final int size;
+
+  @override
+  final bool isTruncated;
+
+  /// Not known to be empty: nothing of it is here to tell.
+  @override
+  bool get isEmpty => false;
+
+  @override
+  bool operator ==(Object other) =>
+      other is PeekRemoteBody &&
+      other.size == size &&
+      other.contentType == contentType &&
+      other.isTruncated == isTruncated;
+
+  @override
+  int get hashCode => Object.hash(size, contentType, isTruncated);
+
+  @override
+  String toString() => 'PeekRemoteBody($size B, ${contentType ?? '-'})';
 }

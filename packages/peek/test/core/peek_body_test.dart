@@ -284,6 +284,7 @@ void main() {
         PeekFormBody() => 'form',
         PeekEmptyBody() => 'empty',
         PeekUnavailableBody() => 'unavailable',
+        PeekRemoteBody() => 'remote',
       };
 
       expect(describe(PeekBody.text('')), 'text');
@@ -296,6 +297,118 @@ void main() {
         ),
         'unavailable',
       );
+      expect(describe(const PeekBody.remote(size: 1)), 'remote');
+    });
+  });
+
+  group('PeekBody.remote', () {
+    test('knows its size and type but holds nothing', () {
+      const body = PeekBody.remote(size: 2048, contentType: PeekMediaType.json);
+      expect(body, isA<PeekRemoteBody>());
+      expect(body.size, 2048);
+      expect(body.contentType, PeekMediaType.json);
+      expect(body.isTruncated, isFalse);
+      expect(body.isEmpty, isFalse);
+      expect(
+        const PeekBody.remote(size: 10, isTruncated: true).isTruncated,
+        isTrue,
+      );
+    });
+
+    test('compares by size, type and truncation, and prints no content', () {
+      const body = PeekBody.remote(size: 5, contentType: PeekMediaType.json);
+      expect(
+        body,
+        const PeekBody.remote(size: 5, contentType: PeekMediaType.json),
+      );
+      expect(
+        body.hashCode,
+        const PeekBody.remote(
+          size: 5,
+          contentType: PeekMediaType.json,
+        ).hashCode,
+      );
+      expect(
+        body,
+        isNot(const PeekBody.remote(size: 6, contentType: PeekMediaType.json)),
+      );
+      expect(body, isNot(const PeekBody.remote(size: 5)));
+      expect(
+        body,
+        isNot(
+          const PeekBody.remote(
+            size: 5,
+            contentType: PeekMediaType.json,
+            isTruncated: true,
+          ),
+        ),
+      );
+      expect(body.toString(), 'PeekRemoteBody(5 B, application/json)');
+    });
+  });
+
+  group('PeekBodySide and PeekBodyLoader', () {
+    final entry = PeekEntry(
+      id: const PeekId('e'),
+      request: PeekRequest(
+        method: 'POST',
+        uri: Uri.parse('https://example.com/'),
+        body: const PeekBody.remote(size: 3),
+      ),
+      startedAt: DateTime.utc(2026),
+      source: 'test',
+      response: PeekResponse(
+        statusCode: 200,
+        body: const PeekBody.remote(size: 4),
+      ),
+      completedAt: DateTime.utc(2026),
+    );
+
+    test('reach and replace a body by its side', () {
+      expect(
+        entry.bodyOn(PeekBodySide.request),
+        const PeekBody.remote(size: 3),
+      );
+      expect(
+        entry.bodyOn(PeekBodySide.response),
+        const PeekBody.remote(size: 4),
+      );
+
+      final loaded = entry.withBody(PeekBodySide.response, PeekBody.text('ok'));
+      expect(loaded.response!.body, PeekBody.text('ok'));
+      expect(loaded.request.body, const PeekBody.remote(size: 3));
+      expect(loaded.id, entry.id);
+      expect(
+        entry.withBody(PeekBodySide.request, PeekBody.text('x')).request.body,
+        PeekBody.text('x'),
+      );
+    });
+
+    test('leave a call without a response alone', () {
+      final pending = PeekEntry(
+        id: const PeekId('p'),
+        request: entry.request,
+        startedAt: DateTime.utc(2026),
+        source: 'test',
+      );
+      expect(pending.bodyOn(PeekBodySide.response), isNull);
+      expect(
+        pending.withBody(PeekBodySide.response, PeekBody.text('x')),
+        pending,
+      );
+    });
+
+    test('load through a function', () async {
+      final calls = <(PeekId, PeekBodySide)>[];
+      final loader = PeekBodyLoader.from((id, side) async {
+        calls.add((id, side));
+        return PeekBody.text('loaded');
+      });
+      expect(
+        await loader.load(const PeekId('e'), PeekBodySide.response),
+        PeekBody.text('loaded'),
+      );
+      expect(calls, [(const PeekId('e'), PeekBodySide.response)]);
     });
   });
 }

@@ -27,7 +27,7 @@ final class PeekCurlExporter {
 
     final sendsData = switch (body) {
       PeekTextBody() || PeekFormBody() || PeekBytesBody() => true,
-      PeekEmptyBody() || PeekUnavailableBody() => false,
+      PeekEmptyBody() || PeekUnavailableBody() || PeekRemoteBody() => false,
     };
     // -X HEAD leaves curl waiting for a body no server will send.
     if (request.method == 'HEAD') {
@@ -85,6 +85,8 @@ final class PeekCurlExporter {
         );
       case PeekUnavailableBody():
         notes.add('body not captured (${body.reason.name})');
+      case PeekRemoteBody():
+        notes.add('body still on the device; load it to include it');
       case PeekEmptyBody():
         break;
     }

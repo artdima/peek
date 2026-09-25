@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
+import '../../core/model/peek_body_loader.dart';
 import '../../core/peek.dart';
 import '../../core/query/peek_search_query.dart';
 import '../peek_controller.dart';
@@ -33,6 +34,7 @@ final class PeekScreen extends StatefulWidget {
     this.strings = const PeekStrings(),
     this.controller,
     this.share,
+    this.bodyLoader,
     super.key,
   });
 
@@ -49,6 +51,10 @@ final class PeekScreen extends StatefulWidget {
   /// copying and nothing else — except on the web, where the browser
   /// saves the file.
   final PeekShareDelegate? share;
+
+  /// What fetches a body held elsewhere — on the device, when the calls come
+  /// from one. Without it such a body shows its size and type, and no button.
+  final PeekBodyLoader? bodyLoader;
 
   /// The width from which the list and the call sit side by side.
   static const double wideLayout = 720;
@@ -96,6 +102,7 @@ class _PeekScreenState extends State<PeekScreen> {
     controller: _controller,
     strings: widget.strings,
     share: widget.share,
+    bodyLoader: widget.bodyLoader,
     child: const _PeekScaffold(),
   );
 }

@@ -14,6 +14,7 @@ export 'src/core/export/peek_text_exporter.dart';
 export 'src/core/limits/peek_body_truncator.dart';
 export 'src/core/limits/peek_limits.dart';
 export 'src/core/model/peek_body.dart';
+export 'src/core/model/peek_body_loader.dart';
 export 'src/core/model/peek_cookie.dart';
 export 'src/core/model/peek_entry.dart';
 export 'src/core/model/peek_failure.dart';
