@@ -36,17 +36,22 @@ final class PeekRemoteCodec {
       'type': 'hello',
       'protocolVersion': frame.protocolVersion,
       if (frame.token case final token?) 'token': token,
+      if (frame.code case final code?) 'code': code,
       'sessionId': frame.sessionId,
       'session': _encodeSession(frame.session),
     },
     PeekRemoteWelcome() => {
       'type': 'welcome',
       'protocolVersion': frame.protocolVersion,
-      if (frame.serverName != null || frame.serverVersion != null)
+      if (frame.serverName != null ||
+          frame.serverVersion != null ||
+          frame.serverId != null)
         'server': {
           if (frame.serverName case final name?) 'name': name,
           if (frame.serverVersion case final version?) 'version': version,
+          if (frame.serverId case final id?) 'id': id,
         },
+      if (frame.deviceToken case final deviceToken?) 'deviceToken': deviceToken,
     },
     PeekRemoteDenied() => {
       'type': 'denied',
@@ -98,6 +103,7 @@ final class PeekRemoteCodec {
       'hello' => PeekRemoteHello(
         protocolVersion: _int(json, 'protocolVersion'),
         token: _optionalString(json, 'token'),
+        code: _optionalString(json, 'code'),
         sessionId: _string(json, 'sessionId'),
         session: _decodeSession(json['session']),
       ),
@@ -108,6 +114,8 @@ final class PeekRemoteCodec {
           _optionalObject(json, 'server'),
           'version',
         ),
+        serverId: _optionalString(_optionalObject(json, 'server'), 'id'),
+        deviceToken: _optionalString(json, 'deviceToken'),
       ),
       'denied' => PeekRemoteDenied(
         PeekRemoteDeniedReason.values.asNameMap()[json['reason']] ??

@@ -343,6 +343,112 @@ void main() {
     });
   });
 
+  group('pairing', () {
+    const desk = PeekRemoteEndpoint('desk.local');
+    const issued = 'c1f6a2e9d4b8074f3e5a19c2b7d0e6f4';
+
+    test('sends the code alone, then the device token it got', () async {
+      final client = remote();
+      await client.pair(desk, ' 4719 ');
+      await settle();
+      final first = transport.last.frames.single as PeekRemoteHello;
+      expect(first.code, '4719');
+      expect(first.token, isNull);
+      expect(client.deviceToken, isNull);
+
+      transport.last.reply(
+        const PeekRemoteWelcome(serverId: 'mac-1', deviceToken: issued),
+      );
+      await settle();
+      expect(client.state, PeekRemoteState.connected);
+      expect(client.deviceToken, issued);
+      expect(client.serverId, 'mac-1');
+
+      await transport.last.hangUp();
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      final again = transport.last.frames.single as PeekRemoteHello;
+      expect(again.token, issued);
+      expect(again.code, isNull);
+      expect(again.sessionId, client.sessionId);
+    });
+
+    test('keeps the code until a desktop answers it with a token', () async {
+      final client = remote();
+      await client.pair(desk, '4719');
+      await settle();
+      transport.last.reply(const PeekRemoteWelcome());
+      await settle();
+      expect(client.state, PeekRemoteState.connected);
+      expect(client.deviceToken, isNull);
+
+      await transport.last.hangUp();
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      expect((transport.last.frames.single as PeekRemoteHello).code, '4719');
+    });
+
+    test('stops on a wrong code, and says so', () async {
+      final client = remote();
+      await client.pair(desk, '0000');
+      await settle();
+      transport.last.reply(
+        const PeekRemoteDenied(PeekRemoteDeniedReason.code, 'wrong code'),
+      );
+      await settle();
+      expect(client.state, PeekRemoteState.denied);
+      expect(client.denial?.reason, PeekRemoteDeniedReason.code);
+      expect(errors.single, isA<PeekRemoteDeniedException>());
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(transport.attempts, 1);
+
+      // A fresh code starts over, without the burnt one.
+      await client.pair(desk, '4719');
+      await settle();
+      expect((transport.last.frames.single as PeekRemoteHello).code, '4719');
+      expect(client.denial, isNull);
+    });
+
+    test('drops a device token the desktop no longer knows', () async {
+      final client = remote();
+      await client.pair(desk, '4719');
+      await settle();
+      transport.last.reply(const PeekRemoteWelcome(deviceToken: issued));
+      await settle();
+      await transport.last.hangUp();
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+
+      transport.last.reply(
+        const PeekRemoteDenied(PeekRemoteDeniedReason.token, 'who?'),
+      );
+      await settle();
+      expect(client.state, PeekRemoteState.denied);
+      expect(client.deviceToken, isNull);
+      expect(client.serverId, isNull);
+    });
+
+    test('pairs anew where told, leaving the old desktop', () async {
+      final client = remote();
+      final old = await welcomed(client);
+      await client.pair(
+        const PeekRemoteEndpoint('other.local', port: 9800),
+        '2222',
+      );
+      await settle();
+      expect(old.closed, isTrue);
+      expect(
+        client.endpoint,
+        const PeekRemoteEndpoint('other.local', port: 9800),
+      );
+      expect(transport.last.uri, Uri.parse('ws://other.local:9800/'));
+      expect((transport.last.frames.single as PeekRemoteHello).code, '2222');
+    });
+
+    test('refuses an empty code', () async {
+      final client = remote();
+      await expectLater(client.pair(desk, '  '), throwsArgumentError);
+      expect(client.state, PeekRemoteState.stopped);
+    });
+  });
+
   group('PeekRemoteEndpoint', () {
     test('reads host or host:port', () {
       expect(

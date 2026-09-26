@@ -40,6 +40,7 @@ void main() {
       expect(json.containsKey('token'), isFalse);
       expect(json['session'], isNot(contains('name')));
       expect(json['session'], isNot(contains('osVersion')));
+      expect(json.containsKey('code'), isFalse);
       expect(jsonDecode(codec.encode(const PeekRemoteWelcome())), {
         'type': 'welcome',
         'protocolVersion': PeekRemoteProtocol.version,
@@ -116,10 +117,113 @@ void main() {
     });
   });
 
+  group('PeekRemoteCodec pairing', () {
+    test('carries the code alone, and the device token with the id', () {
+      final helloJson =
+          jsonDecode(codec.encode(helloWithCode)) as Map<String, Object?>;
+      expect(helloJson['code'], '4719');
+      expect(helloJson.containsKey('token'), isFalse);
+      final welcomeJson =
+          jsonDecode(codec.encode(welcomePaired)) as Map<String, Object?>;
+      expect(welcomeJson['deviceToken'], welcomePaired.deviceToken);
+      expect(welcomeJson['server'], {
+        'name': 'Peek Pro',
+        'version': '1.0.0',
+        'id': '9d4c2b7a1e0f4c8d',
+      });
+      expect(jsonDecode(codec.encode(const PeekRemoteWelcome(serverId: 'x'))), {
+        'type': 'welcome',
+        'protocolVersion': PeekRemoteProtocol.version,
+        'server': {'id': 'x'},
+      });
+    });
+
+    test('reads the code reason, and an older desktop reads it as other', () {
+      expect(
+        (codec.decode('{"type":"denied","reason":"code","message":"no"}')
+                as PeekRemoteDenied)
+            .reason,
+        PeekRemoteDeniedReason.code,
+      );
+      expect(
+        (codec.decode('{"type":"denied","reason":"retina","message":"no"}')
+                as PeekRemoteDenied)
+            .reason,
+        PeekRemoteDeniedReason.other,
+      );
+    });
+  });
+
   group('PeekRemoteProtocol.check', () {
     test('welcomes an app with the right token and version', () {
       expect(PeekRemoteProtocol.check(hello, token: 'k7Qx2mP9'), isNull);
       expect(PeekRemoteProtocol.check(hello, token: null), isNull);
+    });
+
+    test('judges a hello with a code by the code alone', () {
+      expect(
+        PeekRemoteProtocol.check(
+          helloWithCode,
+          token: 'k7Qx2mP9',
+          code: '4719',
+        ),
+        isNull,
+      );
+      expect(
+        PeekRemoteProtocol.check(
+          helloWithCode,
+          token: 'k7Qx2mP9',
+          code: '4718',
+        )?.reason,
+        PeekRemoteDeniedReason.code,
+      );
+      // A desktop showing no code, or one that accepts anyone, still refuses
+      // a code it cannot check: the person typed one for a reason.
+      expect(
+        PeekRemoteProtocol.check(helloWithCode, token: 'k7Qx2mP9')?.reason,
+        PeekRemoteDeniedReason.code,
+      );
+      expect(
+        PeekRemoteProtocol.check(helloWithCode, token: null)?.reason,
+        PeekRemoteDeniedReason.code,
+      );
+    });
+
+    test('accepts a device token it issued', () {
+      final withDeviceToken = PeekRemoteHello(
+        sessionId: 's',
+        token: welcomePaired.deviceToken,
+        session: frameSession,
+      );
+      expect(
+        PeekRemoteProtocol.check(
+          withDeviceToken,
+          token: 'k7Qx2mP9',
+          deviceTokens: [welcomePaired.deviceToken!],
+        ),
+        isNull,
+      );
+      expect(
+        PeekRemoteProtocol.check(
+          withDeviceToken,
+          token: 'k7Qx2mP9',
+          deviceTokens: ['another'],
+        )?.reason,
+        PeekRemoteDeniedReason.token,
+      );
+    });
+
+    test('checks the version before the code', () {
+      final newer = PeekRemoteHello(
+        protocolVersion: 9,
+        sessionId: 's',
+        code: '4719',
+        session: frameSession,
+      );
+      expect(
+        PeekRemoteProtocol.check(newer, token: null, code: '4719')?.reason,
+        PeekRemoteDeniedReason.protocolVersion,
+      );
     });
 
     test('turns away a wrong or missing token', () {

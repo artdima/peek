@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peek/core.dart';
 import 'package:peek_remote/peek_remote.dart';
 
@@ -9,18 +11,27 @@ import 'package:peek_remote/peek_remote.dart';
 ///   --dart-define=PEEK_REMOTE_TOKEN=k7Qx2mP9
 /// ```
 ///
-/// Without `PEEK_REMOTE` nothing is sent and this returns `null`. Peek
-/// disposes the client with itself.
+/// `PEEK_REMOTE_CODE=4719` pairs with the code the desktop shows instead of
+/// a token. Without `PEEK_REMOTE` nothing is sent and this returns `null`.
+/// Peek disposes the client with itself.
 PeekRemote? startRemote(Peek peek) {
   const address = String.fromEnvironment('PEEK_REMOTE');
   if (address.isEmpty) return null;
   const token = String.fromEnvironment('PEEK_REMOTE_TOKEN');
-  return peek.attach(
+  const code = String.fromEnvironment('PEEK_REMOTE_CODE');
+  final endpoint = PeekRemoteEndpoint.parse(address);
+  final remote = peek.attach(
     PeekRemote(
       peek,
-      endpoint: PeekRemoteEndpoint.parse(address),
+      endpoint: endpoint,
       token: token.isEmpty ? null : token,
       name: 'Peek example',
     ),
-  )..start();
+  );
+  if (code.isEmpty) {
+    remote.start();
+  } else {
+    unawaited(remote.pair(endpoint, code));
+  }
+  return remote;
 }

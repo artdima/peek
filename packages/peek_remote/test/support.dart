@@ -18,6 +18,22 @@ final PeekRemoteHello hello = PeekRemoteHello(
   session: frameSession,
 );
 
+/// The same app, pairing with the code the desktop shows.
+final PeekRemoteHello helloWithCode = PeekRemoteHello(
+  sessionId: '3f2a9c1e0b7d4e56a8c1f0e2d3b4a596',
+  code: '4719',
+  session: frameSession,
+);
+
+/// The desktop's answer to a right code.
+const PeekRemoteWelcome welcomePaired = PeekRemoteWelcome(
+  serverName: 'Peek Pro',
+  serverVersion: '1.0.0',
+  serverId: '9d4c2b7a1e0f4c8d',
+  deviceToken:
+      'c1f6a2e9d4b8074f3e5a19c2b7d0e6f4a8c3b5d1e7f2094a6c8b0d3e5f7a1c2b',
+);
+
 /// A call as the app first sends it: still running, its body left behind.
 final PeekEntry started = PeekEntry(
   id: const PeekId('e1'),
@@ -45,13 +61,19 @@ final PeekEntry completed = started.complete(
 /// Every frame the protocol has, by the name of its reference file.
 final Map<String, PeekRemoteFrame> referenceFrames = {
   'hello': hello,
+  'hello-code': helloWithCode,
   'welcome': const PeekRemoteWelcome(
     serverName: 'Peek Pro',
     serverVersion: '1.0.0',
   ),
+  'welcome-paired': welcomePaired,
   'denied': const PeekRemoteDenied(
     PeekRemoteDeniedReason.token,
     'The token does not match the one the desktop shows.',
+  ),
+  'denied-code': const PeekRemoteDenied(
+    PeekRemoteDeniedReason.code,
+    'The code is wrong or has expired. Check the one the desktop shows.',
   ),
   'entry-add': PeekRemoteEntry.add(started),
   'entry-update': PeekRemoteEntry.update(completed),

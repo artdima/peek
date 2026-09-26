@@ -34,6 +34,17 @@ final remote = peek.attach(
 `peek.attach` disposes the client together with Peek. Pass `name:` to say
 what the desktop should call the app; `PeekOptions.name` is used otherwise.
 
+A person at the phone can pair with the short code the desktop shows
+instead of a token written in code:
+
+```dart
+await remote.pair(PeekRemoteEndpoint.parse('192.168.1.20:9741'), '4719');
+```
+
+A right code is answered with a `remote.deviceToken`, which the client sends
+from then on; the code is not needed again. Keep the token (and
+`remote.serverId`) if the pairing should outlive the app's run.
+
 - **Where the desktop is.** A phone on the same Wi-Fi uses the address the
   desktop shows. An Android emulator reaches the machine it runs on as
   `10.0.2.2`; a device on a cable can run `adb reverse tcp:9741 tcp:9741` and
@@ -60,6 +71,8 @@ does and prints every frame, for trying the client out:
 ```sh
 dart run tool/peek_remote_dump.dart --token k7Qx2mP9 --out session.jsonl
 ```
+
+`--code 4719` makes it pair the way a desktop does.
 
 ## The protocol
 

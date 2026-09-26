@@ -5,11 +5,14 @@
 //
 //   dart run tool/peek_remote_dump.dart --token k7Qx2mP9 --out session.jsonl
 //
-// Options: --port (9741), --token (none: any app is welcomed), --out (no
-// file), --fetch-bodies (ask for every body the app holds back).
+// Options: --port (9741), --token (none: any app is welcomed), --code (a
+// pairing code; a right one is answered with a device token that is good
+// until this process ends — the code stays good too, unlike on a desktop),
+// --out (no file), --fetch-bodies (ask for every body the app holds back).
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:peek/core.dart';
 import 'package:peek_remote/peek_remote.dart';
@@ -26,9 +29,11 @@ Future<void> main(List<String> arguments) async {
   stdout.writeln(
     'Listening on ws://<this machine>:${server.port}/ '
     '— token: ${options.token ?? 'none'}'
+    '${options.code == null ? '' : ', code: ${options.code}'}'
     '${out == null ? '' : ', writing to ${options.out}'}',
   );
   var requests = 0;
+  final issued = <String>{};
   await for (final request in server) {
     if (!WebSocketTransformer.isUpgradeRequest(request)) {
       request.response.statusCode = HttpStatus.upgradeRequired;
@@ -36,14 +41,26 @@ Future<void> main(List<String> arguments) async {
       continue;
     }
     final socket = await WebSocketTransformer.upgrade(request);
-    unawaited(_serve(socket, options, out, () => '${++requests}'));
+    unawaited(_serve(socket, options, out, issued, () => '${++requests}'));
   }
 }
+
+/// A random hex string of [bytes] bytes: device tokens and the server id.
+String _random(int bytes) {
+  final random = math.Random.secure();
+  return [
+    for (var i = 0; i < bytes; i++)
+      random.nextInt(256).toRadixString(16).padLeft(2, '0'),
+  ].join();
+}
+
+final String _serverId = _random(8);
 
 Future<void> _serve(
   WebSocket socket,
   _Options options,
   IOSink? out,
+  Set<String> issued,
   String Function() nextRequestId,
 ) async {
   var welcomed = false;
@@ -61,14 +78,32 @@ Future<void> _serve(
 
     if (!welcomed) {
       if (frame is! PeekRemoteHello) continue;
-      final denial = PeekRemoteProtocol.check(frame, token: options.token);
+      final denial = PeekRemoteProtocol.check(
+        frame,
+        token: options.token,
+        code: options.code,
+        deviceTokens: issued,
+      );
       if (denial != null) {
+        stdout.writeln('denied ${denial.reason.name}: ${denial.message}');
         socket.add(_codec.encode(denial));
         await socket.close();
         return;
       }
+      String? deviceToken;
+      if (frame.code != null) {
+        deviceToken = _random(32);
+        issued.add(deviceToken);
+        stdout.writeln('paired: issued a device token');
+      }
       socket.add(
-        _codec.encode(const PeekRemoteWelcome(serverName: 'peek_remote_dump')),
+        _codec.encode(
+          PeekRemoteWelcome(
+            serverName: 'peek_remote_dump',
+            serverId: _serverId,
+            deviceToken: deviceToken,
+          ),
+        ),
       );
       welcomed = true;
       continue;
@@ -117,6 +152,7 @@ final class _Options {
   const _Options({
     required this.port,
     required this.token,
+    required this.code,
     required this.out,
     required this.fetchBodies,
   });
@@ -134,6 +170,7 @@ final class _Options {
           int.tryParse(valueOf('--port') ?? '') ??
           PeekRemoteProtocol.defaultPort,
       token: valueOf('--token'),
+      code: valueOf('--code'),
       out: valueOf('--out'),
       fetchBodies: arguments.contains('--fetch-bodies'),
     );
@@ -141,6 +178,7 @@ final class _Options {
 
   final int port;
   final String? token;
+  final String? code;
   final String? out;
   final bool fetchBodies;
 }

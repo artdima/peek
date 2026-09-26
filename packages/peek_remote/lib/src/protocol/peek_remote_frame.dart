@@ -19,13 +19,19 @@ final class PeekRemoteHello extends PeekRemoteFrame {
     required this.session,
     this.protocolVersion = PeekRemoteProtocol.version,
     this.token,
+    this.code,
   });
 
   /// The protocol the app speaks.
   final int protocolVersion;
 
-  /// The token the desktop showed, as the app was given it.
+  /// The token the desktop showed, as the app was given it, or the device
+  /// token a desktop issued after pairing.
   final String? token;
+
+  /// The pairing code the desktop shows, typed by a person; sent instead of
+  /// [token] until the desktop answers with a device token.
+  final String? code;
 
   /// Stays the same while the app runs, across reconnections, so the
   /// desktop knows a session it has seen before.
@@ -39,11 +45,13 @@ final class PeekRemoteHello extends PeekRemoteFrame {
       other is PeekRemoteHello &&
       other.protocolVersion == protocolVersion &&
       other.token == token &&
+      other.code == code &&
       other.sessionId == sessionId &&
       other.session == session;
 
   @override
-  int get hashCode => Object.hash(protocolVersion, token, sessionId, session);
+  int get hashCode =>
+      Object.hash(protocolVersion, token, code, sessionId, session);
 
   @override
   String toString() => 'PeekRemoteHello($sessionId, v$protocolVersion)';
@@ -56,6 +64,8 @@ final class PeekRemoteWelcome extends PeekRemoteFrame {
     this.protocolVersion = PeekRemoteProtocol.version,
     this.serverName,
     this.serverVersion,
+    this.serverId,
+    this.deviceToken,
   });
 
   /// The protocol the desktop speaks.
@@ -67,15 +77,31 @@ final class PeekRemoteWelcome extends PeekRemoteFrame {
   /// Its version.
   final String? serverVersion;
 
+  /// Tells this desktop from others across launches, so the app knows whose
+  /// [deviceToken] it holds.
+  final String? serverId;
+
+  /// Issued for a right pairing code: the token this device sends from now
+  /// on.
+  final String? deviceToken;
+
   @override
   bool operator ==(Object other) =>
       other is PeekRemoteWelcome &&
       other.protocolVersion == protocolVersion &&
       other.serverName == serverName &&
-      other.serverVersion == serverVersion;
+      other.serverVersion == serverVersion &&
+      other.serverId == serverId &&
+      other.deviceToken == deviceToken;
 
   @override
-  int get hashCode => Object.hash(protocolVersion, serverName, serverVersion);
+  int get hashCode => Object.hash(
+    protocolVersion,
+    serverName,
+    serverVersion,
+    serverId,
+    deviceToken,
+  );
 
   @override
   String toString() => 'PeekRemoteWelcome(v$protocolVersion)';
@@ -85,6 +111,9 @@ final class PeekRemoteWelcome extends PeekRemoteFrame {
 enum PeekRemoteDeniedReason {
   /// The token is missing or wrong.
   token,
+
+  /// The pairing code is wrong or has expired.
+  code,
 
   /// The desktop does not speak the app's protocol version.
   protocolVersion,
@@ -377,11 +406,17 @@ abstract final class PeekRemoteProtocol {
   /// Decides whether a desktop accepts [hello]: `null` to welcome it, or the
   /// refusal to send.
   ///
-  /// [token] is the one the desktop showed; `null` accepts any app. The
-  /// desktop speaks versions [oldest] to [newest].
+  /// The version comes first. A hello with a [PeekRemoteHello.code] is then
+  /// judged by [code] alone — the one the desktop shows now, `null` when it
+  /// shows none — and a right code is the desktop's cue to issue a device
+  /// token. Any other hello must carry [token], the one the desktop shows,
+  /// or one of the [deviceTokens] it issued; a [token] of `null` accepts
+  /// any app. The desktop speaks versions [oldest] to [newest].
   static PeekRemoteDenied? check(
     PeekRemoteHello hello, {
     required String? token,
+    String? code,
+    Iterable<String> deviceTokens = const [],
     int oldest = version,
     int newest = version,
   }) {
@@ -394,18 +429,27 @@ abstract final class PeekRemoteProtocol {
         'Update ${spoken < oldest ? 'Peek in the app' : 'the desktop'}.',
       );
     }
-    if (token != null && !_sameToken(hello.token, token)) {
+    if (hello.code case final given?) {
+      if (code != null && sameSecret(given, code)) return null;
       return const PeekRemoteDenied(
-        PeekRemoteDeniedReason.token,
-        'The token does not match the one the desktop shows.',
+        PeekRemoteDeniedReason.code,
+        'The code is wrong or has expired. Check the one the desktop shows.',
       );
     }
-    return null;
+    if (token == null) return null;
+    if (sameSecret(hello.token, token)) return null;
+    for (final issued in deviceTokens) {
+      if (sameSecret(hello.token, issued)) return null;
+    }
+    return const PeekRemoteDenied(
+      PeekRemoteDeniedReason.token,
+      'The token does not match the one the desktop shows.',
+    );
   }
 
-  // Compares every character, so the time taken says nothing about how much
-  // of a guess was right.
-  static bool _sameToken(String? given, String expected) {
+  /// Whether [given] is [expected], looking at every character so the time
+  /// taken says nothing about how much of a guess was right.
+  static bool sameSecret(String? given, String expected) {
     if (given == null || given.length != expected.length) return false;
     var difference = 0;
     for (var i = 0; i < expected.length; i++) {
