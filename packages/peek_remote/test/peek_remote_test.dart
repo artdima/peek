@@ -12,15 +12,20 @@ void main() {
   late FakeTransport transport;
   late List<Object> errors;
 
+  late PeekRemoteMemory memory;
+
   PeekRemote remote({
     int maxQueued = 2000,
     Duration retryMin = const Duration(milliseconds: 10),
     Duration retryMax = const Duration(milliseconds: 40),
+    PeekRemoteEndpoint? endpoint = const PeekRemoteEndpoint('desk.local'),
+    String? token = 'k7Qx2mP9',
   }) {
     final client = PeekRemote(
       peek,
-      endpoint: const PeekRemoteEndpoint('desk.local'),
-      token: 'k7Qx2mP9',
+      endpoint: endpoint,
+      token: token,
+      memory: memory,
       maxQueued: maxQueued,
       retryMin: retryMin,
       retryMax: retryMax,
@@ -51,6 +56,7 @@ void main() {
     );
     addTearDown(peek.dispose);
     transport = FakeTransport();
+    memory = PeekRemoteMemory.inMemory();
   });
 
   group('connecting', () {
@@ -349,7 +355,7 @@ void main() {
 
     test('sends the code alone, then the device token it got', () async {
       final client = remote();
-      await client.pair(desk, ' 4719 ');
+      await client.connect(desk, code: ' 4719 ');
       await settle();
       final first = transport.last.frames.single as PeekRemoteHello;
       expect(first.code, '4719');
@@ -374,7 +380,7 @@ void main() {
 
     test('keeps the code until a desktop answers it with a token', () async {
       final client = remote();
-      await client.pair(desk, '4719');
+      await client.connect(desk, code: '4719');
       await settle();
       transport.last.reply(const PeekRemoteWelcome());
       await settle();
@@ -388,7 +394,7 @@ void main() {
 
     test('stops on a wrong code, and says so', () async {
       final client = remote();
-      await client.pair(desk, '0000');
+      await client.connect(desk, code: '0000');
       await settle();
       transport.last.reply(
         const PeekRemoteDenied(PeekRemoteDeniedReason.code, 'wrong code'),
@@ -401,7 +407,7 @@ void main() {
       expect(transport.attempts, 1);
 
       // A fresh code starts over, without the burnt one.
-      await client.pair(desk, '4719');
+      await client.connect(desk, code: '4719');
       await settle();
       expect((transport.last.frames.single as PeekRemoteHello).code, '4719');
       expect(client.denial, isNull);
@@ -409,7 +415,7 @@ void main() {
 
     test('drops a device token the desktop no longer knows', () async {
       final client = remote();
-      await client.pair(desk, '4719');
+      await client.connect(desk, code: '4719');
       await settle();
       transport.last.reply(const PeekRemoteWelcome(deviceToken: issued));
       await settle();
@@ -428,9 +434,9 @@ void main() {
     test('pairs anew where told, leaving the old desktop', () async {
       final client = remote();
       final old = await welcomed(client);
-      await client.pair(
+      await client.connect(
         const PeekRemoteEndpoint('other.local', port: 9800),
-        '2222',
+        code: '2222',
       );
       await settle();
       expect(old.closed, isTrue);
@@ -444,8 +450,160 @@ void main() {
 
     test('refuses an empty code', () async {
       final client = remote();
-      await expectLater(client.pair(desk, '  '), throwsArgumentError);
+      await expectLater(client.connect(desk, code: '  '), throwsArgumentError);
       expect(client.state, PeekRemoteState.stopped);
+    });
+
+    test('connects again to a known desktop with the token it holds', () async {
+      final client = remote();
+      await client.connect(desk, code: '4719', name: 'Studio Mac');
+      await settle();
+      transport.last.reply(
+        const PeekRemoteWelcome(serverId: 'mac-1', deviceToken: issued),
+      );
+      await settle();
+
+      await client.connect(const PeekRemoteEndpoint('10.0.0.9'));
+      await settle();
+      final hello = transport.last.frames.single as PeekRemoteHello;
+      expect(hello.token, issued);
+      expect(hello.code, isNull);
+      expect(client.desktop?.name, 'Studio Mac');
+    });
+  });
+
+  group('memory', () {
+    const desk = PeekRemoteEndpoint('desk.local');
+    const issued = 'c1f6a2e9d4b8074f3e5a19c2b7d0e6f4';
+
+    /// Pairs [client] with the desktop at [desk], named [name].
+    Future<void> paired(PeekRemote client, {String? name}) async {
+      await client.connect(desk, code: '4719', name: name);
+      await settle();
+      transport.last.reply(
+        const PeekRemoteWelcome(serverId: 'mac-1', deviceToken: issued),
+      );
+      await settle();
+    }
+
+    test('remembers the desktop and its token once paired', () async {
+      final client = remote(endpoint: null, token: null);
+      await paired(client, name: 'Studio Mac');
+      expect(
+        await memory.lastDesktop(),
+        const PeekRemoteDesktop(
+          serverId: 'mac-1',
+          endpoint: desk,
+          name: 'Studio Mac',
+        ),
+      );
+      expect(await memory.token('mac-1'), issued);
+      expect(client.desktop?.name, 'Studio Mac');
+    });
+
+    test('finds its way back on the next run, without a code', () async {
+      await paired(remote(endpoint: null, token: null));
+
+      final next = remote(endpoint: null, token: null)..start();
+      expect(next.state, PeekRemoteState.connecting);
+      await settle();
+      expect(transport.last.uri, desk.uri);
+      final hello = transport.last.frames.single as PeekRemoteHello;
+      expect(hello.token, issued);
+      expect(hello.code, isNull);
+      expect(next.endpoint, desk);
+      expect(next.deviceToken, issued);
+      expect(next.serverId, 'mac-1');
+    });
+
+    test('is unpaired with nothing remembered', () async {
+      final client = remote(endpoint: null, token: null)..start();
+      await settle();
+      expect(client.state, PeekRemoteState.unpaired);
+      expect(transport.attempts, 0);
+      expect(errors, isEmpty);
+    });
+
+    test('sends the token of the last desktop, not another one', () async {
+      await memory.remember(
+        const PeekRemoteDesktop(
+          serverId: 'mac-0',
+          endpoint: PeekRemoteEndpoint('old.local'),
+        ),
+        token: 'old-token',
+      );
+      await paired(remote(endpoint: null, token: null));
+
+      remote(endpoint: null, token: null).start();
+      await settle();
+      expect((transport.last.frames.single as PeekRemoteHello).token, issued);
+      expect(await memory.token('mac-0'), 'old-token');
+    });
+
+    test('keeps a new address of a remembered desktop', () async {
+      await paired(remote(endpoint: null, token: null), name: 'Studio Mac');
+      final next = remote(endpoint: null, token: null);
+      await next.connect(const PeekRemoteEndpoint('10.0.0.9'));
+      await settle();
+      transport.last.reply(const PeekRemoteWelcome(serverId: 'mac-1'));
+      await settle();
+      expect(
+        await memory.lastDesktop(),
+        const PeekRemoteDesktop(
+          serverId: 'mac-1',
+          endpoint: PeekRemoteEndpoint('10.0.0.9'),
+          name: 'Studio Mac',
+        ),
+      );
+      expect(await memory.token('mac-1'), issued);
+    });
+
+    test('forget drops the desktop here and in memory', () async {
+      final client = remote(endpoint: null, token: null);
+      await paired(client);
+      await client.forget();
+      expect(client.state, PeekRemoteState.unpaired);
+      expect(client.deviceToken, isNull);
+      expect(client.desktop, isNull);
+      expect(transport.last.closed, isTrue);
+      expect(await memory.lastDesktop(), isNull);
+      expect(await memory.token('mac-1'), isNull);
+
+      client.start();
+      await settle();
+      expect(client.state, PeekRemoteState.unpaired);
+    });
+
+    test('forgets a desktop that no longer knows the device', () async {
+      await paired(remote(endpoint: null, token: null));
+      final next = remote(endpoint: null, token: null)..start();
+      await settle();
+      transport.last.reply(
+        const PeekRemoteDenied(PeekRemoteDeniedReason.token, 'who?'),
+      );
+      await settle();
+      expect(next.state, PeekRemoteState.denied);
+      expect(await memory.lastDesktop(), isNull);
+      expect(await memory.token('mac-1'), isNull);
+    });
+
+    test('leaves memory alone with a token written in code', () async {
+      final client = remote();
+      await welcomed(client);
+      expect(await memory.lastDesktop(), isNull);
+    });
+
+    test('a memory that fails is reported, not fatal', () async {
+      final client = PeekRemote(
+        peek,
+        memory: _BrokenMemory(),
+        transport: transport,
+      );
+      addTearDown(client.dispose);
+      client.start();
+      await settle();
+      expect(client.state, PeekRemoteState.unpaired);
+      expect(errors.single, isA<StateError>());
     });
   });
 
@@ -474,4 +632,26 @@ void main() {
       );
     });
   });
+}
+
+/// A store that is out of order: memory is best effort.
+final class _BrokenMemory implements PeekRemoteMemory {
+  @override
+  Future<PeekRemoteDesktop?> lastDesktop() async =>
+      throw StateError('no preferences here');
+
+  @override
+  Future<String?> token(String serverId) async =>
+      throw StateError('no preferences here');
+
+  @override
+  Future<void> remember(PeekRemoteDesktop desktop, {String? token}) async =>
+      throw StateError('no preferences here');
+
+  @override
+  Future<void> forget(String serverId) async =>
+      throw StateError('no preferences here');
+
+  @override
+  Future<void> forgetAll() async => throw StateError('no preferences here');
 }

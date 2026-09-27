@@ -18,6 +18,9 @@ dependencies:
   # PeekBody.remote and PeekBodySide arrive in 2.0.0; the constraint moves
   # there with the release, while the workspace still reads 1.4.0.
   peek: ^1.4.0
+  # The one plugin in the Peek family: a pairing has to outlive the app's
+  # run, and there is no portable place for it but the platform's own.
+  shared_preferences: ^2.5.0
 
 dev_dependencies:
   flutter_test:

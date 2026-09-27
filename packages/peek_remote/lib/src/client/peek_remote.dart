@@ -8,6 +8,7 @@ import '../protocol/peek_remote_codec.dart';
 import '../protocol/peek_remote_frame.dart';
 import '../transport/peek_remote_transport.dart';
 import 'peek_remote_endpoint.dart';
+import 'peek_remote_memory.dart';
 
 /// Where a [PeekRemote] is in its life.
 enum PeekRemoteState {
@@ -26,6 +27,10 @@ enum PeekRemoteState {
   /// The desktop turned the app away; see [PeekRemote.denial]. It does not
   /// try again until started anew.
   denied,
+
+  /// Nothing to connect to: no desktop was given, and none is remembered.
+  /// [PeekRemote.connect] with a code changes that.
+  unpaired,
 }
 
 /// The desktop turned the app away; reported to `PeekOptions.onError`.
@@ -59,9 +64,14 @@ final class PeekRemoteDeniedException implements Exception {
 /// the desktop asks for one.
 ///
 /// Instead of a token in code, a person can type the short code the desktop
-/// shows: [pair] sends it, and the desktop answers with a [deviceToken] that
-/// this client uses from then on. Keeping it across launches is the job of
-/// whoever calls [pair].
+/// shows: [connect] with a `code` sends it, and the desktop answers with a
+/// [deviceToken] that this client uses from then on. The desktop and the
+/// token go into [PeekRemoteMemory], so a client created without an
+/// [endpoint] finds its way back on the next run:
+///
+/// ```dart
+/// peek.attach(PeekRemote(peek)..start());
+/// ```
 ///
 /// Recording never waits for the network: a change is written to a queue of
 /// at most [maxQueued] frames and sent on the next turn of the event loop.
@@ -73,13 +83,16 @@ final class PeekRemoteDeniedException implements Exception {
 final class PeekRemote implements PeekAdapter {
   /// Creates the client; nothing is sent until [start].
   ///
-  /// [name] is what the desktop calls the app; `PeekOptions.name` when
-  /// omitted.
+  /// With [endpoint] (and usually [token]) the desktop is fixed in code;
+  /// without it, [start] goes to the desktop remembered in [memory], and a
+  /// person pairs with a code when there is none. [name] is what the desktop
+  /// calls the app; `PeekOptions.name` when omitted.
   PeekRemote(
     this.peek, {
-    required PeekRemoteEndpoint endpoint,
+    PeekRemoteEndpoint? endpoint,
     this.token,
     String? name,
+    PeekRemoteMemory? memory,
     this.maxQueued = 2000,
     this.inlineBodyBytes = 4096,
     this.retryMin = const Duration(milliseconds: 500),
@@ -87,7 +100,9 @@ final class PeekRemote implements PeekAdapter {
     PeekRemoteTransport? transport,
     math.Random? random,
   }) : appName = name ?? peek.options.name,
+       _givenEndpoint = endpoint,
        _endpoint = endpoint,
+       _memory = memory ?? PeekRemoteMemory.sharedPreferences(),
        _transport = transport ?? PeekRemoteTransport.webSocket(),
        _random = random ?? math.Random(),
        _sessionId = _newSessionId(),
@@ -117,14 +132,21 @@ final class PeekRemote implements PeekAdapter {
   final Duration retryMax;
 
   final PeekRemoteTransport _transport;
+  final PeekRemoteMemory _memory;
   final math.Random _random;
   final String _sessionId;
   final DateTime _startedAt;
+  final PeekRemoteEndpoint? _givenEndpoint;
 
-  PeekRemoteEndpoint _endpoint;
+  PeekRemoteEndpoint? _endpoint;
   String? _code;
   String? _deviceToken;
   String? _serverId;
+
+  /// What a person called the desktop being connected to, kept until the
+  /// welcome makes it a [PeekRemoteDesktop].
+  String? _desktopName;
+  PeekRemoteDesktop? _desktop;
 
   static const PeekRemoteCodec _codec = PeekRemoteCodec();
 
@@ -164,9 +186,10 @@ final class PeekRemote implements PeekAdapter {
   /// Identifies this run of the app to the desktop, across reconnections.
   String get sessionId => _sessionId;
 
-  /// Where the desktop listens: what the client was created with, or where
-  /// it last paired.
-  PeekRemoteEndpoint get endpoint => _endpoint;
+  /// Where the desktop listens: what the client was created with, what it
+  /// remembers, or where it was last told to connect; `null` until one of
+  /// those.
+  PeekRemoteEndpoint? get endpoint => _endpoint;
 
   /// The token a desktop issued for a right code, sent as the token from
   /// then on; `null` until a pairing succeeds, and again once a desktop
@@ -176,37 +199,63 @@ final class PeekRemote implements PeekAdapter {
   /// The desktop the [deviceToken] came from, as its `welcome` named it.
   String? get serverId => _serverId;
 
+  /// The desktop paired with, once its welcome has been heard.
+  PeekRemoteDesktop? get desktop => _desktop;
+
   /// Connects, and keeps connecting until [stop]. Safe to call twice.
+  ///
+  /// Without an endpoint the remembered desktop is tried; with none
+  /// remembered the state becomes [PeekRemoteState.unpaired] and nothing
+  /// happens until [connect].
   void start() {
     if (_running || _disposed) return;
     _running = true;
     _denial = null;
     _attempts = 0;
-    unawaited(_connect());
+    if (_endpoint != null) {
+      unawaited(_connect());
+    } else {
+      unawaited(_startFromMemory());
+    }
   }
 
-  /// Connects to [endpoint] with the [code] the desktop shows, in place of a
-  /// token, and keeps connecting until [stop].
+  /// Connects to [endpoint] and keeps connecting until [stop]: with the
+  /// [code] the desktop shows in place of a token, or, without one, with the
+  /// token this client holds — a device token from an earlier pairing, or
+  /// the one written in code.
   ///
   /// A right code is answered with a [deviceToken], which replaces the code
-  /// from then on; a wrong one ends in [PeekRemoteState.denied] with
-  /// [PeekRemoteDeniedReason.code]. Whatever an earlier pairing gave is
-  /// forgotten.
-  Future<void> pair(PeekRemoteEndpoint endpoint, String code) async {
+  /// from then on and is remembered with the desktop; a wrong one ends in
+  /// [PeekRemoteState.denied] with [PeekRemoteDeniedReason.code]. [name] is
+  /// what a person knows the desktop as, kept with it.
+  Future<void> connect(
+    PeekRemoteEndpoint endpoint, {
+    String? code,
+    String? name,
+  }) async {
     if (_disposed) return;
-    final typed = code.trim();
-    if (typed.isEmpty) {
+    final typed = code?.trim();
+    if (typed != null && typed.isEmpty) {
       throw ArgumentError.value(code, 'code', 'must not be empty');
     }
     final previous = _endConnection();
     _endpoint = endpoint;
     _code = typed;
-    _deviceToken = null;
-    _serverId = null;
+    _desktopName = name;
+    if (typed != null) {
+      _deviceToken = null;
+      _serverId = null;
+      _desktop = null;
+    }
     _denial = null;
     _attempts = 0;
     _running = true;
-    unawaited(_connect());
+    if (typed != null || _deviceToken != null) {
+      unawaited(_connect());
+    } else {
+      // A known desktop at a new address: its token is in memory.
+      unawaited(_connectRecalling());
+    }
     await previous?.close();
   }
 
@@ -216,6 +265,76 @@ final class PeekRemote implements PeekAdapter {
     final connection = _endConnection();
     _setState(PeekRemoteState.stopped);
     await connection?.close();
+  }
+
+  /// Drops the desktop and its token, here and in memory, and disconnects:
+  /// the next connection needs a code again.
+  Future<void> forget() async {
+    final serverId = _serverId ?? _desktop?.serverId;
+    _running = false;
+    final connection = _endConnection();
+    _deviceToken = null;
+    _serverId = null;
+    _desktop = null;
+    _desktopName = null;
+    _code = null;
+    _endpoint = _givenEndpoint;
+    _setState(
+      _endpoint == null ? PeekRemoteState.unpaired : PeekRemoteState.stopped,
+    );
+    await connection?.close();
+    if (serverId != null) await _remember(() => _memory.forget(serverId));
+  }
+
+  Future<void> _startFromMemory() async {
+    final generation = _generation;
+    _setState(PeekRemoteState.connecting);
+    final recalled = await _recall(generation);
+    if (generation != _generation || !_running) return;
+    if (!recalled) {
+      _running = false;
+      _setState(PeekRemoteState.unpaired);
+      return;
+    }
+    _endpoint = _desktop!.endpoint;
+    unawaited(_connect());
+  }
+
+  Future<void> _connectRecalling() async {
+    final generation = _generation;
+    _setState(PeekRemoteState.connecting);
+    await _recall(generation);
+    if (generation != _generation || !_running) return;
+    unawaited(_connect());
+  }
+
+  /// Takes the last desktop and its token from memory; `false` when there is
+  /// none, or the client moved on meanwhile.
+  Future<bool> _recall(int generation) async {
+    PeekRemoteDesktop? desktop;
+    String? deviceToken;
+    try {
+      desktop = await _memory.lastDesktop();
+      if (desktop != null) deviceToken = await _memory.token(desktop.serverId);
+    } on Object catch (error, stackTrace) {
+      peek.reportAdapterError(error, stackTrace);
+    }
+    if (generation != _generation || !_running) return false;
+    if (desktop == null || deviceToken == null) return false;
+    _desktop = desktop;
+    _desktopName ??= desktop.name;
+    _serverId = desktop.serverId;
+    _deviceToken = deviceToken;
+    return true;
+  }
+
+  /// Memory is best effort: a store that fails must not take the stream down.
+  Future<void> _remember(Future<void> Function() write) async {
+    try {
+      await write();
+    } on Object catch (error, stackTrace) {
+      peek.reportAdapterError(error, stackTrace);
+    }
   }
 
   @override
@@ -230,7 +349,7 @@ final class PeekRemote implements PeekAdapter {
     _setState(PeekRemoteState.connecting);
     final PeekRemoteConnection connection;
     try {
-      connection = await _transport.connect(_endpoint.uri);
+      connection = await _transport.connect(_endpoint!.uri);
     } on Object {
       // A desktop that is not listening is the usual case, not an error.
       if (generation == _generation && _running) _waitAndRetry();
@@ -298,6 +417,27 @@ final class PeekRemote implements PeekAdapter {
       _serverId = welcome.serverId;
       _code = null;
     }
+    // A paired desktop is remembered where it answered from, with the token
+    // it issued; one taking the token written in code is not the app's to keep.
+    if (_deviceToken case final deviceToken?) {
+      if (_serverId case final serverId?) {
+        final desktop = PeekRemoteDesktop(
+          serverId: serverId,
+          endpoint: _endpoint!,
+          name: _desktopName ?? _desktop?.name,
+        );
+        final issued = welcome.deviceToken != null;
+        if (desktop != _desktop || issued) {
+          _desktop = desktop;
+          unawaited(
+            _remember(
+              () =>
+                  _memory.remember(desktop, token: issued ? deviceToken : null),
+            ),
+          );
+        }
+      }
+    }
     _setState(PeekRemoteState.connected);
     final history = peek.store.entries;
     _changes = peek.store.changes.listen(_onChange);
@@ -317,7 +457,12 @@ final class PeekRemote implements PeekAdapter {
       case PeekRemoteDeniedReason.token when _deviceToken != null:
         // The desktop forgot this device: pair again.
         _deviceToken = null;
+        final serverId = _serverId ?? _desktop?.serverId;
         _serverId = null;
+        _desktop = null;
+        if (serverId != null) {
+          unawaited(_remember(() => _memory.forget(serverId)));
+        }
       default:
         break;
     }

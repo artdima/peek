@@ -35,15 +35,20 @@ final remote = peek.attach(
 what the desktop should call the app; `PeekOptions.name` is used otherwise.
 
 A person at the phone can pair with the short code the desktop shows
-instead of a token written in code:
+instead of a token written in code — and then nothing needs to be in code
+at all:
 
 ```dart
-await remote.pair(PeekRemoteEndpoint.parse('192.168.1.20:9741'), '4719');
+final remote = peek.attach(PeekRemote(peek)..start());
+// Once, when the person types the code the desktop shows:
+await remote.connect(PeekRemoteEndpoint.parse('192.168.1.20:9741'), code: '4719');
 ```
 
-A right code is answered with a `remote.deviceToken`, which the client sends
-from then on; the code is not needed again. Keep the token (and
-`remote.serverId`) if the pairing should outlive the app's run.
+A right code is answered with a device token, which the client sends from
+then on, and the desktop is remembered (`shared_preferences`): the next
+`start()` goes straight back to it. `remote.forget()` drops it; a desktop
+that has forgotten the device turns it away, and the app asks for a code
+again. `remote.state` is `unpaired` while there is nothing to connect to.
 
 - **Where the desktop is.** A phone on the same Wi-Fi uses the address the
   desktop shows. An Android emulator reaches the machine it runs on as
