@@ -324,6 +324,66 @@ class PeekStrings {
   String get forgetDesktopHint =>
       'The app stays disconnected and asks for a code the next time.';
 
+  /// Connects to the desktop the link knows, after a disconnect.
+  String get connectAgain => 'Connect again';
+
+  /// Heads the desktops heard on the local network.
+  String get desktopsNearby => 'On this network';
+
+  /// Stands in the list while nothing has been heard yet.
+  String get desktopSearching => 'Looking for Peek Pro…';
+
+  /// Says the network cannot be searched from here.
+  String get desktopSearchUnavailable =>
+      "Can't look for Peek Pro on this network — type its address below.";
+
+  /// Marks a desktop that already knows the app.
+  String get desktopPaired => 'Paired — no code needed';
+
+  /// Marks a desktop that speaks another version of the protocol.
+  String get desktopIncompatible => 'Needs another version of Peek';
+
+  /// Heads the field for a desktop's address.
+  String get desktopAddress => 'Address';
+
+  /// Shown in the empty address field.
+  String get desktopAddressPlaceholder => '192.168.1.20:9741';
+
+  /// Says what to type where the network cannot help.
+  String get desktopAddressHint =>
+      'The iOS Simulator reaches the Mac as localhost, the Android emulator '
+      'as 10.0.2.2. An iPhone connects over Wi-Fi, cable or not: type the '
+      "Mac's address from Peek Pro. An Android phone on a cable can instead "
+      'run adb reverse tcp:9741 tcp:9741 and type localhost.';
+
+  /// Heads the pairing code.
+  String get desktopCode => 'Code';
+
+  /// Names the pairing code for a screen reader.
+  String get desktopCodeLabel => 'Pairing code';
+
+  /// Says where the code comes from.
+  String get desktopCodeHint =>
+      'Peek Pro shows a four-digit code in its window.';
+
+  /// Says the desktop refused the code.
+  String get desktopCodeWrong => 'Check the code on the Mac.';
+
+  /// Asks where to connect before the code can go.
+  String get desktopChooseFirst => 'Choose a Mac above or type its address.';
+
+  /// Says the typed address cannot be read.
+  String get desktopBadAddress => "That doesn't look like an address.";
+
+  /// Says [name] does not answer.
+  String desktopUnreachable(String name) =>
+      "Can't reach $name. Check that Peek Pro is open and on the same network.";
+
+  /// Says the desktop speaks another version of the protocol.
+  String get desktopOtherVersion =>
+      'This Peek Pro speaks another version of the protocol. Update whichever '
+      'of the two is older.';
+
   /// Shares the exported content.
   String get share => 'Share';
 

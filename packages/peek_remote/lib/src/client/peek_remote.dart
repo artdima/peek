@@ -189,6 +189,16 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
     },
     desktopName: _desktop?.name ?? _desktopName ?? _endpoint?.toString(),
     message: _denial?.message,
+    denial: switch (_denial?.reason) {
+      null => null,
+      PeekRemoteDeniedReason.token => PeekDesktopDenial.token,
+      PeekRemoteDeniedReason.code => PeekDesktopDenial.code,
+      PeekRemoteDeniedReason.protocolVersion =>
+        PeekDesktopDenial.protocolVersion,
+      PeekRemoteDeniedReason.other => PeekDesktopDenial.other,
+    },
+    host: _endpoint?.host,
+    port: _endpoint?.port,
   );
 
   @override

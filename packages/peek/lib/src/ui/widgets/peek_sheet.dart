@@ -114,40 +114,45 @@ class _SheetFrame extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
     final size = MediaQuery.sizeOf(context);
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
 
     return PeekSurface(
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: size.height * 0.85,
-            maxWidth: 560,
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(theme.radius * 2),
+      child: Padding(
+        // Rides above the keyboard, so a field in the sheet stays in view.
+        padding: EdgeInsets.only(bottom: keyboard),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: (size.height - keyboard) * 0.85,
+              maxWidth: 560,
             ),
-            child: ColoredBox(
-              color: theme.groupedBackground,
-              child: SafeArea(
-                top: false,
-                minimum: EdgeInsets.only(bottom: theme.rowSpacing),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 4),
-                      child: Container(
-                        width: 36,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: theme.separator,
-                          borderRadius: BorderRadius.circular(2),
+            child: ClipRRect(
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(theme.radius * 2),
+              ),
+              child: ColoredBox(
+                color: theme.groupedBackground,
+                child: SafeArea(
+                  top: false,
+                  minimum: EdgeInsets.only(bottom: theme.rowSpacing),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8, bottom: 4),
+                        child: Container(
+                          width: 36,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: theme.separator,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
                         ),
                       ),
-                    ),
-                    Flexible(child: builder(context)),
-                  ],
+                      Flexible(child: builder(context)),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -23,6 +23,21 @@ enum PeekDesktopLinkStatus {
   stopped,
 }
 
+/// Why a desktop turned the app away.
+enum PeekDesktopDenial {
+  /// The desktop does not know the app's token; a code pairs it again.
+  token,
+
+  /// The code is wrong or has expired.
+  code,
+
+  /// The desktop speaks another version of the protocol.
+  protocolVersion,
+
+  /// Anything else.
+  other,
+}
+
 /// A link's status and the desktop it concerns, for the screen to show.
 @immutable
 final class PeekDesktopLinkState {
@@ -31,6 +46,9 @@ final class PeekDesktopLinkState {
     required this.status,
     this.desktopName,
     this.message,
+    this.denial,
+    this.host,
+    this.port,
   });
 
   /// Where the link stands.
@@ -44,15 +62,28 @@ final class PeekDesktopLinkState {
   /// [PeekDesktopLinkStatus.denied].
   final String? message;
 
+  /// The kind of refusal behind [message].
+  final PeekDesktopDenial? denial;
+
+  /// Where the desktop listens, when the link knows.
+  final String? host;
+
+  /// The port it listens on, beside [host].
+  final int? port;
+
   @override
   bool operator ==(Object other) =>
       other is PeekDesktopLinkState &&
       other.status == status &&
       other.desktopName == desktopName &&
-      other.message == message;
+      other.message == message &&
+      other.denial == denial &&
+      other.host == host &&
+      other.port == port;
 
   @override
-  int get hashCode => Object.hash(status, desktopName, message);
+  int get hashCode =>
+      Object.hash(status, desktopName, message, denial, host, port);
 
   @override
   String toString() => 'PeekDesktopLinkState(${status.name}, $desktopName)';
@@ -114,6 +145,9 @@ final class PeekDesktopFound {
 /// with no word about how the streaming works. `peek_remote` provides one;
 /// the screen finds it among `Peek.adapters`.
 abstract interface class PeekDesktopLink implements PeekAdapter {
+  /// The port a desktop listens on unless told otherwise.
+  static const int defaultPort = 9741;
+
   /// Where the link stands now.
   PeekDesktopLinkState get linkState;
 

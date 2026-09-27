@@ -14,6 +14,20 @@ void main() {
       expect(peekRemoteHostOf(['fe80::1%en0'], ' '), isNull);
       expect(peekRemoteHostOf(const [], null), isNull);
     });
+
+    test('leaves self-assigned and link-local addresses for last', () {
+      expect(
+        peekRemoteHostOf(['169.254.12.7', '192.168.1.20'], 'mac.local.'),
+        '192.168.1.20',
+      );
+      expect(peekRemoteHostOf(['169.254.12.7'], 'mac.local.'), 'mac.local');
+      expect(
+        peekRemoteHostOf(['169.254.12.7', 'fd00::5'], null),
+        '169.254.12.7',
+      );
+      expect(peekRemoteHostOf(['fe80::1', 'fd00::5'], null), 'fd00::5');
+      expect(peekRemoteHostOf(['FE80::1'], null), isNull);
+    });
   });
 
   group('DiscoveredDesktops', () {

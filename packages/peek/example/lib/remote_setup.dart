@@ -13,7 +13,8 @@ import 'package:peek_remote/peek_remote.dart';
 ///
 /// `PEEK_REMOTE_CODE=4719` pairs with the code the desktop shows instead of
 /// a token. Without `PEEK_REMOTE` the client goes back to the desktop it
-/// paired with last, if any. Peek disposes the client with itself.
+/// paired with last, if any; "Connect to Peek Pro" in Peek's menu pairs with
+/// another. Peek disposes the client with itself.
 PeekRemote startRemote(Peek peek) {
   const address = String.fromEnvironment('PEEK_REMOTE');
   const token = String.fromEnvironment('PEEK_REMOTE_TOKEN');

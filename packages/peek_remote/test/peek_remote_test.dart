@@ -627,6 +627,8 @@ void main() {
       await settle();
       expect(client.linkState.status, PeekDesktopLinkStatus.connecting);
       expect(client.linkState.desktopName, 'Studio Mac');
+      expect(client.linkState.host, 'desk.local');
+      expect(client.linkState.port, 9741);
       expect(transport.last.uri, Uri.parse('ws://desk.local:9741/'));
       expect((transport.last.frames.single as PeekRemoteHello).code, '4719');
 
@@ -647,6 +649,7 @@ void main() {
       await client.forgetDesktop();
       expect(client.linkState.status, PeekDesktopLinkStatus.unpaired);
       expect(client.linkState.desktopName, isNull);
+      expect(client.linkState.host, isNull);
     });
 
     test('names an address when that is all it knows', () async {
@@ -660,6 +663,28 @@ void main() {
       await settle();
       expect(client.linkState.status, PeekDesktopLinkStatus.denied);
       expect(client.linkState.message, 'wrong token');
+      expect(client.linkState.denial, PeekDesktopDenial.token);
+    });
+
+    test('says what kind of refusal it was', () async {
+      final client = remote(endpoint: null, token: null);
+      for (final (reason, denial) in [
+        (PeekRemoteDeniedReason.code, PeekDesktopDenial.code),
+        (
+          PeekRemoteDeniedReason.protocolVersion,
+          PeekDesktopDenial.protocolVersion,
+        ),
+        (PeekRemoteDeniedReason.other, PeekDesktopDenial.other),
+      ]) {
+        await client.connectDesktop('desk.local', 9741, code: '4719');
+        await settle();
+        transport.last.reply(PeekRemoteDenied(reason, 'no'));
+        await settle();
+        expect(client.linkState.status, PeekDesktopLinkStatus.denied);
+        expect(client.linkState.denial, denial);
+      }
+      await client.connectDesktop('desk.local', 9741, code: '4719');
+      expect(client.linkState.denial, isNull);
     });
   });
 

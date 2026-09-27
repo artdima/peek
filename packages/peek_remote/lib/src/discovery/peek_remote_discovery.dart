@@ -107,18 +107,31 @@ final class DiscoveredDesktops {
 /// The address to connect to among what a record resolved to: IPv4 first,
 /// because every client and network handles it; then the `.local` name;
 /// then IPv6 without a zone, which a URI cannot carry.
+///
+/// A self-assigned `169.254.x.x` comes after the name: a Mac has one on the
+/// link to an iPhone on a cable, and the phone cannot connect through it.
 @internal
 String? peekRemoteHostOf(List<String> addresses, String? hostname) {
   final ipv4 = RegExp(r'^\d{1,3}(\.\d{1,3}){3}$');
+  final linkLocal = [
+    for (final address in addresses)
+      if (ipv4.hasMatch(address) && address.startsWith('169.254.')) address,
+  ];
   for (final address in addresses) {
-    if (ipv4.hasMatch(address)) return address;
+    if (ipv4.hasMatch(address) && !linkLocal.contains(address)) return address;
   }
   final name = hostname?.trim();
   if (name != null && name.isNotEmpty) {
     return name.endsWith('.') ? name.substring(0, name.length - 1) : name;
   }
+  if (linkLocal.isNotEmpty) return linkLocal.first;
   for (final address in addresses) {
-    if (address.contains(':') && !address.contains('%')) return address;
+    final lower = address.toLowerCase();
+    if (lower.contains(':') &&
+        !lower.contains('%') &&
+        !lower.startsWith('fe80:')) {
+      return address;
+    }
   }
   return null;
 }
