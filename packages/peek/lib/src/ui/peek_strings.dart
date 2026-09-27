@@ -260,6 +260,70 @@ class PeekStrings {
   /// because a wide layout shows both menus at once.
   String get requestActions => 'Request actions';
 
+  /// Heads the desktop viewer's part of the list menu.
+  String get desktop => 'Peek Pro';
+
+  /// Opens the way to a desktop viewer; also the title of what opens.
+  String get connectToDesktop => 'Connect to Peek Pro';
+
+  /// The menu item while the app is connected to [name].
+  String connectedToDesktop(String name) => 'Connected to $name';
+
+  /// The menu item while the app is connecting to [name].
+  String connectingToDesktop(String name) => 'Connecting to $name…';
+
+  /// The menu item while the app waits to reach [name] again.
+  String waitingForDesktop(String name) => 'Waiting for $name…';
+
+  /// The menu item after the desktop turned the app away.
+  String get desktopDenied => 'Peek Pro turned the app away';
+
+  /// The menu item while nothing is being streamed.
+  String get desktopDisconnected => 'Not connected to Peek Pro';
+
+  /// Says what a desktop viewer is, for an app that has none set up.
+  String get desktopAbout =>
+      "Peek Pro shows this app's requests on a Mac, live, as they happen — "
+      'with a bigger screen, search across everything and sessions saved to '
+      'files. This build of the app has no link to it yet.';
+
+  /// Heads the dependency to add.
+  String get desktopAddDependency => 'Add to pubspec.yaml';
+
+  /// Heads the line of code to add.
+  String get desktopSetUp => 'Then, where Peek is set up';
+
+  /// Heads the links.
+  String get desktopLinks => 'Links';
+
+  /// Names the link to Peek Pro.
+  String get desktopRepository => 'Peek Pro on GitHub';
+
+  /// Names the link to the remote package.
+  String get desktopPackage => 'peek_remote on pub.dev';
+
+  /// Names the link to the guide.
+  String get desktopGuide => 'Setting up remote viewing';
+
+  /// Heads the status of the link.
+  String get desktopStatus => 'Status';
+
+  /// Names the desktop the app is paired with.
+  String get desktopPairedWith => 'Paired with';
+
+  /// The status while no desktop is known.
+  String get desktopUnpaired => 'Not paired';
+
+  /// Cuts the connection.
+  String get disconnect => 'Disconnect';
+
+  /// Drops the paired desktop.
+  String get forgetDesktop => 'Forget this Mac';
+
+  /// Explains what forgetting does.
+  String get forgetDesktopHint =>
+      'The app stays disconnected and asks for a code the next time.';
+
   /// Shares the exported content.
   String get share => 'Share';
 

@@ -10,6 +10,7 @@ import '../peek_scope.dart';
 import '../peek_share.dart';
 import '../theme/peek_theme.dart';
 import 'peek_copy_button.dart';
+import 'peek_desktop_sheet.dart';
 import 'peek_method_badge.dart';
 import 'peek_sheet.dart';
 import 'peek_toast.dart';
@@ -129,7 +130,7 @@ Future<void> showPeekEntryActions(
   }
 }
 
-enum _ListAction { copyHar, shareHar, saveSession }
+enum _ListAction { copyHar, shareHar, saveSession, desktop }
 
 /// Offers what can be done with the list as it stands, and does it.
 Future<void> showPeekListActions(BuildContext context) async {
@@ -138,31 +139,42 @@ Future<void> showPeekListActions(BuildContext context) async {
   final share = PeekScope.shareOf(context);
   final entries = controller.entries;
   final origin = peekShareOrigin(context);
+  final link = peekDesktopLinkOf(context);
 
+  // The exports need something to export; the desktop is always there to
+  // connect to, or to read about.
   final action = await showPeekActions<_ListAction>(
     context,
     title: strings.requestCount(entries.length, controller.totalCount),
     actions: [
-      PeekAction(
-        value: _ListAction.copyHar,
-        label: strings.exportHar,
-        icon: PeekIcons.braces,
-        section: strings.copy,
-      ),
-      if (share != null) ...[
+      if (entries.isNotEmpty) ...[
         PeekAction(
-          value: _ListAction.shareHar,
-          label: strings.shareHar,
-          icon: PeekIcons.share,
-          section: strings.share,
+          value: _ListAction.copyHar,
+          label: strings.exportHar,
+          icon: PeekIcons.braces,
+          section: strings.copy,
         ),
-        PeekAction(
-          value: _ListAction.saveSession,
-          label: strings.saveSession,
-          icon: PeekIcons.download,
-          section: strings.share,
-        ),
+        if (share != null) ...[
+          PeekAction(
+            value: _ListAction.shareHar,
+            label: strings.shareHar,
+            icon: PeekIcons.share,
+            section: strings.share,
+          ),
+          PeekAction(
+            value: _ListAction.saveSession,
+            label: strings.saveSession,
+            icon: PeekIcons.download,
+            section: strings.share,
+          ),
+        ],
       ],
+      PeekAction(
+        value: _ListAction.desktop,
+        label: peekDesktopMenuLabel(strings, link),
+        icon: PeekIcons.desktop,
+        section: strings.desktop,
+      ),
     ],
   );
   if (action == null || !context.mounted) return;
@@ -176,6 +188,8 @@ Future<void> showPeekListActions(BuildContext context) async {
       await share?.share(peekHarContent(entries, 'peek', origin: origin));
     case _ListAction.saveSession:
       await share?.share(peekSessionContent(controller.peek, origin: origin));
+    case _ListAction.desktop:
+      await showPeekDesktop(context);
   }
 }
 

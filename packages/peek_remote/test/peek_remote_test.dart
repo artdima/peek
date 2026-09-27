@@ -607,6 +607,59 @@ void main() {
     });
   });
 
+  group('as a desktop link', () {
+    test('shows the screen where it stands and who the desktop is', () async {
+      final client = remote(endpoint: null, token: null);
+      expect(client.linkState.status, PeekDesktopLinkStatus.stopped);
+      expect(client.linkState.desktopName, isNull);
+
+      final seen = <PeekDesktopLinkState>[];
+      client.linkChanges.listen(seen.add);
+      await client.connectDesktop(
+        'desk.local',
+        9741,
+        code: '4719',
+        name: 'Studio Mac',
+      );
+      await settle();
+      expect(client.linkState.status, PeekDesktopLinkStatus.connecting);
+      expect(client.linkState.desktopName, 'Studio Mac');
+      expect(transport.last.uri, Uri.parse('ws://desk.local:9741/'));
+      expect((transport.last.frames.single as PeekRemoteHello).code, '4719');
+
+      transport.last.reply(
+        const PeekRemoteWelcome(serverId: 'mac-1', deviceToken: 'issued'),
+      );
+      await settle();
+      expect(client.linkState.status, PeekDesktopLinkStatus.connected);
+      expect(seen.map((state) => state.status), [
+        PeekDesktopLinkStatus.connecting,
+        PeekDesktopLinkStatus.connected,
+      ]);
+
+      await client.disconnectDesktop();
+      expect(client.linkState.status, PeekDesktopLinkStatus.stopped);
+      expect(client.linkState.desktopName, 'Studio Mac');
+
+      await client.forgetDesktop();
+      expect(client.linkState.status, PeekDesktopLinkStatus.unpaired);
+      expect(client.linkState.desktopName, isNull);
+    });
+
+    test('names an address when that is all it knows', () async {
+      final client = remote();
+      expect(client.linkState.desktopName, 'desk.local:9741');
+      client.start();
+      await settle();
+      transport.last.reply(
+        const PeekRemoteDenied(PeekRemoteDeniedReason.token, 'wrong token'),
+      );
+      await settle();
+      expect(client.linkState.status, PeekDesktopLinkStatus.denied);
+      expect(client.linkState.message, 'wrong token');
+    });
+  });
+
   group('PeekRemoteEndpoint', () {
     test('reads host or host:port', () {
       expect(

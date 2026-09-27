@@ -80,7 +80,7 @@ final class PeekRemoteDeniedException implements Exception {
 /// pause that grows up to [retryMax]; the history is sent again after every
 /// welcome. Nothing here throws into the app: errors reach
 /// `PeekOptions.onError`.
-final class PeekRemote implements PeekAdapter {
+final class PeekRemote implements PeekAdapter, PeekDesktopLink {
   /// Creates the client; nothing is sent until [start].
   ///
   /// With [endpoint] (and usually [token]) the desktop is fixed in code;
@@ -172,6 +172,38 @@ final class PeekRemote implements PeekAdapter {
 
   @override
   String get name => 'remote';
+
+  @override
+  PeekDesktopLinkState get linkState => PeekDesktopLinkState(
+    status: switch (_state) {
+      PeekRemoteState.stopped => PeekDesktopLinkStatus.stopped,
+      PeekRemoteState.connecting => PeekDesktopLinkStatus.connecting,
+      PeekRemoteState.connected => PeekDesktopLinkStatus.connected,
+      PeekRemoteState.waiting => PeekDesktopLinkStatus.waiting,
+      PeekRemoteState.denied => PeekDesktopLinkStatus.denied,
+      PeekRemoteState.unpaired => PeekDesktopLinkStatus.unpaired,
+    },
+    desktopName: _desktop?.name ?? _desktopName ?? _endpoint?.toString(),
+    message: _denial?.message,
+  );
+
+  @override
+  Stream<PeekDesktopLinkState> get linkChanges =>
+      _states.stream.map((_) => linkState);
+
+  @override
+  Future<void> connectDesktop(
+    String host,
+    int port, {
+    String? code,
+    String? name,
+  }) => connect(PeekRemoteEndpoint(host, port: port), code: code, name: name);
+
+  @override
+  Future<void> disconnectDesktop() => stop();
+
+  @override
+  Future<void> forgetDesktop() => forget();
 
   /// Where the client is now.
   PeekRemoteState get state => _state;

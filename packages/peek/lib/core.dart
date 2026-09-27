@@ -40,6 +40,7 @@ export 'src/core/session/peek_session.dart';
 export 'src/core/session/peek_session_codec.dart';
 export 'src/core/session/peek_session_header.dart';
 export 'src/core/sink/peek_adapter.dart';
+export 'src/core/sink/peek_desktop_link.dart';
 export 'src/core/sink/peek_event.dart';
 export 'src/core/sink/peek_sink.dart';
 export 'src/core/store/in_memory_peek_store.dart';

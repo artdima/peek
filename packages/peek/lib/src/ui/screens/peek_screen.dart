@@ -257,10 +257,7 @@ class _PeekScaffoldState extends State<_PeekScaffold> {
       PeekIconButton(
         icon: Icons.more_horiz,
         tooltip: strings.more,
-        onPressed:
-            controller.entries.isEmpty
-                ? null
-                : () => unawaited(showPeekListActions(context)),
+        onPressed: () => unawaited(showPeekListActions(context)),
       ),
     ];
   }

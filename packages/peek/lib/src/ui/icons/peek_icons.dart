@@ -345,4 +345,16 @@ abstract final class PeekIcons {
       'M4 12C4 11.448 4.448 11 5 11C5.552 11 6 11.448 6 12C6 12.552 5.552 13 5 13C4.448 13 4 12.552 4 12Z',
     ],
   );
+
+  /// A desktop viewer: the screen the calls are streamed to.
+  static const PeekIconData desktop = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M4 3L20 3C21.105 3 22 3.895 22 5L22 15C22 16.105 21.105 17 20 17L4 17C2.895 17 2 16.105 2 15L2 5C2 3.895 2.895 3 4 3Z',
+      'M8 21L16 21',
+      'M12 17L12 21',
+    ],
+  );
 }
