@@ -7,9 +7,9 @@ import '../protocol/peek_remote_frame.dart';
 final class PeekRemoteEndpoint {
   /// The desktop at [host] on [port].
   ///
-  /// An Android emulator reaches the machine it runs on as `10.0.2.2`; a
-  /// device on a cable can use `adb reverse tcp:9741 tcp:9741` and
-  /// `localhost`.
+  /// An Android emulator reaches the machine it runs on as `10.0.2.2`; an
+  /// Android device on a cable can use `adb reverse tcp:9741 tcp:9741` and
+  /// `localhost`. An iPhone connects over Wi-Fi, cable or not.
   const PeekRemoteEndpoint(
     this.host, {
     this.port = PeekRemoteProtocol.defaultPort,

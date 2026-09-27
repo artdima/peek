@@ -31,8 +31,9 @@ app → desktop  {"type":"bodyResponse","requestId":"7","body":{…}}
   watch several apps at once.
 - The transport is a **WebSocket**. The desktop listens on port **9741** by
   default, at the path `/`: `ws://<desktop>:9741/`. An Android emulator
-  reaches the host as `10.0.2.2`; a device on a cable can use
-  `adb reverse tcp:9741 tcp:9741` and connect to `localhost`.
+  reaches the host as `10.0.2.2`; an Android device on a cable can use
+  `adb reverse tcp:9741 tcp:9741` and connect to `localhost`. An iPhone
+  connects over Wi-Fi, cable or not.
 - Every frame is one **text message** holding one JSON object. Binary
   messages are not used; a peer ignores one it receives.
 - Every frame has a string `type`. Frames that go to the desktop come from

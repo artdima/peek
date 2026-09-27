@@ -116,6 +116,49 @@ without Peek exposing a second theming system. `PeekSurface` gives every
 screen and panel the ancestors Flutter's text expects, so nothing inherits
 the host's styling by accident.
 
+## Beyond the device
+
+A store's calls leave the device in two ways, and both carry them in one
+format — the session format of [`doc/spec/`](spec/), which `PeekCodec`
+writes and reads:
+
+```
+                  ┌──────────────────────────────┐
+                  │  peek/core                   │
+                  │  store · PeekCodec           │
+                  └───────┬──────────────┬───────┘
+      PeekStore.changes   │              │   PeekSessionWriter
+                  ┌───────▼───────┐ ┌────▼─────────────────┐
+                  │  peek_remote  │ │  a .peek file,       │
+                  │  PeekRemote   │ │  shared from the app │
+                  └───────┬───────┘ └────┬─────────────────┘
+                   ws://  │              │
+                  ┌───────▼──────────────▼───────┐
+                  │  Peek Pro, on a Mac          │
+                  └──────────────────────────────┘
+```
+
+**`peek_remote` is an adapter facing the other way.** It reports nothing
+into the sink; it reads `store.changes` and streams each change to a
+desktop viewer over a WebSocket. Like any adapter it depends on
+`package:peek/core.dart` and never on the UI — its other dependencies,
+`bonsoir` to find the desktop and `shared_preferences` to remember it, stay
+in its own package. [`doc/remote.md`](remote.md) is the guide.
+
+**The screen does not know `peek_remote`.** "Connect to Peek Pro" needs a
+link to a desktop, so the core defines one — `PeekDesktopLink`, pure Dart —
+and `PeekRemote` implements it. The screen looks for it among
+`Peek.adapters`: found, it offers pairing; not found, it explains how to
+add the package. `ui → core` stays the only direction.
+
+**Peek Pro is the format's second reader.** A `.peek` file and the wire
+hold a call the same way, so Peek Pro reads both with one decoder, written
+in Swift from the documents alone. That is why a change to the model starts
+in `doc/spec/`: the documents come with reference files that Peek's tests
+write and check, and Peek Pro's tests read the same files, copied over by
+its sync script. A field Peek adds and Peek Pro has not learned yet is
+ignored, not fatal — both sides read leniently.
+
 ## Where things go
 
 | Adding                     | Goes in                              |
@@ -125,6 +168,8 @@ the host's styling by accident.
 | A way to filter or sort    | `core/query/`                        |
 | A screen or a widget       | `ui/screens/`, `ui/widgets/`         |
 | Support for another logger | a new `peek_<logger>` package        |
+| A field in a `.peek` file  | `doc/spec/session-format.md` first, then `core/codec/` |
+| A frame on the wire        | `doc/spec/remote-protocol.md` first, then `peek_remote` |
 
 Nothing in `core/` may import from `ui/`, and nothing in either may import an
 adapter.

@@ -112,6 +112,7 @@ calls all four ways and drives every screen.
 | [`peek_chopper`](https://github.com/artdima/peek/tree/main/packages/peek_chopper) | `PeekChopperInterceptor`: reports what a Chopper client does | `peek`, `chopper`, `http` |
 | [`peek_dio`](https://github.com/artdima/peek/tree/main/packages/peek_dio) | `PeekDioInterceptor`: reports what a Dio client does | `peek`, `dio` |
 | [`peek_http`](https://github.com/artdima/peek/tree/main/packages/peek_http) | `PeekHttpClient`: reports what a `package:http` client does | `peek`, `http` |
+| [`peek_remote`](https://github.com/artdima/peek/tree/main/packages/peek_remote) | `PeekRemote`: streams the calls to Peek Pro on a Mac, live | `peek`, `bonsoir`, `shared_preferences` |
 | [`peek_talker`](https://github.com/artdima/peek/tree/main/packages/peek_talker) | `PeekTalkerAdapter`: reads what Talker logs, `talker_dio_logger` understood out of the box | `peek`, `peek_dio`, `talker`, `talker_dio_logger` |
 
 ## Configuration
@@ -150,6 +151,25 @@ final peek = Peek(
   `PeekShareDelegate` wired to the one you use; the example shows it with
   `share_plus`. On the web there is nothing to hand over: the browser
   saves the file, and a delegate given there is still used instead.
+
+## Peek Pro
+
+[Peek Pro](https://github.com/artdima/peek-pro) is a Mac app that shows the
+calls live while the app runs on a phone, a simulator or an emulator: a
+bigger screen, search across everything, several apps at once and sessions
+saved to files. Add [`peek_remote`](https://github.com/artdima/peek/tree/main/packages/peek_remote), start it in debug
+builds, and pair once from Peek's menu — Connect to Peek Pro — with the
+code Peek Pro shows:
+
+```dart
+if (kDebugMode) {
+  peek.attach(PeekRemote(peek)..start());
+}
+```
+
+[`doc/remote.md`](https://github.com/artdima/peek/blob/main/doc/remote.md) is the guide, from setting up to what never
+leaves the device. Anyone building another viewer finds the protocol and
+the `.peek` file format in [`doc/spec/`](https://github.com/artdima/peek/tree/main/doc/spec).
 
 ## Writing your own adapter
 
