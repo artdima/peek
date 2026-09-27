@@ -15,17 +15,16 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:peek/core.dart';
-import 'package:peek_remote/peek_remote.dart';
+import 'package:peek_remote/protocol.dart';
 
 const PeekRemoteCodec _codec = PeekRemoteCodec();
 
 Future<void> main(List<String> arguments) async {
   final options = _Options.parse(arguments);
   final server = await HttpServer.bind(InternetAddress.anyIPv4, options.port);
-  final out =
-      options.out == null
-          ? null
-          : File(options.out!).openWrite(mode: FileMode.append);
+  final out = options.out == null
+      ? null
+      : File(options.out!).openWrite(mode: FileMode.append);
   stdout.writeln(
     'Listening on ws://<this machine>:${server.port}/ '
     '— token: ${options.token ?? 'none'}'

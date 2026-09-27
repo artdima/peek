@@ -35,8 +35,8 @@ final class PeekRemoteCodec {
     PeekRemoteHello() => {
       'type': 'hello',
       'protocolVersion': frame.protocolVersion,
-      if (frame.token case final token?) 'token': token,
-      if (frame.code case final code?) 'code': code,
+      'token': ?frame.token,
+      'code': ?frame.code,
       'sessionId': frame.sessionId,
       'session': _encodeSession(frame.session),
     },
@@ -47,11 +47,11 @@ final class PeekRemoteCodec {
           frame.serverVersion != null ||
           frame.serverId != null)
         'server': {
-          if (frame.serverName case final name?) 'name': name,
-          if (frame.serverVersion case final version?) 'version': version,
-          if (frame.serverId case final id?) 'id': id,
+          'name': ?frame.serverName,
+          'version': ?frame.serverVersion,
+          'id': ?frame.serverId,
         },
-      if (frame.deviceToken case final deviceToken?) 'deviceToken': deviceToken,
+      'deviceToken': ?frame.deviceToken,
     },
     PeekRemoteDenied() => {
       'type': 'denied',
@@ -86,7 +86,7 @@ final class PeekRemoteCodec {
       'type': 'bodyResponse',
       'requestId': frame.requestId,
       'error': (frame.error ?? PeekRemoteBodyError.failed).name,
-      if (frame.message case final message?) 'message': message,
+      'message': ?frame.message,
     },
     PeekRemotePing() => {'type': 'ping'},
     PeekRemotePong() => {'type': 'pong'},
@@ -143,15 +143,15 @@ final class PeekRemoteCodec {
       'bodyResponse' =>
         json['body'] == null
             ? PeekRemoteBodyResponse.error(
-              _string(json, 'requestId'),
-              PeekRemoteBodyError.values.asNameMap()[json['error']] ??
-                  PeekRemoteBodyError.failed,
-              _optionalString(json, 'message'),
-            )
+                _string(json, 'requestId'),
+                PeekRemoteBodyError.values.asNameMap()[json['error']] ??
+                    PeekRemoteBodyError.failed,
+                _optionalString(json, 'message'),
+              )
             : PeekRemoteBodyResponse.body(
-              _string(json, 'requestId'),
-              _codec.decodeBody(json['body']),
-            ),
+                _string(json, 'requestId'),
+                _codec.decodeBody(json['body']),
+              ),
       'ping' => const PeekRemotePing(),
       'pong' => const PeekRemotePong(),
       _ => PeekRemoteUnknownFrame(type),
@@ -160,9 +160,9 @@ final class PeekRemoteCodec {
 
   static Map<String, Object?> _encodeSession(PeekSessionHeader session) => {
     'peekVersion': session.peekVersion,
-    if (session.name case final name?) 'name': name,
+    'name': ?session.name,
     'platform': session.platform,
-    if (session.osVersion case final osVersion?) 'osVersion': osVersion,
+    'osVersion': ?session.osVersion,
     'startedAt': session.startedAt.toUtc().toIso8601String(),
   };
 

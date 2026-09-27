@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:peek/core.dart';
 
+import '../discovery/peek_remote_discovery.dart';
 import '../protocol/peek_remote_codec.dart';
 import '../protocol/peek_remote_frame.dart';
 import '../transport/peek_remote_transport.dart';
@@ -93,6 +94,7 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
     this.token,
     String? name,
     PeekRemoteMemory? memory,
+    PeekRemoteDiscovery? discovery,
     this.maxQueued = 2000,
     this.inlineBodyBytes = 4096,
     this.retryMin = const Duration(milliseconds: 500),
@@ -103,6 +105,7 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
        _givenEndpoint = endpoint,
        _endpoint = endpoint,
        _memory = memory ?? PeekRemoteMemory.sharedPreferences(),
+       _discovery = discovery ?? PeekRemoteDiscovery.bonjour(),
        _transport = transport ?? PeekRemoteTransport.webSocket(),
        _random = random ?? math.Random(),
        _sessionId = _newSessionId(),
@@ -133,6 +136,7 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
 
   final PeekRemoteTransport _transport;
   final PeekRemoteMemory _memory;
+  final PeekRemoteDiscovery _discovery;
   final math.Random _random;
   final String _sessionId;
   final DateTime _startedAt;
@@ -192,12 +196,39 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
       _states.stream.map((_) => linkState);
 
   @override
+  Stream<List<PeekDesktopFound>> watchDesktops() => _discovery.watch().map(
+    (desktops) => [
+      for (final desktop in desktops)
+        PeekDesktopFound(
+          name: desktop.name,
+          host: desktop.endpoint.host,
+          port: desktop.endpoint.port,
+          serverId: desktop.serverId,
+          isPaired:
+              desktop.serverId != null &&
+              desktop.serverId == (_serverId ?? _desktop?.serverId) &&
+              _deviceToken != null,
+          isCompatible: desktop.isCompatible,
+        ),
+    ],
+  );
+
+  /// Desktops on the local network, as [PeekRemoteDiscovery] finds them.
+  Stream<List<PeekRemoteDiscovered>> discover() => _discovery.watch();
+
+  @override
   Future<void> connectDesktop(
     String host,
     int port, {
     String? code,
     String? name,
-  }) => connect(PeekRemoteEndpoint(host, port: port), code: code, name: name);
+    String? serverId,
+  }) => connect(
+    PeekRemoteEndpoint(host, port: port),
+    code: code,
+    name: name,
+    serverId: serverId,
+  );
 
   @override
   Future<void> disconnectDesktop() => stop();
@@ -259,11 +290,14 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
   /// A right code is answered with a [deviceToken], which replaces the code
   /// from then on and is remembered with the desktop; a wrong one ends in
   /// [PeekRemoteState.denied] with [PeekRemoteDeniedReason.code]. [name] is
-  /// what a person knows the desktop as, kept with it.
+  /// what a person knows the desktop as, kept with it. [serverId], when the
+  /// network said it, picks the token: this desktop's own, or none — never
+  /// another desktop's.
   Future<void> connect(
     PeekRemoteEndpoint endpoint, {
     String? code,
     String? name,
+    String? serverId,
   }) async {
     if (_disposed) return;
     final typed = code?.trim();
@@ -271,10 +305,11 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
       throw ArgumentError.value(code, 'code', 'must not be empty');
     }
     final previous = _endConnection();
+    final known = _serverId ?? _desktop?.serverId;
     _endpoint = endpoint;
     _code = typed;
     _desktopName = name;
-    if (typed != null) {
+    if (typed != null || (serverId != null && serverId != known)) {
       _deviceToken = null;
       _serverId = null;
       _desktop = null;
@@ -286,7 +321,7 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
       unawaited(_connect());
     } else {
       // A known desktop at a new address: its token is in memory.
-      unawaited(_connectRecalling());
+      unawaited(_connectRecalling(serverId));
     }
     await previous?.close();
   }
@@ -332,21 +367,33 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
     unawaited(_connect());
   }
 
-  Future<void> _connectRecalling() async {
+  Future<void> _connectRecalling(String? serverId) async {
     final generation = _generation;
     _setState(PeekRemoteState.connecting);
-    await _recall(generation);
+    await _recall(generation, serverId: serverId);
     if (generation != _generation || !_running) return;
     unawaited(_connect());
   }
 
-  /// Takes the last desktop and its token from memory; `false` when there is
-  /// none, or the client moved on meanwhile.
-  Future<bool> _recall(int generation) async {
+  /// Takes a desktop and its token from memory — the one [serverId] names,
+  /// or else the last one; `false` when there is none, or the client moved
+  /// on meanwhile.
+  Future<bool> _recall(int generation, {String? serverId}) async {
     PeekRemoteDesktop? desktop;
     String? deviceToken;
     try {
-      desktop = await _memory.lastDesktop();
+      final last = await _memory.lastDesktop();
+      if (serverId == null) {
+        desktop = last;
+      } else if (last?.serverId == serverId) {
+        desktop = last;
+      } else if (_endpoint case final endpoint?) {
+        desktop = PeekRemoteDesktop(
+          serverId: serverId,
+          endpoint: endpoint,
+          name: _desktopName,
+        );
+      }
       if (desktop != null) deviceToken = await _memory.token(desktop.serverId);
     } on Object catch (error, stackTrace) {
       peek.reportAdapterError(error, stackTrace);
@@ -589,8 +636,9 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
     if (request == null && responseBody == null) return entry;
     return entry.copyWith(
       request: request == null ? null : entry.request.copyWith(body: request),
-      response:
-          responseBody == null ? null : response!.copyWith(body: responseBody),
+      response: responseBody == null
+          ? null
+          : response!.copyWith(body: responseBody),
     );
   }
 

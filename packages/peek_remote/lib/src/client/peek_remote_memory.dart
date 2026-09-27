@@ -34,7 +34,7 @@ final class PeekRemoteDesktop {
     'serverId': serverId,
     'host': endpoint.host,
     'port': endpoint.port,
-    if (name case final name?) 'name': name,
+    'name': ?name,
   };
 
   static PeekRemoteDesktop? _fromJson(Object? json) {

@@ -36,11 +36,15 @@ final class FakeDesktopLink implements PeekDesktopLink {
   Stream<PeekDesktopLinkState> get linkChanges => _changes.stream;
 
   @override
+  Stream<List<PeekDesktopFound>> watchDesktops() => const Stream.empty();
+
+  @override
   Future<void> connectDesktop(
     String host,
     int port, {
     String? code,
     String? name,
+    String? serverId,
   }) async {
     calls.add('connect $host:$port ${code ?? ''}'.trim());
   }

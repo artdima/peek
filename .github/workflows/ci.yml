@@ -79,13 +79,18 @@ jobs:
     strategy:
       matrix:
         package: [peek, peek_chopper, peek_dio, peek_http, peek_remote, peek_talker]
+        include:
+          - flutter: 3.29.0
+          # bonsoir's Apple half needs Dart 3.11.
+          - package: peek_remote
+            flutter: 3.41.0
     steps:
       - uses: actions/checkout@v7
 
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.29.0
+          flutter-version: ${{ matrix.flutter }}
           cache: true
 
       # The workspace tooling needs a newer Dart than the packages promise,

@@ -56,19 +56,18 @@ bool _insideIo(File file) {
 
 /// Every file under [directory] that breaks the rules above; `dart:io` is
 /// allowed under `src/io/` and nowhere else.
-List<String> offendingDartFiles(Directory directory) =>
-    directory
-        .listSync(recursive: true)
-        .whereType<File>()
-        .where((file) => file.path.endsWith('.dart'))
-        .where((file) {
-          final source = file.readAsStringSync();
-          if (reachesPastCore(source)) return true;
-          if (_insideIo(file)) return false;
-          return importsDartIo(source) || reachesIoUnguarded(source);
-        })
-        .map((file) => file.path)
-        .toList();
+List<String> offendingDartFiles(Directory directory) => directory
+    .listSync(recursive: true)
+    .whereType<File>()
+    .where((file) => file.path.endsWith('.dart'))
+    .where((file) {
+      final source = file.readAsStringSync();
+      if (reachesPastCore(source)) return true;
+      if (_insideIo(file)) return false;
+      return importsDartIo(source) || reachesIoUnguarded(source);
+    })
+    .map((file) => file.path)
+    .toList();
 
 void main() {
   test("the package imports Peek's core and keeps dart:io in its place", () {
@@ -86,10 +85,9 @@ void main() {
     final directory = Directory.systemTemp.createTempSync('peek_remote_arch');
     addTearDown(() => directory.deleteSync(recursive: true));
 
-    void plant(String path, String source) =>
-        File('${directory.path}/$path')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(source);
+    void plant(String path, String source) => File('${directory.path}/$path')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(source);
 
     plant('nested/offender.dart', "import 'dart:io';");
     plant('src/io/allowed.dart', "import 'dart:io';");

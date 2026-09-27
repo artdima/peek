@@ -28,8 +28,9 @@ final class _WebSocketConnection implements PeekRemoteConnection {
 
   // The protocol sends text; a binary message is ignored, as it says.
   @override
-  late final Stream<String> messages =
-      _socket.where((message) => message is String).cast<String>();
+  late final Stream<String> messages = _socket
+      .where((message) => message is String)
+      .cast<String>();
 
   @override
   void send(String message) {

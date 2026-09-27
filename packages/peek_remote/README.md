@@ -68,6 +68,25 @@ again. `remote.state` is `unpaired` while there is nothing to connect to.
 
 `remote.state` and `remote.stateChanges` say whether it is connected.
 
+## Finding the desktop
+
+Peek Pro announces itself over Bonjour as `_peek._tcp`, and
+`remote.discover()` lists the desktops on the network as they come and go
+(the "Connect to Peek Pro" sheet in Peek shows them). It browses through the
+platform's own Bonjour, by way of [`bonsoir`](https://pub.dev/packages/bonsoir);
+on iOS the app needs two keys in `Info.plist`:
+
+```xml
+<key>NSLocalNetworkUsageDescription</key>
+<string>Streams network calls to Peek Pro on this network.</string>
+<key>NSBonjourServices</key>
+<array>
+  <string>_peek._tcp</string>
+</array>
+```
+
+Office networks often block multicast; an address typed in always works.
+
 ## Without a desktop
 
 `tool/peek_remote_dump.dart` in the repository listens the way the desktop

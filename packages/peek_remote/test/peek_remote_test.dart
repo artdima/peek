@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:peek/core.dart';
 import 'package:peek_remote/peek_remote.dart';
 
+import 'fake_discovery.dart';
 import 'fake_transport.dart';
 import 'support.dart';
 
@@ -13,6 +14,7 @@ void main() {
   late List<Object> errors;
 
   late PeekRemoteMemory memory;
+  late FakeDiscovery discovery;
 
   PeekRemote remote({
     int maxQueued = 2000,
@@ -26,6 +28,7 @@ void main() {
       endpoint: endpoint,
       token: token,
       memory: memory,
+      discovery: discovery,
       maxQueued: maxQueued,
       retryMin: retryMin,
       retryMax: retryMax,
@@ -57,6 +60,7 @@ void main() {
     addTearDown(peek.dispose);
     transport = FakeTransport();
     memory = PeekRemoteMemory.inMemory();
+    discovery = FakeDiscovery();
   });
 
   group('connecting', () {
@@ -229,11 +233,10 @@ void main() {
         );
       await settle();
 
-      final answers =
-          connection.frames
-              .skip(before)
-              .cast<PeekRemoteBodyResponse>()
-              .toList();
+      final answers = connection.frames
+          .skip(before)
+          .cast<PeekRemoteBodyResponse>()
+          .toList();
       expect(answers[0], PeekRemoteBodyResponse.body('1', large));
       expect(answers[1].error, PeekRemoteBodyError.notHeld);
       expect(answers[2].error, PeekRemoteBodyError.notFound);
@@ -657,6 +660,111 @@ void main() {
       await settle();
       expect(client.linkState.status, PeekDesktopLinkStatus.denied);
       expect(client.linkState.message, 'wrong token');
+    });
+  });
+
+  group('discovery', () {
+    const issued = 'c1f6a2e9d4b8074f3e5a19c2b7d0e6f4';
+    const studio = PeekRemoteDiscovered(
+      name: 'Studio Mac',
+      endpoint: PeekRemoteEndpoint('10.0.0.2'),
+      protocolVersion: 1,
+      serverId: 'mac-1',
+    );
+    const other = PeekRemoteDiscovered(
+      name: 'Air',
+      endpoint: PeekRemoteEndpoint('10.0.0.3'),
+      serverId: 'mac-2',
+    );
+
+    Future<PeekRemote> pairedWithStudio() async {
+      final client = remote(endpoint: null, token: null);
+      await client.connectDesktop(
+        '10.0.0.2',
+        9741,
+        code: '4719',
+        name: 'Studio Mac',
+      );
+      await settle();
+      transport.last.reply(
+        const PeekRemoteWelcome(serverId: 'mac-1', deviceToken: issued),
+      );
+      await settle();
+      return client;
+    }
+
+    test('lists what the network has, marking the paired desktop', () async {
+      final client = await pairedWithStudio();
+      final seen = <List<PeekDesktopFound>>[];
+      final subscription = client.watchDesktops().listen(seen.add);
+      await settle();
+      expect(discovery.listeners, 1);
+
+      discovery.show([other, studio]);
+      await settle();
+      expect(seen.single, [
+        const PeekDesktopFound(
+          name: 'Air',
+          host: '10.0.0.3',
+          port: 9741,
+          serverId: 'mac-2',
+        ),
+        const PeekDesktopFound(
+          name: 'Studio Mac',
+          host: '10.0.0.2',
+          port: 9741,
+          serverId: 'mac-1',
+          isPaired: true,
+        ),
+      ]);
+
+      await subscription.cancel();
+      expect(discovery.listeners, 0);
+    });
+
+    test('sends its token to the desktop that issued it', () async {
+      final client = await pairedWithStudio();
+      await client.stop();
+      await client.connectDesktop('10.0.0.7', 9741, serverId: 'mac-1');
+      await settle();
+      expect((transport.last.frames.single as PeekRemoteHello).token, issued);
+    });
+
+    test('never sends a token to another desktop', () async {
+      final client = await pairedWithStudio();
+      await client.connectDesktop('10.0.0.3', 9741, serverId: 'mac-2');
+      await settle();
+      final hello = transport.last.frames.single as PeekRemoteHello;
+      expect(hello.token, isNull);
+      expect(hello.code, isNull);
+
+      transport.last.reply(
+        const PeekRemoteDenied(PeekRemoteDeniedReason.token, 'who?'),
+      );
+      await settle();
+      expect(client.state, PeekRemoteState.denied);
+      expect(await memory.token('mac-1'), issued);
+    });
+
+    test('finds the token of a desktop paired before the last one', () async {
+      await memory.remember(
+        const PeekRemoteDesktop(
+          serverId: 'mac-0',
+          endpoint: PeekRemoteEndpoint('old.local'),
+          name: 'Old Mac',
+        ),
+        token: 'old-token',
+      );
+      await pairedWithStudio();
+
+      final next = remote(endpoint: null, token: null);
+      await next.connectDesktop('10.0.0.8', 9741, serverId: 'mac-0');
+      await settle();
+      expect(
+        (transport.last.frames.single as PeekRemoteHello).token,
+        'old-token',
+      );
+      expect(next.serverId, 'mac-0');
     });
   });
 

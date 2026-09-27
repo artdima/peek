@@ -28,6 +28,10 @@
 	<true/>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Streams the calls this app makes to Peek Pro on a Mac on the same network.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_peek._tcp</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -9,17 +9,21 @@ repository: https://github.com/artdima/peek/tree/main/packages/peek_remote
 issue_tracker: https://github.com/artdima/peek/issues
 homepage: https://github.com/artdima/peek
 
+# bonsoir's Apple half needs Dart 3.11; the rest of Peek keeps its floor.
 environment:
-  sdk: ^3.7.0
-  flutter: '>=3.29.0'
+  sdk: ^3.11.0
+  flutter: '>=3.41.0'
 
 dependencies:
+  # Bonjour through the platform's own API: raw multicast from Dart needs an
+  # entitlement Apple grants on request, and so fails on iOS.
+  bonsoir: ^7.0.0
   meta: ^1.15.0
   # PeekBody.remote and PeekBodySide arrive in 2.0.0; the constraint moves
   # there with the release, while the workspace still reads 1.4.0.
   peek: ^1.4.0
-  # The one plugin in the Peek family: a pairing has to outlive the app's
-  # run, and there is no portable place for it but the platform's own.
+  # A pairing has to outlive the app's run, and there is no portable place
+  # for it but the platform's own.
   shared_preferences: ^2.5.0
 
 dev_dependencies:

@@ -58,6 +58,57 @@ final class PeekDesktopLinkState {
   String toString() => 'PeekDesktopLinkState(${status.name}, $desktopName)';
 }
 
+/// A desktop viewer heard on the local network.
+@immutable
+final class PeekDesktopFound {
+  /// Creates the record.
+  const PeekDesktopFound({
+    required this.name,
+    required this.host,
+    required this.port,
+    this.serverId,
+    this.isPaired = false,
+    this.isCompatible = true,
+  });
+
+  /// The name the desktop goes by on the network.
+  final String name;
+
+  /// The address to connect to.
+  final String host;
+
+  /// The port it listens on.
+  final int port;
+
+  /// The desktop's id, when it announces one; pairs it with a token held
+  /// from before.
+  final String? serverId;
+
+  /// Whether the app holds a token from this desktop, so no code is needed.
+  final bool isPaired;
+
+  /// Whether it speaks the app's protocol; one that does not would turn the
+  /// app away.
+  final bool isCompatible;
+
+  @override
+  bool operator ==(Object other) =>
+      other is PeekDesktopFound &&
+      other.name == name &&
+      other.host == host &&
+      other.port == port &&
+      other.serverId == serverId &&
+      other.isPaired == isPaired &&
+      other.isCompatible == isCompatible;
+
+  @override
+  int get hashCode =>
+      Object.hash(name, host, port, serverId, isPaired, isCompatible);
+
+  @override
+  String toString() => 'PeekDesktopFound($name, $host:$port)';
+}
+
 /// An adapter that streams to a desktop viewer such as Peek Pro and can be
 /// told where to connect — what the screen's "Connect to Peek Pro" needs,
 /// with no word about how the streaming works. `peek_remote` provides one;
@@ -69,14 +120,21 @@ abstract interface class PeekDesktopLink implements PeekAdapter {
   /// Every change of [linkState].
   Stream<PeekDesktopLinkState> get linkChanges;
 
+  /// The desktops on the local network, as they come and go; listening
+  /// starts the search and cancelling stops it. An error means the search
+  /// is not possible here, not that nothing is there.
+  Stream<List<PeekDesktopFound>> watchDesktops();
+
   /// Connects to the desktop at [host]:[port]: with the [code] it shows to
   /// pair, or without one to a desktop that knows this device. [name] is what
-  /// a person knows the desktop as.
+  /// a person knows the desktop as; [serverId], when known, says which token
+  /// to send.
   Future<void> connectDesktop(
     String host,
     int port, {
     String? code,
     String? name,
+    String? serverId,
   });
 
   /// Disconnects; [connectDesktop] connects again.
