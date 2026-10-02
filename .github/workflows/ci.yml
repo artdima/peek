@@ -95,10 +95,14 @@ jobs:
 
       # The workspace tooling needs a newer Dart than the packages promise,
       # so each package is checked on its own against the oldest SDK it claims.
+      # The spec tests read the reference files at ../../doc/spec, so the
+      # copy keeps the repository's layout around the package.
       - name: Detach the package from the workspace
         run: |
-          cp -r packages/${{ matrix.package }} "$RUNNER_TEMP/floor"
-          cd "$RUNNER_TEMP/floor"
+          mkdir -p "$RUNNER_TEMP/floor/packages" "$RUNNER_TEMP/floor/doc"
+          cp -r packages/${{ matrix.package }} "$RUNNER_TEMP/floor/packages/"
+          cp -r doc/spec "$RUNNER_TEMP/floor/doc/"
+          cd "$RUNNER_TEMP/floor/packages/${{ matrix.package }}"
           rm -rf example
           sed -i '/^resolution: workspace$/d' pubspec.yaml
           rm -f analysis_options.yaml test/analysis_options.yaml
@@ -124,17 +128,17 @@ jobs:
           fi
 
       - run: flutter pub get
-        working-directory: ${{ runner.temp }}/floor
+        working-directory: ${{ runner.temp }}/floor/packages/${{ matrix.package }}
       # The floor is a floor on dependencies too: the oldest version of
       # each that the pubspec admits is the one the package must build on.
       - run: flutter pub downgrade
-        working-directory: ${{ runner.temp }}/floor
+        working-directory: ${{ runner.temp }}/floor/packages/${{ matrix.package }}
       - run: flutter analyze --fatal-infos
-        working-directory: ${{ runner.temp }}/floor
+        working-directory: ${{ runner.temp }}/floor/packages/${{ matrix.package }}
       # Goldens are authored on the pinned Flutter; an older one draws
       # them differently, and that difference is not a regression.
       - run: flutter test
-        working-directory: ${{ runner.temp }}/floor
+        working-directory: ${{ runner.temp }}/floor/packages/${{ matrix.package }}
         env:
           PEEK_GOLDENS: '0'
 
