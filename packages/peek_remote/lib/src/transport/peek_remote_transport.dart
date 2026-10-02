@@ -1,5 +1,22 @@
+import 'package:peek/core.dart';
+
 import 'transport_unsupported.dart'
     if (dart.library.io) '../io/web_socket_transport.dart';
+
+/// Connecting failed, and why, in terms a person can act on.
+final class PeekRemoteConnectException implements Exception {
+  /// Creates the exception for [failure], caused by [cause].
+  const PeekRemoteConnectException(this.failure, [this.cause]);
+
+  /// Why the desktop could not be reached.
+  final PeekDesktopFailure failure;
+
+  /// What the platform threw.
+  final Object? cause;
+
+  @override
+  String toString() => 'PeekRemoteConnectException(${failure.name}: $cause)';
+}
 
 /// A connection that carries text messages both ways.
 abstract interface class PeekRemoteConnection {
@@ -23,6 +40,7 @@ abstract interface class PeekRemoteTransport {
     Duration timeout = const Duration(seconds: 5),
   }) => platformTransport(timeout);
 
-  /// Opens a connection to [uri], or throws.
+  /// Opens a connection to [uri], or throws — a
+  /// [PeekRemoteConnectException] when the reason is known.
   Future<PeekRemoteConnection> connect(Uri uri);
 }

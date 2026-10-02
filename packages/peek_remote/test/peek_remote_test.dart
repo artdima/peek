@@ -666,6 +666,81 @@ void main() {
       expect(client.linkState.denial, PeekDesktopDenial.token);
     });
 
+    test('says why the desktop cannot be reached', () async {
+      final client = remote(endpoint: null, token: null);
+      transport.failWith = const PeekRemoteConnectException(
+        PeekDesktopFailure.timedOut,
+      );
+      await client.connectDesktop('desk.local', 9741, code: '4719');
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(client.linkState.status, PeekDesktopLinkStatus.waiting);
+      expect(client.linkState.failure, PeekDesktopFailure.timedOut);
+
+      transport.failWith = Exception('something else');
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      expect(client.linkState.failure, PeekDesktopFailure.other);
+
+      transport.failWith = null;
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      expect(client.linkState.status, PeekDesktopLinkStatus.connecting);
+      expect(client.linkState.failure, isNull);
+      transport.last.reply(
+        const PeekRemoteWelcome(serverId: 'mac-1', deviceToken: 'issued'),
+      );
+      await settle();
+      expect(client.linkState.status, PeekDesktopLinkStatus.connected);
+
+      final seen = <PeekDesktopLinkState>[];
+      client.linkChanges.listen(seen.add);
+      await transport.last.hangUp();
+      await settle();
+      expect(
+        seen.first,
+        isA<PeekDesktopLinkState>()
+            .having(
+              (state) => state.status,
+              'status',
+              PeekDesktopLinkStatus.waiting,
+            )
+            .having(
+              (state) => state.failure,
+              'failure',
+              PeekDesktopFailure.dropped,
+            ),
+      );
+
+      await client.stop();
+      expect(client.linkState.failure, isNull);
+    });
+
+    test(
+      'is paired once the desktop lets it in, and until it forgets',
+      () async {
+        final client = remote(endpoint: null, token: null);
+        await client.connectDesktop('desk.local', 9741, code: '4719');
+        await settle();
+        expect(client.linkState.isPaired, isFalse);
+
+        transport.last.reply(
+          const PeekRemoteWelcome(serverId: 'mac-1', deviceToken: 'issued'),
+        );
+        await settle();
+        expect(client.linkState.isPaired, isTrue);
+
+        await client.disconnectDesktop();
+        expect(client.linkState.isPaired, isTrue);
+
+        final again = remote(endpoint: null, token: null)..start();
+        await settle();
+        expect(again.linkState.isPaired, isTrue);
+
+        await client.connectDesktop('other.local', 9741, code: '1111');
+        expect(client.linkState.isPaired, isFalse);
+        await client.forgetDesktop();
+        expect(client.linkState.isPaired, isFalse);
+      },
+    );
+
     test('says what kind of refusal it was', () async {
       final client = remote(endpoint: null, token: null);
       for (final (reason, denial) in [

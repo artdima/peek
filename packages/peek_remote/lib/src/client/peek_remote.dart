@@ -160,6 +160,9 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
 
   PeekRemoteState _state = PeekRemoteState.stopped;
   PeekRemoteDenied? _denial;
+  PeekDesktopFailure? _failure;
+  // The desktop let this client in, now or in an earlier run.
+  bool _admitted = false;
   PeekRemoteConnection? _connection;
   StreamSubscription<String>? _messages;
   StreamSubscription<PeekStoreChange>? _changes;
@@ -197,6 +200,8 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
         PeekDesktopDenial.protocolVersion,
       PeekRemoteDeniedReason.other => PeekDesktopDenial.other,
     },
+    failure: _state == PeekRemoteState.waiting ? _failure : null,
+    isPaired: _admitted,
     host: _endpoint?.host,
     port: _endpoint?.port,
   );
@@ -284,6 +289,7 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
     if (_running || _disposed) return;
     _running = true;
     _denial = null;
+    _failure = null;
     _attempts = 0;
     if (_endpoint != null) {
       unawaited(_connect());
@@ -323,8 +329,10 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
       _deviceToken = null;
       _serverId = null;
       _desktop = null;
+      _admitted = false;
     }
     _denial = null;
+    _failure = null;
     _attempts = 0;
     _running = true;
     if (typed != null || _deviceToken != null) {
@@ -339,6 +347,7 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
   /// Disconnects and stops trying. Safe to call twice.
   Future<void> stop() async {
     _running = false;
+    _failure = null;
     final connection = _endConnection();
     _setState(PeekRemoteState.stopped);
     await connection?.close();
@@ -355,6 +364,8 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
     _desktop = null;
     _desktopName = null;
     _code = null;
+    _admitted = false;
+    _failure = null;
     _endpoint = _givenEndpoint;
     _setState(
       _endpoint == null ? PeekRemoteState.unpaired : PeekRemoteState.stopped,
@@ -414,6 +425,7 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
     _desktopName ??= desktop.name;
     _serverId = desktop.serverId;
     _deviceToken = deviceToken;
+    _admitted = true;
     return true;
   }
 
@@ -439,9 +451,14 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
     final PeekRemoteConnection connection;
     try {
       connection = await _transport.connect(_endpoint!.uri);
-    } on Object {
+    } on Object catch (error) {
       // A desktop that is not listening is the usual case, not an error.
-      if (generation == _generation && _running) _waitAndRetry();
+      if (generation == _generation && _running) {
+        _failure = error is PeekRemoteConnectException
+            ? error.failure
+            : PeekDesktopFailure.other;
+        _waitAndRetry();
+      }
       return;
     }
     if (generation != _generation || !_running) {
@@ -500,6 +517,8 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
 
   void _onWelcome(PeekRemoteWelcome welcome) {
     _welcomed = true;
+    _admitted = true;
+    _failure = null;
     _attempts = 0;
     if (welcome.deviceToken case final issued?) {
       _deviceToken = issued;
@@ -546,6 +565,7 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
       case PeekRemoteDeniedReason.token when _deviceToken != null:
         // The desktop forgot this device: pair again.
         _deviceToken = null;
+        _admitted = false;
         final serverId = _serverId ?? _desktop?.serverId;
         _serverId = null;
         _desktop = null;
@@ -568,7 +588,10 @@ final class PeekRemote implements PeekAdapter, PeekDesktopLink {
     if (generation != _generation) return;
     final connection = _endConnection();
     unawaited(connection?.close());
-    if (_running) _waitAndRetry();
+    if (_running) {
+      _failure = PeekDesktopFailure.dropped;
+      _waitAndRetry();
+    }
   }
 
   void _waitAndRetry() {

@@ -190,7 +190,10 @@ never started opens no socket and browses for nothing.
 
 | The sheet says | What it means |
 | --- | --- |
-| Waiting for … | The app cannot reach the Mac at that address. A real device typed `localhost`; the phone and the Mac are on different networks, or a guest network keeps devices apart; the Mac's firewall blocks Peek Pro (System Settings → Network → Firewall, allow incoming connections); on an iPhone, the app is off in Settings → Privacy & Security → Local Network. |
+| No answer from … | Nothing at that address answered. The phone and the Mac are on different networks, or an office or guest network keeps devices apart — Bonjour may still list the Mac there; the Mac's firewall blocks Peek Pro (System Settings → Network → Firewall, allow incoming connections); on an iPhone, the app is off in Settings → Privacy & Security → Local Network. |
+| … answered, but Peek Pro is not listening there | Something is at that address, but not Peek Pro on that port: Peek Pro is not running, the port differs from the one in Settings → Connection, a real device typed `localhost`, or an Android phone on a cable has no `adb reverse`. |
+| Can't find … | The name does not resolve. Check the address, or type the Mac's IP address instead of its name. |
+| Lost the connection to … | Peek Pro quit, the Mac went to sleep or the network dropped. The app keeps trying and comes back on its own. |
 | Check the code on the Mac. | The code was wrong, or had changed. Type the one Peek Pro shows now. |
 | Speaks another version of the protocol | Update whichever of the two is older. |
 | Peek Pro turned the app away | Peek Pro forgot this device, or the token in code is old. Pair again with a code, or copy the token again. |

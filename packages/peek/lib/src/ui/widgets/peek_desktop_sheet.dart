@@ -305,7 +305,10 @@ class _PeekDesktopLinkSheetState extends State<PeekDesktopLinkSheet> {
             ),
             PeekListRow(
               title: strings.desktopPairedWith,
-              value: name ?? strings.desktopUnpaired,
+              value:
+                  state.isPaired
+                      ? name ?? strings.desktop
+                      : strings.desktopUnpaired,
             ),
           ],
         ),
@@ -480,9 +483,23 @@ class _PeekDesktopLinkSheetState extends State<PeekDesktopLinkSheet> {
 
   static String? _note(PeekStrings strings, PeekDesktopLinkState state) =>
       switch (state.status) {
-        PeekDesktopLinkStatus.waiting => strings.desktopUnreachable(
-          state.desktopName ?? strings.desktop,
-        ),
+        PeekDesktopLinkStatus.waiting => switch (state.failure) {
+          PeekDesktopFailure.timedOut => strings.desktopTimedOut(
+            state.desktopName ?? strings.desktop,
+          ),
+          PeekDesktopFailure.refused => strings.desktopRefused(
+            state.desktopName ?? strings.desktop,
+          ),
+          PeekDesktopFailure.notFound => strings.desktopNotFound(
+            state.desktopName ?? strings.desktop,
+          ),
+          PeekDesktopFailure.dropped => strings.desktopDropped(
+            state.desktopName ?? strings.desktop,
+          ),
+          PeekDesktopFailure.other || null => strings.desktopUnreachable(
+            state.desktopName ?? strings.desktop,
+          ),
+        },
         PeekDesktopLinkStatus.denied => switch (state.denial) {
           PeekDesktopDenial.code => null,
           PeekDesktopDenial.protocolVersion => strings.desktopOtherVersion,

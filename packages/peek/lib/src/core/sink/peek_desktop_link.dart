@@ -38,6 +38,25 @@ enum PeekDesktopDenial {
   other,
 }
 
+/// Why the last attempt to reach a desktop failed.
+enum PeekDesktopFailure {
+  /// Nothing answered in time: a firewall, or a network that keeps devices
+  /// apart.
+  timedOut,
+
+  /// The address answered, but nothing listens on the port.
+  refused,
+
+  /// The name or address could not be found.
+  notFound,
+
+  /// The connection opened, then dropped.
+  dropped,
+
+  /// Anything else.
+  other,
+}
+
 /// A link's status and the desktop it concerns, for the screen to show.
 @immutable
 final class PeekDesktopLinkState {
@@ -47,6 +66,8 @@ final class PeekDesktopLinkState {
     this.desktopName,
     this.message,
     this.denial,
+    this.failure,
+    this.isPaired = false,
     this.host,
     this.port,
   });
@@ -65,6 +86,14 @@ final class PeekDesktopLinkState {
   /// The kind of refusal behind [message].
   final PeekDesktopDenial? denial;
 
+  /// Why the desktop could not be reached, while [status] is
+  /// [PeekDesktopLinkStatus.waiting].
+  final PeekDesktopFailure? failure;
+
+  /// Whether the desktop has let the app in, so it will again without a
+  /// code.
+  final bool isPaired;
+
   /// Where the desktop listens, when the link knows.
   final String? host;
 
@@ -78,12 +107,22 @@ final class PeekDesktopLinkState {
       other.desktopName == desktopName &&
       other.message == message &&
       other.denial == denial &&
+      other.failure == failure &&
+      other.isPaired == isPaired &&
       other.host == host &&
       other.port == port;
 
   @override
-  int get hashCode =>
-      Object.hash(status, desktopName, message, denial, host, port);
+  int get hashCode => Object.hash(
+    status,
+    desktopName,
+    message,
+    denial,
+    failure,
+    isPaired,
+    host,
+    port,
+  );
 
   @override
   String toString() => 'PeekDesktopLinkState(${status.name}, $desktopName)';

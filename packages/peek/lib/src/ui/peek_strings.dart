@@ -379,6 +379,23 @@ class PeekStrings {
   String desktopUnreachable(String name) =>
       "Can't reach $name. Check that Peek Pro is open and on the same network.";
 
+  /// Says nothing at [name] answered in time.
+  String desktopTimedOut(String name) =>
+      'No answer from $name. A firewall or the network may be keeping this '
+      'device and the Mac apart.';
+
+  /// Says [name] answered, but nothing listens there.
+  String desktopRefused(String name) =>
+      '$name answered, but Peek Pro is not listening there. Check that it is '
+      'open and that the port matches.';
+
+  /// Says the address of [name] leads nowhere.
+  String desktopNotFound(String name) => "Can't find $name. Check the address.";
+
+  /// Says the connection to [name] dropped.
+  String desktopDropped(String name) =>
+      'Lost the connection to $name. Trying again…';
+
   /// Says the desktop speaks another version of the protocol.
   String get desktopOtherVersion =>
       'This Peek Pro speaks another version of the protocol. Update whichever '

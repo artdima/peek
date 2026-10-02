@@ -15,9 +15,13 @@ final class FakeTransport implements PeekRemoteTransport {
   /// Whether the next connections fail, as with no desktop listening.
   bool refuse = false;
 
+  /// What the next connections fail with, when set.
+  Exception? failWith;
+
   @override
   Future<PeekRemoteConnection> connect(Uri uri) async {
     attempts++;
+    if (failWith case final error?) throw error;
     if (refuse) throw StateError('nobody listens at $uri');
     final connection = FakeConnection(uri);
     connections.add(connection);

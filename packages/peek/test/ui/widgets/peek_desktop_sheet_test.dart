@@ -285,6 +285,7 @@ void main() {
         const PeekDesktopLinkState(
           status: PeekDesktopLinkStatus.connected,
           desktopName: 'Studio Mac',
+          isPaired: true,
         ),
       );
       await settle(tester);
@@ -306,6 +307,7 @@ void main() {
         const PeekDesktopLinkState(
           status: PeekDesktopLinkStatus.connected,
           desktopName: 'Studio Mac',
+          isPaired: true,
         ),
       );
       await pumpScreen(tester, link: link, brightness: Brightness.dark);
@@ -605,6 +607,56 @@ void main() {
       expect(link.calls.last, 'disconnect');
     });
 
+    testWidgets('says why the Mac cannot be reached', (tester) async {
+      final link = await openPairing(tester);
+      for (final (failure, text) in [
+        (PeekDesktopFailure.timedOut, 'No answer from Studio Mac.'),
+        (
+          PeekDesktopFailure.refused,
+          'Studio Mac answered, but Peek Pro is not listening there.',
+        ),
+        (PeekDesktopFailure.notFound, "Can't find Studio Mac."),
+        (PeekDesktopFailure.dropped, 'Lost the connection to Studio Mac.'),
+        (PeekDesktopFailure.other, "Can't reach Studio Mac."),
+      ]) {
+        link.moveTo(
+          PeekDesktopLinkState(
+            status: PeekDesktopLinkStatus.waiting,
+            desktopName: 'Studio Mac',
+            failure: failure,
+          ),
+        );
+        await settle(tester);
+        expect(find.textContaining(text), findsOneWidget, reason: failure.name);
+      }
+    });
+
+    testWidgets('calls a Mac paired only once it let the app in', (
+      tester,
+    ) async {
+      final link = await openPairing(tester);
+      link.moveTo(
+        const PeekDesktopLinkState(
+          status: PeekDesktopLinkStatus.connecting,
+          desktopName: 'Studio Mac',
+        ),
+      );
+      await settle(tester);
+      expect(find.text('Connecting to Studio Mac…'), findsOneWidget);
+      expect(find.text('Not paired'), findsOneWidget);
+
+      link.moveTo(
+        const PeekDesktopLinkState(
+          status: PeekDesktopLinkStatus.connected,
+          desktopName: 'Studio Mac',
+          isPaired: true,
+        ),
+      );
+      await settle(tester);
+      expect(find.text('Not paired'), findsNothing);
+      expect(find.text('Studio Mac'), findsOneWidget);
+    });
+
     testWidgets('says when the versions differ', (tester) async {
       await openPairing(
         tester,
@@ -629,6 +681,7 @@ void main() {
         state: const PeekDesktopLinkState(
           status: PeekDesktopLinkStatus.stopped,
           desktopName: 'Studio Mac',
+          isPaired: true,
           host: '10.0.0.2',
           port: 9741,
         ),
