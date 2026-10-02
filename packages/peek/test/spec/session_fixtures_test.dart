@@ -24,6 +24,8 @@ final PeekSessionHeader _header = PeekSessionHeader(
   platform: 'ios',
   osVersion: '18.0',
   startedAt: fixtureStart,
+  // The same as peekVersion in 2.0.0, and pinned past it.
+  // ignore: avoid_redundant_argument_values
   peekVersion: '2.0.0',
 );
 

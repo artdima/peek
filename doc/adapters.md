@@ -274,7 +274,7 @@ environment:
 
 dependencies:
   foo: ^1.0.0
-  peek: ^1.0.0
+  peek: ^2.0.0
 
 topics:
   - debugging

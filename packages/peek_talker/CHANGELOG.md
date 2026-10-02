@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.0
+
+Released alongside `peek` 2.0.0, which brings remote viewing in Peek Pro.
+The code in this package is unchanged; it now depends on `peek: ^2.0.0`
+and `peek_dio: ^2.0.0`.
+
 ## 1.4.0
 
 Released alongside `peek` 1.4.0, which saves exports from a browser and

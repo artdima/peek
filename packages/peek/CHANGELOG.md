@@ -1,6 +1,16 @@
 # Changelog
 
-## Unreleased
+## 2.0.0
+
+Remote viewing: the calls Peek records can be watched live on a Mac, in
+[Peek Pro](https://github.com/artdima/peek-pro), through the new
+`peek_remote` package — see
+[`doc/remote.md`](https://github.com/artdima/peek/blob/main/doc/remote.md).
+
+**Upgrading from 1.x.** One change breaks code, and only code that
+switches over `PeekBody`: it has a sixth kind, `PeekRemoteBody`. Add a
+`PeekRemoteBody()` case — treating it like `PeekUnavailableBody` is a safe
+start — and move the constraint to `peek: ^2.0.0`. Everything else is new.
 
 - **Breaking:** `PeekBody` has a sixth kind, `PeekRemoteBody`
   (`PeekBody.remote`) — a body that exists and can be had, but is held
@@ -24,7 +34,7 @@
   knows — pending calls, the kind of a failure and its stack trace, pins,
   truncation, why a body is missing — and it reads leniently, so a newer
   writer's unknown keys and kinds do not break an older reader. Session
-  files and remote viewing will be built on it.
+  files and remote viewing are built on it.
 - New in the public API: a session file. `PeekSessionWriter` writes a
   `PeekSessionHeader` and then one line of JSON per call; `PeekSessionReader`
   reads it back into a `PeekSession`. A broken line costs that line, not the
@@ -40,6 +50,26 @@
   `PeekShareDelegate`, or as a download on the web. `peekSessionContent`
   builds the same file for an app's own menu; `PeekIcons.download` and
   `PeekStrings.saveSession` are new.
+- The list's menu always offers **Connect to Peek Pro**, under its own
+  heading, and says where the link stands — connected, waiting, turned
+  away. With `peek_remote` attached it opens a sheet to pair from: the Macs
+  heard on the network, an address to type, and the four-digit code Peek
+  Pro shows, in four cells that take a pasted or autofilled code. A refused
+  code shakes the cells; a Mac that does not answer, one that answers
+  without Peek Pro, an address that leads nowhere and a dropped connection
+  each say so. Without `peek_remote` the sheet says what Peek Pro is and how
+  to add it. Export moved beside it and appears only when there is
+  something to export.
+- New in the public API, for the link: `PeekDesktopLink` in the core —
+  pure Dart, so the screen knows nothing of `peek_remote`, which implements
+  it — with `PeekDesktopLinkState`, `PeekDesktopLinkStatus`,
+  `PeekDesktopDenial`, `PeekDesktopFailure` and `PeekDesktopFound`. The
+  screen finds the link among `Peek.adapters`. `PeekDesktopSetup`,
+  `PeekDesktopLinkSheet`, `showPeekDesktop`, `peekDesktopLinkOf`,
+  `peekDesktopMenuLabel` and `peekDesktopAddress` are the sheet's parts;
+  `PeekCodeField` is the code cells on their own; `PeekIcons.desktop` and
+  the `PeekStrings` that start with `desktop` are new.
+- Sheets rise above the keyboard, so a field in one stays in view.
 
 ## 1.4.0
 

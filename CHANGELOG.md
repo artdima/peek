@@ -3,6 +3,23 @@
 Each package keeps its own changelog; this one says what a release is.
 Versions move together, so every package always carries the same number.
 
+## 2.0.0
+
+Remote viewing. A sixth package,
+[`peek_remote`](packages/peek_remote/CHANGELOG.md), streams what Peek
+records to [Peek Pro](https://github.com/artdima/peek-pro), a Mac app, over
+the local network. Pair once from Connect to Peek Pro in Peek's menu with
+the code Peek Pro shows, and the calls appear there as they happen; large
+bodies stay on the device until someone opens one. A session also saves as
+a `.peek` file, which Peek Pro opens. [`doc/remote.md`](doc/remote.md) is
+the guide, and `doc/spec/` describes the format and the protocol for anyone
+building another viewer.
+
+The major version is for one change: `PeekBody` has a new kind,
+`PeekRemoteBody`, so a `switch` that names every kind needs one more case —
+see [`peek`](packages/peek/CHANGELOG.md). The four adapters are unchanged
+and move to `peek: ^2.0.0`.
+
 ## 1.4.0
 
 A release about the console again; the adapters only carry the number. On

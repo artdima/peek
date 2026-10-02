@@ -1,7 +1,7 @@
 name: peek_chopper
 description: >-
   Reports the calls Chopper makes to Peek, so they can be read in the app.
-version: 1.4.0
+version: 2.0.0
 resolution: workspace
 
 repository: https://github.com/artdima/peek/tree/main/packages/peek_chopper
@@ -20,7 +20,7 @@ dependencies:
   # transport errors are its exceptions, so the mapper names both directly.
   # 1.5.0 is where aborting a request — and its exception — arrived.
   http: ^1.5.0
-  peek: ^1.0.0
+  peek: ^2.0.0
 
 dev_dependencies:
   flutter_test:

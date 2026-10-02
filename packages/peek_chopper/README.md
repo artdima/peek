@@ -11,8 +11,8 @@ arrived, and so does the response.
 
 ```yaml
 dependencies:
-  peek: ^1.0.0
-  peek_chopper: ^1.1.0
+  peek: ^2.0.0
+  peek_chopper: ^2.0.0
 ```
 
 ## Use

@@ -11,8 +11,8 @@ even record: an app that already logs its calls through Talker has them in
 
 ```yaml
 dependencies:
-  peek: ^1.0.0
-  peek_talker: ^1.0.0
+  peek: ^2.0.0
+  peek_talker: ^2.0.0
 ```
 
 ## Use

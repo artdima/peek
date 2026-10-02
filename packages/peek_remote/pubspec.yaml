@@ -2,7 +2,7 @@ name: peek_remote
 description: >-
   Streams the calls Peek records in an app to a desktop viewer such as Peek
   Pro, over a WebSocket on the local network.
-version: 1.4.0
+version: 2.0.0
 resolution: workspace
 
 repository: https://github.com/artdima/peek/tree/main/packages/peek_remote
@@ -19,9 +19,7 @@ dependencies:
   # entitlement Apple grants on request, and so fails on iOS.
   bonsoir: ^7.0.0
   meta: ^1.15.0
-  # PeekBody.remote and PeekBodySide arrive in 2.0.0; the constraint moves
-  # there with the release, while the workspace still reads 1.4.0.
-  peek: ^1.4.0
+  peek: ^2.0.0
   # A pairing has to outlive the app's run, and there is no portable place
   # for it but the platform's own.
   shared_preferences: ^2.5.0

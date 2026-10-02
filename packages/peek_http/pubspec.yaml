@@ -2,7 +2,7 @@ name: peek_http
 description: >-
   Reports the calls a package:http client makes to Peek, so they can be read
   in the app.
-version: 1.4.0
+version: 2.0.0
 resolution: workspace
 
 repository: https://github.com/artdima/peek/tree/main/packages/peek_http
@@ -17,7 +17,7 @@ dependencies:
   # 1.5.0 is where aborting a request — and its exception — arrived; the
   # final URL of a response (`BaseResponseWithUrl`) is older, from 1.2.0.
   http: ^1.5.0
-  peek: ^1.0.0
+  peek: ^2.0.0
 
 dev_dependencies:
   flutter_test:
