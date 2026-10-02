@@ -1,6 +1,6 @@
 /// Where Peek Pro and the remote package live, for the screen to point at.
 ///
-/// One place, so the addresses change together once Peek Pro is published.
+/// One place, so the addresses change together.
 abstract final class PeekLinks {
   /// Peek Pro's repository.
   static const String peekPro = 'https://github.com/artdima/peek-pro';

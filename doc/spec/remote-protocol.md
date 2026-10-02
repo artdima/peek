@@ -2,7 +2,7 @@
 
 An app that uses Peek can show its calls on a desktop while it runs: the
 [`peek_remote`](../../packages/peek_remote) package in the app streams them to
-a viewer such as Peek Pro. This document is the source of truth for what the
+a viewer such as [Peek Pro](https://github.com/artdima/peek-pro). This document is the source of truth for what the
 two say to each other. A viewer can be built from it without reading Peek's
 Dart code; the reference frames in [`fixtures/remote/`](fixtures/remote/) are
 written by `peek_remote`'s tests and fail them when they drift.

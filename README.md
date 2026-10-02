@@ -187,5 +187,5 @@ the definition of done. Security reports are private: see
 
 ## License
 
-MIT © 2026 Dmitrii Medyannik. The icon outlines come from
+MIT © 2026 Dmitriy Medyannik. The icon outlines come from
 [Lucide](https://lucide.dev) (ISC); see [`NOTICE`](NOTICE).
