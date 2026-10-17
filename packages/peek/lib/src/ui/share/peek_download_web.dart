@@ -31,15 +31,12 @@ final class _BrowserShareDelegate implements PeekShareDelegate {
   /// Whether the browser took the text: a cancelled sheet counts, a browser
   /// that refused — desktop ones, or a tap too long ago — does not.
   Future<bool> _shareText(PeekShareContent content) async {
+    final data = _ShareData(
+      title: content.subject ?? content.filename,
+      text: content.text,
+    );
     try {
-      await _navigator
-          .share(
-            _ShareData(
-              title: content.subject ?? content.filename,
-              text: content.text,
-            ),
-          )
-          .toDart;
+      await _navigator.share(data).toDart;
       return true;
     } on Object catch (error) {
       return error is JSObject && _DOMException._(error).name == 'AbortError';
@@ -78,8 +75,8 @@ extension type _Navigator._(JSObject _) implements JSObject {
 
   external JSPromise<JSAny?> share(_ShareData data);
 
-  /// Whether the Web Share API is there at all: phones and Safari have it,
-  /// most desktop browsers do not.
+  /// Whether the Web Share API is there at all: phones have it, desktop
+  /// browsers only some.
   bool get canShareText => _shareFunction != null;
 }
 

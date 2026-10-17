@@ -155,6 +155,7 @@ void main() {
         await tester.longPress(find.byType(PeekEntryTile));
         await settle(tester);
         await tester.ensureVisible(find.text(label));
+        await tester.pump();
         await tester.tap(find.text(label));
         await settle(tester);
 
