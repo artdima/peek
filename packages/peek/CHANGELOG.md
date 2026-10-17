@@ -49,6 +49,15 @@
   type, `PeekFilledButton` gains `tinted`, and `PeekStrings` gain
   `noRequestsPausedHint` and `noMatchesOf`; `noRequestsHint` now says that
   recording is on.
+- The dark theme's neutrals are redrawn with a cold cast: near-black
+  `#0B0D10` behind everything, `#15181D` for cards, chips and the search
+  field, a hairline of white at 7 % that reads the same on any surface,
+  and ink in three steps — `#F3F5F7`, `#9AA3AD`, `#7A838D`. The accent and
+  the status hues are as they were. A sheet has colours of its own now,
+  `PeekTheme.sheet` and `PeekTheme.sheetCard` (`#1C2026` and `#242931` in
+  the dark; unset in the light, and unset in a theme of your own, where
+  `elevated` goes on lifting a card's colour instead). A pressed row tints
+  with the ink rather than the fill, so it shows on a card too.
 - In the dark, a sheet rises off the screen instead of vanishing into it:
   every sheet and alert now draws with `PeekTheme.elevated`, which lifts
   each surface a step the way iOS does — the sheet takes a card's colour,

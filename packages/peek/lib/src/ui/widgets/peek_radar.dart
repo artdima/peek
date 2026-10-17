@@ -45,7 +45,7 @@ final class PeekRadar extends StatelessWidget {
           Positioned.fill(
             child: CustomPaint(
               painter: _Arcs(
-                color: theme.separator,
+                color: theme.tertiaryLabel,
                 origin: origin,
                 dashed: _filtered,
               ),
@@ -115,8 +115,8 @@ class _Pulse extends StatelessWidget {
   }
 }
 
-/// The arcs, fading outward; dashed, with a dot caught on each, for a
-/// filter.
+/// The arcs, fading outward, in a wash of the quiet ink; dashed, with a
+/// dot caught on each, for a filter.
 class _Arcs extends CustomPainter {
   const _Arcs({
     required this.color,
@@ -129,7 +129,9 @@ class _Arcs extends CustomPainter {
   final bool dashed;
 
   static const List<double> _radii = [44, 80, 116];
-  static const List<double> _alphas = [1, 0.6, 0.33];
+
+  /// How much of the ink each arc gets, fading outward.
+  static const List<double> _alphas = [0.45, 0.26, 0.16];
 
   /// Where a dot sits on each arc, as an angle from the horizontal:
   /// scattered, the way a catch would be.
@@ -158,7 +160,7 @@ class _Arcs extends CustomPainter {
         final sweep = math.min(dash, math.pi * 2 - angle);
         canvas.drawArc(rect, angle, sweep, false, paint);
       }
-      final dot = Paint()..color = color;
+      final dot = Paint()..color = color.withValues(alpha: _alphas.first);
       canvas.drawCircle(
         origin +
             Offset(

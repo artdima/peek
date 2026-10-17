@@ -91,23 +91,68 @@ void main() {
 
       final dark = PeekTheme.dark();
       final lifted = dark.elevated;
-      // Each surface takes the colour of the one that was above it.
-      expect(lifted.groupedBackground, dark.card);
-      expect(lifted.background, dark.card);
-      expect(lifted.card, dark.fill);
+      // The sheet has colours of its own, a step up from the screen's.
+      expect(lifted.groupedBackground, dark.sheet);
+      expect(lifted.background, dark.sheet);
+      expect(lifted.card, dark.sheetCard);
+      expect(
+        dark.sheet!.computeLuminance(),
+        greaterThan(dark.background.computeLuminance()),
+      );
+      expect(
+        dark.sheetCard!.computeLuminance(),
+        greaterThan(dark.sheet!.computeLuminance()),
+      );
       expect(
         lifted.fill.computeLuminance(),
         greaterThan(dark.fill.computeLuminance()),
       );
-      expect(
-        lifted.separator.computeLuminance(),
-        greaterThan(dark.separator.computeLuminance()),
-      );
+      // A translucent hairline lifts by covering more, not by lightening.
+      expect(lifted.separator.a, greaterThan(dark.separator.a));
       // Only the surfaces move: ink and meaning stay where they were.
       expect(lifted.label, dark.label);
       expect(lifted.accent, dark.accent);
       expect(lifted.success, dark.success);
       expect(lifted.body, dark.body);
+    });
+
+    test('a dark theme without sheet colours lifts a card instead', () {
+      final dark = PeekTheme.dark();
+      final bare = PeekTheme(
+        background: dark.background,
+        groupedBackground: dark.groupedBackground,
+        card: dark.card,
+        fill: dark.fill,
+        separator: dark.separator,
+        label: dark.label,
+        secondaryLabel: dark.secondaryLabel,
+        tertiaryLabel: dark.tertiaryLabel,
+        accent: dark.accent,
+        success: dark.success,
+        redirect: dark.redirect,
+        clientError: dark.clientError,
+        serverError: dark.serverError,
+        pending: dark.pending,
+        cancelled: dark.cancelled,
+        failure: dark.failure,
+        highlight: dark.highlight,
+        methodColors: dark.methodColors,
+        largeTitle: dark.largeTitle,
+        headline: dark.headline,
+        body: dark.body,
+        footnote: dark.footnote,
+        caption: dark.caption,
+        mono: dark.mono,
+        gutter: dark.gutter,
+        rowSpacing: dark.rowSpacing,
+        radius: dark.radius,
+        hairline: dark.hairline,
+        minRowHeight: dark.minRowHeight,
+        minTapTarget: dark.minTapTarget,
+      );
+      expect(bare.sheet, isNull);
+      expect(bare.elevated.groupedBackground, bare.card);
+      expect(bare.elevated.card, bare.fill);
     });
 
     test('copies with replaced values', () {

@@ -89,7 +89,7 @@ void main() {
 
     final dark = PeekTheme.dark();
     final scope = tester.widget<PeekThemeScope>(find.byType(PeekThemeScope));
-    expect(scope.theme.groupedBackground, dark.card);
+    expect(scope.theme.groupedBackground, dark.sheet);
     // The sheet itself is drawn in the lifted colour, so it has an edge.
     final surfaces = tester
         .widgetList<ColoredBox>(
@@ -99,8 +99,10 @@ void main() {
           ),
         )
         .map((box) => box.color);
-    expect(surfaces, contains(dark.card));
+    expect(surfaces, contains(dark.sheet));
+    expect(surfaces, contains(dark.sheetCard));
     expect(surfaces, isNot(contains(dark.background)));
+    expect(surfaces, isNot(contains(dark.card)));
   });
 
   testWidgets('the actions sheet groups neighbours by section', (tester) async {

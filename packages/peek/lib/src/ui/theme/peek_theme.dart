@@ -23,6 +23,8 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     required this.fill,
     required this.separator,
     required this.label,
+    this.sheet,
+    this.sheetCard,
     required this.secondaryLabel,
     required this.tertiaryLabel,
     required this.accent,
@@ -83,16 +85,19 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     minTapTarget: 44,
   );
 
-  /// The dark theme: the same structure on black, hues lifted to match.
+  /// The dark theme: the same structure on near-black, with a cold cast
+  /// to the neutrals and the hues lifted to match.
   factory PeekTheme.dark() => PeekTheme(
-    background: const Color(0xFF000000),
-    groupedBackground: const Color(0xFF000000),
-    card: const Color(0xFF1C1C1E),
-    fill: const Color(0xFF2C2C2E),
-    separator: const Color(0xFF38383A),
-    label: const Color(0xFFFFFFFF),
-    secondaryLabel: const Color(0xFF98989D),
-    tertiaryLabel: const Color(0xFF6B6B70),
+    background: const Color(0xFF0B0D10),
+    groupedBackground: const Color(0xFF0B0D10),
+    card: const Color(0xFF15181D),
+    fill: const Color(0xFF15181D),
+    separator: const Color(0x12FFFFFF),
+    label: const Color(0xFFF3F5F7),
+    secondaryLabel: const Color(0xFF9AA3AD),
+    tertiaryLabel: const Color(0xFF7A838D),
+    sheet: const Color(0xFF1C2026),
+    sheetCard: const Color(0xFF242931),
     accent: const Color(0xFF0A84FF),
     success: const Color(0xFF32D74B),
     redirect: const Color(0xFF64A8FF),
@@ -103,12 +108,12 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     failure: const Color(0xFFFF6B5E),
     highlight: const Color(0xFF5C4A14),
     methodColors: _methodColors(dark: true),
-    largeTitle: _largeTitle.copyWith(color: const Color(0xFFFFFFFF)),
-    headline: _headline.copyWith(color: const Color(0xFFFFFFFF)),
-    body: _body.copyWith(color: const Color(0xFFFFFFFF)),
-    footnote: _footnote.copyWith(color: const Color(0xFF98989D)),
-    caption: _caption.copyWith(color: const Color(0xFF98989D)),
-    mono: _mono.copyWith(color: const Color(0xFFFFFFFF)),
+    largeTitle: _largeTitle.copyWith(color: const Color(0xFFF3F5F7)),
+    headline: _headline.copyWith(color: const Color(0xFFF3F5F7)),
+    body: _body.copyWith(color: const Color(0xFFF3F5F7)),
+    footnote: _footnote.copyWith(color: const Color(0xFF9AA3AD)),
+    caption: _caption.copyWith(color: const Color(0xFF9AA3AD)),
+    mono: _mono.copyWith(color: const Color(0xFFF3F5F7)),
     gutter: 16,
     rowSpacing: 8,
     radius: 10,
@@ -134,17 +139,19 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
   ///
   /// In the dark a surface that rises gets lighter, the way it does on iOS
   /// — a sheet on a black screen that stayed black would have no edge — and
-  /// everything on it moves up a step with it: the sheet takes a card's
-  /// colour, a card on the sheet a fill's. In the light nothing moves:
-  /// paper on paper reads fine as it is.
+  /// everything on it moves up a step with it: the sheet takes [sheet]'s
+  /// colour, or a card's where none is set, and a card on the sheet
+  /// [sheetCard]'s, or a fill's. In the light nothing moves: paper on paper
+  /// reads fine as it is.
   PeekTheme get elevated {
     if (ThemeData.estimateBrightnessForColor(background) == Brightness.light) {
       return this;
     }
+    final sheet = this.sheet ?? card;
     return copyWith(
-      background: card,
-      groupedBackground: card,
-      card: fill,
+      background: sheet,
+      groupedBackground: sheet,
+      card: sheetCard ?? fill,
       fill: Color.alphaBlend(label.withValues(alpha: 0.06), fill),
       separator: Color.alphaBlend(label.withValues(alpha: 0.03), separator),
     );
@@ -168,6 +175,13 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
 
   /// The hairline between rows.
   final Color separator;
+
+  /// Behind a sheet that rises over a screen, where [elevated] lifts the
+  /// dark theme; a card's colour stands in where this is unset.
+  final Color? sheet;
+
+  /// A card on such a sheet; a fill's colour stands in where this is unset.
+  final Color? sheetCard;
 
   /// Primary text.
   final Color label;
@@ -294,6 +308,8 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     Color? card,
     Color? fill,
     Color? separator,
+    Color? sheet,
+    Color? sheetCard,
     Color? label,
     Color? secondaryLabel,
     Color? tertiaryLabel,
@@ -325,6 +341,8 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     card: card ?? this.card,
     fill: fill ?? this.fill,
     separator: separator ?? this.separator,
+    sheet: sheet ?? this.sheet,
+    sheetCard: sheetCard ?? this.sheetCard,
     label: label ?? this.label,
     secondaryLabel: secondaryLabel ?? this.secondaryLabel,
     tertiaryLabel: tertiaryLabel ?? this.tertiaryLabel,
@@ -365,6 +383,8 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
       card: color(card, other.card),
       fill: color(fill, other.fill),
       separator: color(separator, other.separator),
+      sheet: Color.lerp(sheet, other.sheet, t),
+      sheetCard: Color.lerp(sheetCard, other.sheetCard, t),
       label: color(label, other.label),
       secondaryLabel: color(secondaryLabel, other.secondaryLabel),
       tertiaryLabel: color(tertiaryLabel, other.tertiaryLabel),

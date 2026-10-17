@@ -53,8 +53,15 @@ class _PeekTappableState extends State<PeekTappable> {
     var child = widget.child;
     if (widget.fade) {
       child = Opacity(opacity: down ? 0.4 : 1, child: child);
-    } else if (down || widget.selected) {
+    } else if (widget.selected) {
       child = ColoredBox(color: theme.fill, child: child);
+    } else if (down) {
+      // A wash of ink rather than the fill: it shows on a card as well as
+      // on the background, where the two share a colour.
+      child = ColoredBox(
+        color: theme.label.withValues(alpha: 0.07),
+        child: child,
+      );
     }
 
     if (inert) return child;
