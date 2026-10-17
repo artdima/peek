@@ -29,18 +29,17 @@ final class _BrowserShareDelegate implements PeekShareDelegate {
   }
 
   /// Whether the browser took the text: a cancelled sheet counts, a browser
-  /// that refused — desktop ones, or a tap too long ago — does not.
+  /// that refused — a tap too long ago, say — does not.
   Future<bool> _shareText(PeekShareContent content) async {
     final data = _ShareData(
       title: content.subject ?? content.filename,
       text: content.text,
     );
-    try {
-      await _navigator.share(data).toDart;
-      return true;
-    } on Object catch (error) {
-      return error is JSObject && _DOMException._(error).name == 'AbortError';
-    }
+    // Settled in JS: a Dart `is` on the reason would be a runtime check of
+    // a JS interop type, which the analyzer forbids.
+    final sharing = _navigator.share(data).recover(_refusalName.toJS);
+    final refusal = await sharing.toDart;
+    return refusal == null || refusal.toDart == 'AbortError';
   }
 
   void _download(PeekShareContent content) {
@@ -73,7 +72,7 @@ extension type _Navigator._(JSObject _) implements JSObject {
   @JS('share')
   external JSAny? get _shareFunction;
 
-  external JSPromise<JSAny?> share(_ShareData data);
+  external _Sharing share(_ShareData data);
 
   /// Whether the Web Share API is there at all: phones have it, desktop
   /// browsers only some.
@@ -84,10 +83,24 @@ extension type _ShareData._(JSObject _) implements JSObject {
   external factory _ShareData({String title, String text});
 }
 
-/// What a rejected share comes back as.
-extension type _DOMException._(JSObject _) implements JSObject {
+/// The promise `navigator.share` returns.
+extension type _Sharing._(JSObject _) implements JSObject {
+  /// Settles with what [onRejected] returns when the share was refused,
+  /// and with nothing when it went through.
+  @JS('catch')
+  external JSPromise<JSString?> recover(JSFunction onRejected);
+}
+
+/// What a refused share comes back with: a `DOMException`, usually.
+extension type _Refusal._(JSAny _) implements JSAny {
   /// `AbortError` when the person closed the sheet without choosing.
   external String? get name;
+}
+
+/// Names a refusal for [_Sharing.recover]; anything nameless is an error.
+JSString _refusalName(JSAny? reason) {
+  final name = reason == null ? null : _Refusal._(reason).name;
+  return (name ?? 'Error').toJS;
 }
 
 @JS('URL.createObjectURL')

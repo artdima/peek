@@ -32,7 +32,7 @@ final class PeekShareContent {
   /// Whether this is a file to attach or text to paste.
   final PeekShareKind kind;
 
-  /// What kind of thing it is.
+  /// The media type of [text], for a receiver that saves it as a file.
   final String mimeType;
 
   /// The content itself.
