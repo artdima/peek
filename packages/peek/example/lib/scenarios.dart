@@ -2,14 +2,39 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
+/// What a scenario is about, and so where the screen lists it.
+enum ScenarioGroup {
+  /// What goes out and comes back.
+  bodies('Bodies'),
+
+  /// Calls that end badly, each in its own way.
+  failures('Failures'),
+
+  /// What travels beside a body, and calls that move.
+  headers('Headers & redirects');
+
+  const ScenarioGroup(this.label);
+
+  /// What the heading reads.
+  final String label;
+}
+
 /// One thing the example can do to the network, so Peek has something real
 /// to show.
 final class Scenario {
   /// Creates a scenario named [name].
-  const Scenario({required this.name, required this.detail, required this.run});
+  const Scenario({
+    required this.name,
+    required this.detail,
+    required this.group,
+    required this.run,
+  });
 
   /// What the button reads.
   final String name;
+
+  /// Which heading it is listed under.
+  final ScenarioGroup group;
 
   /// What it is worth looking at in Peek afterwards.
   final String detail;
@@ -27,57 +52,73 @@ const List<Scenario> scenarios = [
   Scenario(
     name: 'GET JSON',
     detail: 'A small object, shown as a tree',
+    group: ScenarioGroup.bodies,
     run: _getJson,
   ),
   Scenario(
     name: 'POST JSON',
     detail: 'A body going out as well as coming back',
+    group: ScenarioGroup.bodies,
     run: _postJson,
   ),
   Scenario(
     name: 'Upload a file',
     detail: 'Multipart: the file is described, never read',
+    group: ScenarioGroup.bodies,
     run: _upload,
   ),
   Scenario(
     name: 'Not found',
     detail: '404, with the body the server sent with it',
+    group: ScenarioGroup.failures,
     run: _notFound,
   ),
   Scenario(
     name: 'Server error',
     detail: '500, in the colour of a server error',
+    group: ScenarioGroup.failures,
     run: _serverError,
   ),
   Scenario(
     name: 'Timeout',
     detail: 'Given one second for a five-second answer',
+    group: ScenarioGroup.failures,
     run: _timeout,
   ),
   Scenario(
     name: 'Cancelled',
     detail: 'Called off in flight; not an error',
+    group: ScenarioGroup.failures,
     run: _cancelled,
   ),
   Scenario(
     name: 'Redirected',
     detail: 'Two hops, listed on the Overview tab',
+    group: ScenarioGroup.headers,
     run: _redirected,
   ),
-  Scenario(name: 'An image', detail: 'Bytes, shown as a picture', run: _image),
+  Scenario(
+    name: 'An image',
+    detail: 'Bytes, shown as a picture',
+    group: ScenarioGroup.bodies,
+    run: _image,
+  ),
   Scenario(
     name: 'A big body',
     detail: 'Around a megabyte of JSON, truncated to the limit',
+    group: ScenarioGroup.bodies,
     run: _bigBody,
   ),
   Scenario(
     name: 'A secret header',
     detail: 'Authorization, shown as sent until a policy masks it',
+    group: ScenarioGroup.headers,
     run: _secret,
   ),
   Scenario(
     name: 'Many headers',
     detail: 'Enough to filter, and one name carrying three values',
+    group: ScenarioGroup.headers,
     run: _manyHeaders,
   ),
 ];

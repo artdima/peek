@@ -2,6 +2,8 @@ import 'dart:typed_data';
 
 import 'package:chopper/chopper.dart';
 
+import 'scenarios.dart' show ScenarioGroup;
+
 /// One thing the Chopper route can do to the network.
 ///
 /// Chopper takes the base of a call per request, so each scenario names its
@@ -11,11 +13,15 @@ final class ChopperScenario {
   const ChopperScenario({
     required this.name,
     required this.detail,
+    required this.group,
     required this.run,
   });
 
   /// What the button reads.
   final String name;
+
+  /// Which heading it is listed under.
+  final ScenarioGroup group;
 
   /// What it is worth looking at in Peek afterwards.
   final String detail;
@@ -33,46 +39,55 @@ const List<ChopperScenario> chopperScenarios = [
   ChopperScenario(
     name: 'GET JSON',
     detail: 'A small object, shown as a tree',
+    group: ScenarioGroup.bodies,
     run: _getJson,
   ),
   ChopperScenario(
     name: 'POST JSON',
     detail: 'The body the converter produced, as it goes out',
+    group: ScenarioGroup.bodies,
     run: _postJson,
   ),
   ChopperScenario(
     name: 'Upload a file',
     detail: 'Multipart: the part is described, never read',
+    group: ScenarioGroup.bodies,
     run: _upload,
   ),
   ChopperScenario(
     name: 'Not found',
     detail: '404 — an answer, not a failure',
+    group: ScenarioGroup.failures,
     run: _notFound,
   ),
   ChopperScenario(
     name: 'Server error',
     detail: '500, in the colour of a server error',
+    group: ScenarioGroup.failures,
     run: _serverError,
   ),
   ChopperScenario(
     name: 'Called off',
     detail: 'Aborted in flight; not an error',
+    group: ScenarioGroup.failures,
     run: _aborted,
   ),
   ChopperScenario(
     name: 'An image',
     detail: 'Bytes, shown as a picture',
+    group: ScenarioGroup.bodies,
     run: _image,
   ),
   ChopperScenario(
     name: 'A big body',
     detail: 'Around a megabyte of JSON, truncated to the limit',
+    group: ScenarioGroup.bodies,
     run: _bigBody,
   ),
   ChopperScenario(
     name: 'A secret header',
     detail: 'Authorization, shown as sent until a policy masks it',
+    group: ScenarioGroup.headers,
     run: _secret,
   ),
 ];

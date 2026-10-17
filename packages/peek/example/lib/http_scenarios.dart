@@ -2,17 +2,23 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
+import 'scenarios.dart' show ScenarioGroup;
+
 /// One thing the `package:http` route can do to the network.
 final class HttpScenario {
   /// Creates a scenario named [name].
   const HttpScenario({
     required this.name,
     required this.detail,
+    required this.group,
     required this.run,
   });
 
   /// What the button reads.
   final String name;
+
+  /// Which heading it is listed under.
+  final ScenarioGroup group;
 
   /// What it is worth looking at in Peek afterwards.
   final String detail;
@@ -31,56 +37,67 @@ const List<HttpScenario> httpScenarios = [
   HttpScenario(
     name: 'GET JSON',
     detail: 'A small object, shown as a tree',
+    group: ScenarioGroup.bodies,
     run: _getJson,
   ),
   HttpScenario(
     name: 'POST JSON',
     detail: 'The body as the app wrote it',
+    group: ScenarioGroup.bodies,
     run: _postJson,
   ),
   HttpScenario(
     name: 'Upload a file',
     detail: 'Multipart: the file is described, never read',
+    group: ScenarioGroup.bodies,
     run: _upload,
   ),
   HttpScenario(
     name: 'Not found',
     detail: '404 — an answer, not a failure',
+    group: ScenarioGroup.failures,
     run: _notFound,
   ),
   HttpScenario(
     name: 'Server error',
     detail: '500, in the colour of a server error',
+    group: ScenarioGroup.failures,
     run: _serverError,
   ),
   HttpScenario(
     name: 'Called off',
     detail: 'Aborted in flight; not an error',
+    group: ScenarioGroup.failures,
     run: _aborted,
   ),
   HttpScenario(
     name: 'Body read later',
     detail: 'Pending until the app reads the body, three seconds on',
+    group: ScenarioGroup.bodies,
     run: _readLater,
   ),
   HttpScenario(
     name: 'Redirected',
     detail: 'Followed by the client; the final answer is what is seen',
+    group: ScenarioGroup.headers,
     run: _redirected,
   ),
   HttpScenario(
     name: 'An image',
     detail: 'Bytes, shown as a picture',
+    group: ScenarioGroup.bodies,
     run: _image,
   ),
   HttpScenario(
     name: 'A big body',
     detail: 'Around a megabyte of JSON, truncated to the limit',
+    group: ScenarioGroup.bodies,
     run: _bigBody,
   ),
   HttpScenario(
     name: 'A secret header',
     detail: 'Authorization, shown as sent until a policy masks it',
+    group: ScenarioGroup.headers,
     run: _secret,
   ),
 ];

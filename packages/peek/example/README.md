@@ -9,8 +9,10 @@ flutter run
 
 Every button on the home screen is one scenario — a JSON answer, a failure,
 a timeout, a redirect, an image, a body past the limit, a header with three
-values — chosen so each screen of Peek has something to show. The switch at
-the top picks which adapter reports them:
+values — chosen so each screen of Peek has something to show, and how its
+last run went is read beside its name. The row of adapters under the heading
+picks which one reports them, with the package that carries it named at the
+end:
 
 - `lib/dio_setup.dart` — `PeekDioInterceptor` on a Dio client;
 - `lib/talker_setup.dart` — `PeekTalkerAdapter` next to a `TalkerDioLogger`;

@@ -10,10 +10,10 @@ void main() {
     await tester.pump();
 
     expect(find.text('Peek example'), findsOneWidget);
-    expect(find.byIcon(Icons.dark_mode), findsOneWidget);
+    expect(find.byIcon(Icons.dark_mode_outlined), findsOneWidget);
 
     await tester.tap(find.byTooltip('Toggle theme'));
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.light_mode), findsOneWidget);
+    expect(find.byIcon(Icons.light_mode_outlined), findsOneWidget);
   });
 }

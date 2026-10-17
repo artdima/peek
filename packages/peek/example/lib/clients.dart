@@ -23,10 +23,10 @@ enum ExampleRoute {
   /// Peek's client wrapped around a `package:http` one.
   http('peek_http');
 
-  const ExampleRoute(this.label);
+  const ExampleRoute(this.package);
 
-  /// What the switch reads.
-  final String label;
+  /// The package that carries the route.
+  final String package;
 }
 
 /// The clients the example offers, built once and shared.

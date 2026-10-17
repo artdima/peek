@@ -79,7 +79,7 @@ void main() {
     expect(find.text('Timeout'), findsOneWidget);
     expect(find.text('Called off'), findsNothing);
 
-    await tester.tap(find.text('peek_chopper'));
+    await tester.tap(find.text('chopper'));
     await tester.pumpAndSettle();
 
     expect(find.text('Timeout'), findsNothing);
@@ -94,7 +94,7 @@ void main() {
 
     expect(find.text('Body read later'), findsNothing);
 
-    await tester.tap(find.text('peek_http'));
+    await tester.tap(find.text('http'));
     await tester.pumpAndSettle();
 
     expect(find.text('Timeout'), findsNothing);
@@ -105,7 +105,7 @@ void main() {
     app.main();
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('peek_chopper'));
+    await tester.tap(find.text('chopper'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('GET JSON'));
@@ -128,7 +128,7 @@ void main() {
     app.main();
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('peek_http'));
+    await tester.tap(find.text('http'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('GET JSON'));
