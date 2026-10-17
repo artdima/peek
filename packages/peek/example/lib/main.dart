@@ -61,7 +61,36 @@ class _PeekExampleAppState extends State<PeekExampleApp> {
 ///
 /// Peek takes only the brightness from here; everything the example draws
 /// itself comes from this.
-final class _Palette {
+enum _Palette {
+  light(
+    background: Color(0xFFFFFFFF),
+    ink: Color(0xFF141A16),
+    secondary: Color(0xFF78827B),
+    chipInk: Color(0xFF455048),
+    fill: Color(0xFFF1F4F1),
+    hairline: Color(0xFFECEFEC),
+    border: Color(0xFFD4DCD6),
+    accent: Color(0xFF1F7A3F),
+    onAccent: Color(0xFFFFFFFF),
+    badge: Color(0x3DFFFFFF),
+    warning: Color(0xFF8A4B00),
+    danger: Color(0xFFB3261E),
+  ),
+  dark(
+    background: Color(0xFF0F1411),
+    ink: Color(0xFFF2F5F2),
+    secondary: Color(0xFF7F8A83),
+    chipInk: Color(0xFFC1C8C3),
+    fill: Color(0xFF232B26),
+    hairline: Color(0xFF222624),
+    border: Color(0xFF2E3832),
+    accent: Color(0xFF5FCB84),
+    onAccent: Color(0xFF0F1411),
+    badge: Color(0xFF0F1411),
+    warning: Color(0xFFFFB454),
+    danger: Color(0xFFF2857C),
+  );
+
   const _Palette({
     required this.background,
     required this.ink,
@@ -76,36 +105,6 @@ final class _Palette {
     required this.warning,
     required this.danger,
   });
-
-  static const _Palette light = _Palette(
-    background: Color(0xFFFFFFFF),
-    ink: Color(0xFF141A16),
-    secondary: Color(0xFF78827B),
-    chipInk: Color(0xFF455048),
-    fill: Color(0xFFF1F4F1),
-    hairline: Color(0xFFECEFEC),
-    border: Color(0xFFD4DCD6),
-    accent: Color(0xFF1F7A3F),
-    onAccent: Color(0xFFFFFFFF),
-    badge: Color(0x3DFFFFFF),
-    warning: Color(0xFF8A4B00),
-    danger: Color(0xFFB3261E),
-  );
-
-  static const _Palette dark = _Palette(
-    background: Color(0xFF0F1411),
-    ink: Color(0xFFF2F5F2),
-    secondary: Color(0xFF7F8A83),
-    chipInk: Color(0xFFC1C8C3),
-    fill: Color(0xFF232B26),
-    hairline: Color(0xFF222624),
-    border: Color(0xFF2E3832),
-    accent: Color(0xFF5FCB84),
-    onAccent: Color(0xFF0F1411),
-    badge: Color(0xFF0F1411),
-    warning: Color(0xFFFFB454),
-    danger: Color(0xFFF2857C),
-  );
 
   final Color background;
   final Color ink;
