@@ -149,8 +149,11 @@ final peek = Peek(
   pass it to `showPeek(context, strings: ...)`.
 - **Sharing** — Peek depends on no sharing package. Hand it a
   `PeekShareDelegate` wired to the one you use; the example shows it with
-  `share_plus`. On the web there is nothing to hand over: the browser
-  saves the file, and a delegate given there is still used instead.
+  `share_plus`. What arrives says what it is: `PeekShareKind.text` is a
+  URL, a cURL command or a summary to paste, `PeekShareKind.file` a HAR or
+  a session to attach. On the web there is nothing to hand over: the
+  browser shares the text where it can and saves the file otherwise, and a
+  delegate given there is still used instead.
 
 ## Peek Pro
 

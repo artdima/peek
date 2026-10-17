@@ -34,8 +34,19 @@ void main() {
   }
 
   group('sharing', () {
-    // The web build swaps in a delegate that downloads the file; every other
-    // platform leaves sharing to the app, which owns the package that does it.
+    test('content is a file unless said otherwise', () {
+      const content = PeekShareContent(
+        filename: 'calls.har',
+        mimeType: 'application/json',
+        text: '{}',
+      );
+      expect(content.kind, PeekShareKind.file);
+      expect(content.toString(), 'PeekShareContent(file calls.har, 2 chars)');
+    });
+
+    // The web build swaps in a delegate that shares text and downloads the
+    // file; every other platform leaves sharing to the app, which owns the
+    // package that does it.
     test('the platform offers nothing of its own here', () {
       expect(peekPlatformShareDelegate(), isNull);
     });

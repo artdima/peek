@@ -4,15 +4,16 @@ import 'dart:js_interop';
 
 import '../peek_share.dart';
 
-/// The browser is the platform's share sheet: it saves the file.
-PeekShareDelegate? peekPlatformShare() => const _DownloadShareDelegate();
+/// The browser is the platform's share sheet: it shares text where it has
+/// one of its own and saves a file otherwise.
+PeekShareDelegate? peekPlatformShare() => const _BrowserShareDelegate();
 
-/// Hands content to the browser as a download.
+/// Hands text to the Web Share API and files to the browser as downloads.
 ///
 /// An anchor that clicks itself — the same few lines every web app writes,
 /// and the reason Peek needs no package to share on the web.
-final class _DownloadShareDelegate implements PeekShareDelegate {
-  const _DownloadShareDelegate();
+final class _BrowserShareDelegate implements PeekShareDelegate {
+  const _BrowserShareDelegate();
 
   /// How long the blob outlives the click. Revoking it in the same turn
   /// cancels the download in some browsers; a saved file needs it only
@@ -21,6 +22,31 @@ final class _DownloadShareDelegate implements PeekShareDelegate {
 
   @override
   Future<void> share(PeekShareContent content) async {
+    if (content.kind == PeekShareKind.text && _navigator.canShareText) {
+      if (await _shareText(content)) return;
+    }
+    _download(content);
+  }
+
+  /// Whether the browser took the text: a cancelled sheet counts, a browser
+  /// that refused — desktop ones, or a tap too long ago — does not.
+  Future<bool> _shareText(PeekShareContent content) async {
+    try {
+      await _navigator
+          .share(
+            _ShareData(
+              title: content.subject ?? content.filename,
+              text: content.text,
+            ),
+          )
+          .toDart;
+      return true;
+    } on Object catch (error) {
+      return error is JSObject && _DOMException._(error).name == 'AbortError';
+    }
+  }
+
+  void _download(PeekShareContent content) {
     final blob = _Blob(
       [utf8.encode(content.text).toJS].toJS,
       _BlobOptions(type: content.mimeType),
@@ -42,6 +68,30 @@ final class _DownloadShareDelegate implements PeekShareDelegate {
 
 @JS('document')
 external _Document get _document;
+
+@JS('navigator')
+external _Navigator get _navigator;
+
+extension type _Navigator._(JSObject _) implements JSObject {
+  @JS('share')
+  external JSAny? get _shareFunction;
+
+  external JSPromise<JSAny?> share(_ShareData data);
+
+  /// Whether the Web Share API is there at all: phones and Safari have it,
+  /// most desktop browsers do not.
+  bool get canShareText => _shareFunction != null;
+}
+
+extension type _ShareData._(JSObject _) implements JSObject {
+  external factory _ShareData({String title, String text});
+}
+
+/// What a rejected share comes back as.
+extension type _DOMException._(JSObject _) implements JSObject {
+  /// `AbortError` when the person closed the sheet without choosing.
+  external String? get name;
+}
 
 @JS('URL.createObjectURL')
 external String _createObjectUrl(JSObject blob);
