@@ -120,10 +120,34 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
   /// The theme registered on [context], or Peek's own at that brightness.
   ///
   /// This is the one place Peek looks at the app's theme, and it looks only
-  /// for the brightness: none of the app's colours reach Peek's widgets.
+  /// for the brightness: none of the app's colours reach Peek's widgets. A
+  /// [PeekThemeScope] above [context] comes before either: it is how a
+  /// sheet hands [elevated] to everything it holds.
   static PeekTheme of(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<PeekThemeScope>();
+    if (scope != null) return scope.theme;
     final theme = Theme.of(context);
     return theme.extension<PeekTheme>() ?? fromBrightness(theme.brightness);
+  }
+
+  /// This theme one surface up: what a sheet over a screen draws with.
+  ///
+  /// In the dark a surface that rises gets lighter, the way it does on iOS
+  /// — a sheet on a black screen that stayed black would have no edge — and
+  /// everything on it moves up a step with it: the sheet takes a card's
+  /// colour, a card on the sheet a fill's. In the light nothing moves:
+  /// paper on paper reads fine as it is.
+  PeekTheme get elevated {
+    if (ThemeData.estimateBrightnessForColor(background) == Brightness.light) {
+      return this;
+    }
+    return copyWith(
+      background: card,
+      groupedBackground: card,
+      card: fill,
+      fill: Color.alphaBlend(label.withValues(alpha: 0.06), fill),
+      separator: Color.alphaBlend(label.withValues(alpha: 0.03), separator),
+    );
   }
 
   /// Peek's own theme at [brightness].
@@ -410,4 +434,19 @@ final class PeekTheme extends ThemeExtension<PeekTheme> {
     'HEAD': dark ? const Color(0xFF98989D) : const Color(0xFF646469),
     'OPTIONS': dark ? const Color(0xFF98989D) : const Color(0xFF646469),
   };
+}
+
+/// Puts [theme] in force under [child], before whatever the app registered.
+///
+/// A sheet wraps what it holds in one, so every card, row and hairline on
+/// it draws with [PeekTheme.elevated]; [PeekTheme.of] looks here first.
+final class PeekThemeScope extends InheritedWidget {
+  /// Creates a scope under which [PeekTheme.of] returns [theme].
+  const PeekThemeScope({required this.theme, required super.child, super.key});
+
+  /// What [PeekTheme.of] returns under this scope.
+  final PeekTheme theme;
+
+  @override
+  bool updateShouldNotify(PeekThemeScope oldWidget) => theme != oldWidget.theme;
 }

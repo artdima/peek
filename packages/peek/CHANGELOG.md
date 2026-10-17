@@ -28,6 +28,13 @@
   `PeekStrings` gain `exportAs`, `formatUrl`, `formatCurl`, `formatText`,
   `formatMarkdown`, `formatHar`, `copyHar`, `redirectCount`, `shareUrl`,
   `shareCurl`, `shareText` and `shareMarkdown`.
+- In the dark, a sheet rises off the screen instead of vanishing into it:
+  every sheet and alert now draws with `PeekTheme.elevated`, which lifts
+  each surface a step the way iOS does — the sheet takes a card's colour,
+  a card on it a fill's, with the ink and the status hues unchanged — and
+  leaves a light theme as it is. `PeekThemeScope` is what puts a theme in
+  force under a subtree, and `PeekTheme.of` looks there before the app's
+  registered extension.
 
 ## 2.0.0
 

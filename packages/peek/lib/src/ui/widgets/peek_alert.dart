@@ -33,12 +33,15 @@ Future<bool> showPeekAlert(
           strings: strings,
           share: share,
           bodyLoader: bodyLoader,
-          child: _Alert(
-            title: title,
-            message: message,
-            confirmLabel: confirmLabel,
-            cancelLabel: strings.cancel,
-            destructive: destructive,
+          child: PeekThemeScope(
+            theme: PeekTheme.of(context).elevated,
+            child: _Alert(
+              title: title,
+              message: message,
+              confirmLabel: confirmLabel,
+              cancelLabel: strings.cancel,
+              destructive: destructive,
+            ),
           ),
         ),
     transitionBuilder:

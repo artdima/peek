@@ -85,6 +85,31 @@ void main() {
       expect(light.largeTitle.fontSize, greaterThan(light.body.fontSize!));
     });
 
+    test('rises a level in the dark and stays put in the light', () {
+      final light = PeekTheme.light();
+      expect(light.elevated, same(light));
+
+      final dark = PeekTheme.dark();
+      final lifted = dark.elevated;
+      // Each surface takes the colour of the one that was above it.
+      expect(lifted.groupedBackground, dark.card);
+      expect(lifted.background, dark.card);
+      expect(lifted.card, dark.fill);
+      expect(
+        lifted.fill.computeLuminance(),
+        greaterThan(dark.fill.computeLuminance()),
+      );
+      expect(
+        lifted.separator.computeLuminance(),
+        greaterThan(dark.separator.computeLuminance()),
+      );
+      // Only the surfaces move: ink and meaning stay where they were.
+      expect(lifted.label, dark.label);
+      expect(lifted.accent, dark.accent);
+      expect(lifted.success, dark.success);
+      expect(lifted.body, dark.body);
+    });
+
     test('copies with replaced values', () {
       final theme = PeekTheme.light();
       final copy = theme.copyWith(pending: const Color(0xFF112233), gutter: 4);
@@ -165,6 +190,37 @@ void main() {
         expect(derived.label, expected.label);
       });
     }
+
+    testWidgets('a scope comes before the registered extension', (
+      tester,
+    ) async {
+      final registered = PeekTheme.light().copyWith(
+        pending: const Color(0xFF00FF00),
+      );
+      final scoped = registered.copyWith(pending: const Color(0xFFFF0000));
+      late PeekTheme outside;
+      late PeekTheme inside;
+      await pumpPeek(
+        tester,
+        Builder(
+          builder: (context) {
+            outside = PeekTheme.of(context);
+            return PeekThemeScope(
+              theme: scoped,
+              child: Builder(
+                builder: (context) {
+                  inside = PeekTheme.of(context);
+                  return const SizedBox();
+                },
+              ),
+            );
+          },
+        ),
+        theme: ThemeData(extensions: [registered]),
+      );
+      expect(outside, same(registered));
+      expect(inside, same(scoped));
+    });
 
     testWidgets('none of the app colours reach it', (tester) async {
       late PeekTheme derived;

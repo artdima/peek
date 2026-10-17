@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peek/peek.dart';
@@ -6,7 +8,10 @@ import '../../support/fake_store.dart';
 import '../../support/pump.dart';
 
 void main() {
-  Future<BuildContext> pumpHost(WidgetTester tester) async {
+  Future<BuildContext> pumpHost(
+    WidgetTester tester, {
+    Brightness brightness = Brightness.light,
+  }) async {
     final peek = fakePeek().peek;
     final controller = PeekController(peek);
     addTearDown(controller.dispose);
@@ -24,6 +29,7 @@ void main() {
           },
         ),
       ),
+      brightness: brightness,
     );
     return host;
   }
@@ -68,6 +74,33 @@ void main() {
     await tester.tap(find.text('Export HAR'));
     await tester.pumpAndSettle();
     expect(await picked, 'har');
+  });
+
+  testWidgets('a sheet rises off a dark screen', (tester) async {
+    final context = await pumpHost(tester, brightness: Brightness.dark);
+    unawaited(
+      showPeekActions<String>(
+        context,
+        title: 'Entry',
+        actions: const [PeekAction(value: 'har', label: 'Export HAR')],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final dark = PeekTheme.dark();
+    final scope = tester.widget<PeekThemeScope>(find.byType(PeekThemeScope));
+    expect(scope.theme.groupedBackground, dark.card);
+    // The sheet itself is drawn in the lifted colour, so it has an edge.
+    final surfaces = tester
+        .widgetList<ColoredBox>(
+          find.descendant(
+            of: find.byType(PeekThemeScope),
+            matching: find.byType(ColoredBox),
+          ),
+        )
+        .map((box) => box.color);
+    expect(surfaces, contains(dark.card));
+    expect(surfaces, isNot(contains(dark.background)));
   });
 
   testWidgets('the actions sheet groups neighbours by section', (tester) async {
