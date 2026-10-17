@@ -21,6 +21,7 @@ export 'peek_list_section.dart';
 export 'peek_method_badge.dart';
 export 'peek_pill.dart';
 export 'peek_quick_bar.dart';
+export 'peek_radar.dart';
 export 'peek_scaffold.dart';
 export 'peek_search_bar.dart';
 export 'peek_search_field.dart';

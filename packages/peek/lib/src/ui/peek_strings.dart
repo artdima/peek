@@ -80,13 +80,24 @@ class PeekStrings {
   String get noRequests => 'No requests yet';
 
   /// What to do about it.
-  String get noRequestsHint => 'Send a request and it will show up here.';
+  String get noRequestsHint =>
+      'Recording is on. Send a request from the app and it appears here.';
+
+  /// What to do about it while recording is paused.
+  String get noRequestsPausedHint =>
+      'Recording is paused. Resume it, then send a request from the app.';
 
   /// Empty state when a filter hides everything.
   String get noMatches => 'Nothing matches';
 
   /// What to do about that.
   String get noMatchesHint => 'Try a different search or clear the filters.';
+
+  /// What a filter hid, counted: everything there is.
+  String noMatchesOf(int total) =>
+      total == 1
+          ? 'The only request is outside the current search and filters.'
+          : 'All $total requests are outside the current search and filters.';
 
   /// Empty detail pane, before a call is picked.
   String get noSelection => 'Nothing selected';

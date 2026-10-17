@@ -225,6 +225,36 @@ void main() {
       expect(find.byIcon(Icons.inbox_outlined), findsOneWidget);
       expect(find.byType(TextButton), findsOneWidget);
     });
+
+    testWidgets('draws a picture in place of the icon', (tester) async {
+      await pumpWidgetInScope(
+        tester,
+        const PeekEmptyState.illustrated(
+          title: 'Nothing matches',
+          message: 'Everything is outside the filters.',
+          illustration: PeekRadar.filtered(),
+        ),
+        size: const Size(400, 500),
+      );
+      expect(find.byType(PeekRadar), findsOneWidget);
+      expect(find.byIcon(Icons.inbox_outlined), findsNothing);
+      // The headline reads a size up from an icon's.
+      final title = tester.widget<Text>(find.text('Nothing matches'));
+      expect(title.style?.fontSize, 22);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('PeekRadar', () {
+    testWidgets('listens in green and goes grey when paused', (tester) async {
+      await pumpWidgetInScope(tester, const PeekRadar.listening());
+      expect(tester.takeException(), isNull);
+      await pumpWidgetInScope(tester, const PeekRadar.listening(active: false));
+      expect(tester.takeException(), isNull);
+      await pumpWidgetInScope(tester, const PeekRadar.filtered());
+      expect(tester.takeException(), isNull);
+      expect(find.byIcon(Icons.filter_list), findsOneWidget);
+    });
   });
 
   group('goldens', () {

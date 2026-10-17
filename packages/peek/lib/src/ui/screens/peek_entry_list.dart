@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
@@ -6,7 +7,9 @@ import 'package:flutter/widgets.dart';
 import '../../core/model/peek_entry.dart';
 import '../../core/model/peek_id.dart';
 import '../../core/query/peek_search_query.dart';
+import '../peek_controller.dart';
 import '../peek_scope.dart';
+import '../peek_strings.dart';
 import '../theme/peek_theme.dart';
 import '../widgets/widgets.dart';
 
@@ -34,23 +37,22 @@ final class PeekEntrySliver extends StatelessWidget {
         search.scopes.contains(PeekSearchScope.url) ? search.text : '';
 
     if (entries.isEmpty) {
-      return SliverFillRemaining(
-        hasScrollBody: false,
-        child:
-            controller.isFiltered
-                ? PeekEmptyState(
-                  title: strings.noMatches,
-                  message: strings.noMatchesHint,
-                  icon: Icons.search_off_outlined,
-                  action: PeekTextButton(
-                    label: strings.resetFilters,
-                    onPressed: controller.resetFilter,
+      // Not SliverFillRemaining: it measures the child by intrinsics, which
+      // a capped text width misreports, and overflows by a line or two.
+      return SliverLayoutBuilder(
+        builder:
+            (context, constraints) => SliverToBoxAdapter(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: math.max(
+                    0.0,
+                    constraints.viewportMainAxisExtent -
+                        constraints.precedingScrollExtent,
                   ),
-                )
-                : PeekEmptyState(
-                  title: strings.noRequests,
-                  message: strings.noRequestsHint,
                 ),
+                child: _emptyState(controller, strings),
+              ),
+            ),
       );
     }
 
@@ -73,6 +75,28 @@ final class PeekEntrySliver extends StatelessWidget {
       },
     );
   }
+
+  Widget _emptyState(PeekController controller, PeekStrings strings) =>
+      controller.isFiltered
+          ? PeekEmptyState.illustrated(
+            title: strings.noMatches,
+            message: strings.noMatchesOf(controller.totalCount),
+            illustration: const PeekRadar.filtered(),
+            action: PeekFilledButton(
+              label: strings.resetFilters,
+              icon: Icons.close,
+              tinted: true,
+              onPressed: controller.resetFilter,
+            ),
+          )
+          : PeekEmptyState.illustrated(
+            title: strings.noRequests,
+            message:
+                controller.isPaused
+                    ? strings.noRequestsPausedHint
+                    : strings.noRequestsHint,
+            illustration: PeekRadar.listening(active: !controller.isPaused),
+          );
 }
 
 /// Says how many calls arrived above the list while it was scrolled away,

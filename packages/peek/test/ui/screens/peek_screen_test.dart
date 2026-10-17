@@ -190,7 +190,31 @@ void main() {
     ) async {
       await pumpScreen(tester);
       expect(find.text('No requests yet'), findsOneWidget);
+      expect(find.textContaining('Recording is on.'), findsOneWidget);
       expect(find.byType(PeekEntryTile), findsNothing);
+      // The radar listens: its pulse is live.
+      expect(tester.widget<PeekRadar>(find.byType(PeekRadar)).active, isTrue);
+    });
+
+    testWidgets('tells an empty screen that recording is paused', (
+      tester,
+    ) async {
+      await pumpScreen(tester);
+      controller.pause();
+      await tester.pump();
+
+      expect(find.text('No requests yet'), findsOneWidget);
+      expect(
+        find.text(
+          'Recording is paused. Resume it, then send a request from the app.',
+        ),
+        findsOneWidget,
+      );
+      expect(tester.widget<PeekRadar>(find.byType(PeekRadar)).active, isFalse);
+
+      controller.resume();
+      await tester.pump();
+      expect(find.textContaining('Recording is on.'), findsOneWidget);
     });
 
     testWidgets('offers a different empty state when a filter hides all', (
@@ -201,6 +225,10 @@ void main() {
       await tester.pump();
 
       expect(find.text('Nothing matches'), findsOneWidget);
+      expect(
+        find.text('All 6 requests are outside the current search and filters.'),
+        findsOneWidget,
+      );
       await tester.tap(find.text('Clear filters'));
       await tester.pump();
       expect(find.byType(PeekEntryTile), findsNWidgets(6));
@@ -423,8 +451,17 @@ void main() {
     }
 
     testWidgets('the empty screen', (tester) async {
-      await pumpScreen(tester, size: const Size(420, 500));
+      await pumpScreen(tester, size: const Size(420, 620));
+      expect(tester.takeException(), isNull);
       await expectGolden(find.byType(PeekScreen), 'screen-empty');
+    });
+
+    testWidgets('the screen with everything filtered out', (tester) async {
+      await pumpScreen(tester, entries: fixtures, size: const Size(420, 720));
+      controller.filter = const PeekFilter(hosts: {'nowhere.example.com'});
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      await expectGolden(find.byType(PeekScreen), 'screen-filtered');
     });
 
     testWidgets('the paused screen', (tester) async {

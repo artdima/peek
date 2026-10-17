@@ -37,6 +37,18 @@
   `large` is one); `peekDesktopMenuTitle` and `peekDesktopMenuStatus` give
   an app's own menu the same row; `PeekStrings` gain `session`,
   `listTitle` and `desktopNotConnected`.
+- An empty list has a picture: a radar of three arcs sweeping out from a
+  point. While nothing has been recorded the centre is a green pulse —
+  Peek is listening, and the line under it says recording is on, or that
+  it is paused and the pulse goes grey — and when the search and the
+  filters have caught everything the arcs are dashed, with a stray dot
+  on each, a filter sits at the centre, the line counts what is hidden
+  (`All 6 requests are outside the current search and filters.`) and
+  Clear filters is a tinted button. `PeekRadar` draws the picture,
+  `PeekEmptyState.illustrated` lays a screen out around one with larger
+  type, `PeekFilledButton` gains `tinted`, and `PeekStrings` gain
+  `noRequestsPausedHint` and `noMatchesOf`; `noRequestsHint` now says that
+  recording is on.
 - In the dark, a sheet rises off the screen instead of vanishing into it:
   every sheet and alert now draws with `PeekTheme.elevated`, which lifts
   each surface a step the way iOS does — the sheet takes a card's colour,
