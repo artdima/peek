@@ -253,6 +253,16 @@ class PeekStrings {
   /// Heads the formats a call can be written out in.
   String get exportAs => 'Export as';
 
+  /// What a list's sheet is about, and the heading of what it can do with
+  /// the whole of it.
+  String get session => 'Session';
+
+  /// Names what a list holds at the head of its sheet.
+  String listTitle(int shown, int total) {
+    final count = total == 1 ? '1 request' : '$total requests';
+    return shown == total ? count : '$shown of $total requests';
+  }
+
   /// The URL alone, as a format.
   String get formatUrl => 'URL';
 
@@ -317,6 +327,10 @@ class PeekStrings {
 
   /// The menu item while nothing is being streamed.
   String get desktopDisconnected => 'Not connected to Peek Pro';
+
+  /// The state of the link, beside the menu item, while nothing is being
+  /// streamed.
+  String get desktopNotConnected => 'Not connected';
 
   /// Says what a desktop viewer is, for an app that has none set up.
   String get desktopAbout =>

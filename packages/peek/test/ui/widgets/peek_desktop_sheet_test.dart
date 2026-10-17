@@ -172,9 +172,11 @@ void main() {
     testWidgets('offers Peek Pro even with nothing recorded', (tester) async {
       await pumpScreen(tester);
       await openMenu(tester);
-      expect(find.text('PEEK PRO'), findsOneWidget);
+      // The badge at the head and the heading of the card both say so.
+      expect(find.text('SESSION'), findsNWidgets(2));
       expect(find.text('Connect to Peek Pro'), findsOneWidget);
-      expect(find.text('Export HAR'), findsNothing);
+      expect(find.text('HAR'), findsNothing);
+      expect(find.text('EXPORT AS'), findsNothing);
     });
 
     testWidgets('keeps the exports beside it once there is something', (
@@ -182,11 +184,24 @@ void main() {
     ) async {
       await pumpScreen(tester, entries: [e1]);
       await openMenu(tester);
-      expect(find.text('Export HAR'), findsOneWidget);
+      expect(find.text('EXPORT AS'), findsOneWidget);
+      expect(find.text('HAR'), findsOneWidget);
       expect(find.text('Connect to Peek Pro'), findsOneWidget);
     });
 
     testWidgets('says where a link stands', (tester) async {
+      await pumpScreen(
+        tester,
+        link: FakeDesktopLink(
+          const PeekDesktopLinkState(status: PeekDesktopLinkStatus.unpaired),
+        ),
+      );
+      await openMenu(tester);
+      expect(find.text('Connect to Peek Pro'), findsOneWidget);
+      expect(find.text('Not connected'), findsOneWidget);
+      await tester.tap(find.byTooltip('Close'));
+      await settle(tester);
+
       final link = FakeDesktopLink(
         const PeekDesktopLinkState(
           status: PeekDesktopLinkStatus.connected,
@@ -195,14 +210,25 @@ void main() {
       );
       await pumpScreen(tester, link: link);
       await openMenu(tester);
+      // Once there is a stream the row is the desktop's, not the way there.
+      expect(find.text('Peek Pro'), findsOneWidget);
       expect(find.text('Connected to Studio Mac'), findsOneWidget);
+      expect(find.text('Connect to Peek Pro'), findsNothing);
+    });
+
+    testWidgets('says nothing about a link an app does not have', (
+      tester,
+    ) async {
+      await pumpScreen(tester);
+      await openMenu(tester);
+      expect(find.text('Not connected'), findsNothing);
     });
 
     testWidgets('looks the part in both layouts', (tester) async {
       await pumpScreen(tester, entries: [e1]);
       await openMenu(tester);
       await expectGolden(find.byType(MaterialApp), 'desktop-menu-narrow');
-      await tester.tap(find.text('Cancel'));
+      await tester.tap(find.byTooltip('Close'));
       await settle(tester);
 
       final link = FakeDesktopLink(
@@ -685,7 +711,6 @@ void main() {
           host: '10.0.0.2',
           port: 9741,
         ),
-        menu: 'Not connected to Peek Pro',
       );
       expect(find.text('10.0.0.2'), findsOneWidget);
       await tester.tap(find.text('Connect again'));

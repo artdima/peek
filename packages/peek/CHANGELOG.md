@@ -28,6 +28,15 @@
   `PeekStrings` gain `exportAs`, `formatUrl`, `formatCurl`, `formatText`,
   `formatMarkdown`, `formatHar`, `copyHar`, `redirectCount`, `shareUrl`,
   `shareCurl`, `shareText` and `shareMarkdown`.
+- The list's menu is laid out the same way: a Session badge and the count
+  at its head — `10 requests`, or `2 of 10 requests` under a filter — the
+  HAR row with its Copy and Share buttons, then a Session card with Save
+  session and the way to Peek Pro, which now says where the link stands
+  beside it: `Not connected`, `Connected to Studio Mac`, and so on.
+  `PeekBadge` is the pill at the head of a sheet (`PeekMethodBadge` with
+  `large` is one); `peekDesktopMenuTitle` and `peekDesktopMenuStatus` give
+  an app's own menu the same row; `PeekStrings` gain `session`,
+  `listTitle` and `desktopNotConnected`.
 - In the dark, a sheet rises off the screen instead of vanishing into it:
   every sheet and alert now draws with `PeekTheme.elevated`, which lifts
   each surface a step the way iOS does — the sheet takes a card's colour,

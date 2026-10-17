@@ -234,7 +234,9 @@ void main() {
 
       await tester.tap(find.byTooltip('More'));
       await settle(tester);
-      await tester.tap(find.text('Export HAR'));
+      // The sheet names the list as the filter left it.
+      expect(find.text('1 of 6 requests'), findsOneWidget);
+      await tester.tap(find.byTooltip('Copy HAR'));
       await settle(tester);
 
       expect(copied.single, contains('/login'));
@@ -246,9 +248,29 @@ void main() {
       await pumpScreen(tester);
       await tester.tap(find.byTooltip('More'));
       await settle(tester);
-      expect(find.text('Export HAR'), findsOneWidget);
-      expect(find.text('Share as HAR'), findsNothing);
+      expect(find.text('6 requests'), findsOneWidget);
+      expect(find.byTooltip('Copy HAR'), findsOneWidget);
+      expect(find.text('SHARE'), findsNothing);
+      expect(find.byTooltip('Share as HAR'), findsNothing);
       expect(find.text('Save session'), findsNothing);
+      // The session's card still has somewhere to lead.
+      expect(find.text('Connect to Peek Pro'), findsOneWidget);
+    });
+
+    testWidgets('shares the list as a HAR', (tester) async {
+      final shared = <PeekShareContent>[];
+      await pumpScreen(
+        tester,
+        share: PeekShareDelegate.from((content) async => shared.add(content)),
+      );
+      await tester.tap(find.byTooltip('More'));
+      await settle(tester);
+      await tester.tap(find.byTooltip('Share as HAR'));
+      await settle(tester);
+
+      expect(shared.single.kind, PeekShareKind.file);
+      expect(shared.single.filename, 'peek.har');
+      expect(shared.single.text, contains('/users'));
     });
 
     testWidgets('saves everything recorded, not what the list shows', (

@@ -57,6 +57,32 @@ String peekDesktopMenuLabel(PeekStrings strings, PeekDesktopLink? link) {
   };
 }
 
+/// What the list's menu calls the row that leads to the desktop: the way
+/// there while there is no stream, the desktop itself once there is.
+String peekDesktopMenuTitle(PeekStrings strings, PeekDesktopLink? link) =>
+    switch (link?.linkState.status) {
+      PeekDesktopLinkStatus.connected ||
+      PeekDesktopLinkStatus.connecting ||
+      PeekDesktopLinkStatus.waiting => strings.desktop,
+      _ => strings.connectToDesktop,
+    };
+
+/// Where the link stands, beside that row: nothing for an app without a
+/// link, a word or two otherwise.
+String? peekDesktopMenuStatus(PeekStrings strings, PeekDesktopLink? link) {
+  if (link == null) return null;
+  final state = link.linkState;
+  final name = state.desktopName ?? strings.desktop;
+  return switch (state.status) {
+    PeekDesktopLinkStatus.connected => strings.connectedToDesktop(name),
+    PeekDesktopLinkStatus.connecting => strings.connectingToDesktop(name),
+    PeekDesktopLinkStatus.waiting => strings.waitingForDesktop(name),
+    PeekDesktopLinkStatus.denied => strings.desktopDenied,
+    PeekDesktopLinkStatus.unpaired ||
+    PeekDesktopLinkStatus.stopped => strings.desktopNotConnected,
+  };
+}
+
 /// How to get a desktop viewer, for an app without a link to one: what to
 /// add, what to write, and where to read more. The addresses are shown
 /// rather than opened — Peek takes no plugin for a link.

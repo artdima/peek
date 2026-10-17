@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' show Tooltip;
+import 'package:flutter/material.dart' show Icons, Tooltip;
 import 'package:flutter/widgets.dart';
 
 import '../../core/export/peek_exporters.dart';
@@ -14,6 +14,7 @@ import '../icons/peek_icons.dart';
 import '../peek_scope.dart';
 import '../peek_share.dart';
 import '../theme/peek_theme.dart';
+import 'peek_badge.dart';
 import 'peek_copy_button.dart';
 import 'peek_desktop_sheet.dart';
 import 'peek_icon_button.dart';
@@ -160,39 +161,16 @@ Future<void> showPeekListActions(BuildContext context) async {
 
   // The exports need something to export; the desktop is always there to
   // connect to, or to read about.
-  final action = await showPeekActions<_ListAction>(
+  final action = await showPeekSheet<_ListAction>(
     context,
-    title: strings.requestCount(entries.length, controller.totalCount),
-    actions: [
-      if (entries.isNotEmpty) ...[
-        PeekAction(
-          value: _ListAction.copyHar,
-          label: strings.exportHar,
-          icon: PeekIcons.braces,
-          section: strings.copy,
+    builder:
+        (context) => _ListSheet(
+          title: strings.listTitle(entries.length, controller.totalCount),
+          hasEntries: entries.isNotEmpty,
+          canShare: share != null,
+          desktopTitle: peekDesktopMenuTitle(strings, link),
+          desktopStatus: peekDesktopMenuStatus(strings, link),
         ),
-        if (share != null) ...[
-          PeekAction(
-            value: _ListAction.shareHar,
-            label: strings.shareHar,
-            icon: PeekIcons.share,
-            section: strings.share,
-          ),
-          PeekAction(
-            value: _ListAction.saveSession,
-            label: strings.saveSession,
-            icon: PeekIcons.download,
-            section: strings.share,
-          ),
-        ],
-      ],
-      PeekAction(
-        value: _ListAction.desktop,
-        label: peekDesktopMenuLabel(strings, link),
-        icon: PeekIcons.desktop,
-        section: strings.desktop,
-      ),
-    ],
   );
   if (action == null || !context.mounted) return;
 
@@ -227,53 +205,59 @@ class _EntrySheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
     final strings = PeekScope.stringsOf(context);
-    final caption = theme.caption.copyWith(
-      color: theme.secondaryLabel,
-      letterSpacing: 0.5,
-    );
     final redirects = entry.response?.redirects ?? const [];
     void choose(PeekEntryAction action) => Navigator.of(context).pop(action);
 
     final formats = [
-      _Format(
-        icon: PeekIcons.link,
-        label: strings.formatUrl,
-        copy: PeekEntryAction.copyUrl,
-        copyLabel: strings.copyUrl,
-        share: PeekEntryAction.shareUrl,
-        shareLabel: strings.shareUrl,
+      (
+        _Format(
+          icon: PeekIcons.link,
+          label: strings.formatUrl,
+          copyLabel: strings.copyUrl,
+          shareLabel: strings.shareUrl,
+        ),
+        PeekEntryAction.copyUrl,
+        PeekEntryAction.shareUrl,
       ),
-      _Format(
-        icon: PeekIcons.curl,
-        label: strings.formatCurl,
-        copy: PeekEntryAction.copyCurl,
-        copyLabel: strings.copyCurl,
-        share: PeekEntryAction.shareCurl,
-        shareLabel: strings.shareCurl,
+      (
+        _Format(
+          icon: PeekIcons.curl,
+          label: strings.formatCurl,
+          copyLabel: strings.copyCurl,
+          shareLabel: strings.shareCurl,
+        ),
+        PeekEntryAction.copyCurl,
+        PeekEntryAction.shareCurl,
       ),
-      _Format(
-        icon: PeekIcons.text,
-        label: strings.formatText,
-        copy: PeekEntryAction.copyText,
-        copyLabel: strings.copyText,
-        share: PeekEntryAction.shareText,
-        shareLabel: strings.shareText,
+      (
+        _Format(
+          icon: PeekIcons.text,
+          label: strings.formatText,
+          copyLabel: strings.copyText,
+          shareLabel: strings.shareText,
+        ),
+        PeekEntryAction.copyText,
+        PeekEntryAction.shareText,
       ),
-      _Format(
-        icon: PeekIcons.markdown,
-        label: strings.formatMarkdown,
-        copy: PeekEntryAction.copyMarkdown,
-        copyLabel: strings.copyMarkdown,
-        share: PeekEntryAction.shareMarkdown,
-        shareLabel: strings.shareMarkdown,
+      (
+        _Format(
+          icon: PeekIcons.markdown,
+          label: strings.formatMarkdown,
+          copyLabel: strings.copyMarkdown,
+          shareLabel: strings.shareMarkdown,
+        ),
+        PeekEntryAction.copyMarkdown,
+        PeekEntryAction.shareMarkdown,
       ),
-      _Format(
-        icon: PeekIcons.braces,
-        label: strings.formatHar,
-        copy: PeekEntryAction.copyHar,
-        copyLabel: strings.copyHar,
-        share: PeekEntryAction.shareHar,
-        shareLabel: strings.shareHar,
+      (
+        _Format(
+          icon: PeekIcons.braces,
+          label: strings.formatHar,
+          copyLabel: strings.copyHar,
+          shareLabel: strings.shareHar,
+        ),
+        PeekEntryAction.copyHar,
+        PeekEntryAction.shareHar,
       ),
     ];
 
@@ -285,8 +269,10 @@ class _EntrySheet extends StatelessWidget {
         children: [
           const SizedBox(height: 12),
           _Header(
-            entry: entry,
+            badge: PeekMethodBadge(entry.request.method, large: true),
+            title: entry.request.path.isEmpty ? '/' : entry.request.path,
             onPin: canPin ? () => choose(PeekEntryAction.pin) : null,
+            pinned: entry.isPinned,
             onClose: () => Navigator.of(context).pop(),
           ),
           const SizedBox(height: 6),
@@ -295,41 +281,16 @@ class _EntrySheet extends StatelessWidget {
             const SizedBox(height: 10),
             _RedirectChain(entry, redirects),
           ],
-          Padding(
-            padding: EdgeInsets.only(top: theme.gutter, bottom: 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 6),
-                    child: Text(strings.exportAs.toUpperCase(), style: caption),
-                  ),
+          _ExportCaptions(canShare: canShare),
+          _Card(
+            children: [
+              for (final (format, copy, share) in formats)
+                _FormatRow(
+                  format: format,
+                  onCopy: () => choose(copy),
+                  onShare: canShare ? () => choose(share) : null,
                 ),
-                _ColumnCaption(strings.copy, style: caption),
-                if (canShare) _ColumnCaption(strings.share, style: caption),
-                const SizedBox(width: _FormatRow.endInset),
-              ],
-            ),
-          ),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(theme.radius),
-            child: ColoredBox(
-              color: theme.card,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (final (index, format) in formats.indexed) ...[
-                    if (index > 0)
-                      const PeekSeparator(indent: _FormatRow.labelInset),
-                    _FormatRow(
-                      format: format,
-                      onCopy: () => choose(format.copy),
-                      onShare: canShare ? () => choose(format.share) : null,
-                    ),
-                  ],
-                ],
-              ),
-            ),
+            ],
           ),
           SizedBox(height: theme.gutter),
         ],
@@ -338,50 +299,267 @@ class _EntrySheet extends StatelessWidget {
   }
 }
 
-/// One way a call can leave, and what it is called in each column.
-class _Format {
-  const _Format({
-    required this.icon,
-    required this.label,
-    required this.copy,
-    required this.copyLabel,
-    required this.share,
-    required this.shareLabel,
+/// The sheet of a list: what it holds, the one format the whole of it can
+/// leave in, and what can be done with the session it is part of.
+class _ListSheet extends StatelessWidget {
+  const _ListSheet({
+    required this.title,
+    required this.hasEntries,
+    required this.canShare,
+    required this.desktopTitle,
+    required this.desktopStatus,
   });
 
-  final PeekIconData icon;
-  final String label;
-  final PeekEntryAction copy;
-  final String copyLabel;
-  final PeekEntryAction share;
-  final String shareLabel;
-}
-
-/// The call a sheet is about — its method and path — with the pin and the
-/// way out at the end.
-class _Header extends StatelessWidget {
-  const _Header({
-    required this.entry,
-    required this.onPin,
-    required this.onClose,
-  });
-
-  final PeekEntry entry;
-  final VoidCallback? onPin;
-  final VoidCallback onClose;
+  final String title;
+  final bool hasEntries;
+  final bool canShare;
+  final String desktopTitle;
+  final String? desktopStatus;
 
   @override
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
     final strings = PeekScope.stringsOf(context);
-    final request = entry.request;
+    void choose(_ListAction action) => Navigator.of(context).pop(action);
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: theme.gutter),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 12),
+          _Header(
+            badge: PeekBadge(strings.session, color: theme.accent),
+            title: title,
+            onClose: () => Navigator.of(context).pop(),
+          ),
+          if (hasEntries) ...[
+            _ExportCaptions(canShare: canShare),
+            _Card(
+              children: [
+                _FormatRow(
+                  format: _Format(
+                    icon: PeekIcons.braces,
+                    label: strings.formatHar,
+                    copyLabel: strings.copyHar,
+                    shareLabel: strings.shareHar,
+                  ),
+                  onCopy: () => choose(_ListAction.copyHar),
+                  onShare: canShare ? () => choose(_ListAction.shareHar) : null,
+                ),
+              ],
+            ),
+          ],
+          _SectionCaption(strings.session),
+          _Card(
+            children: [
+              if (canShare)
+                _LinkRow(
+                  icon: PeekIcons.download,
+                  title: strings.saveSession,
+                  onTap: () => choose(_ListAction.saveSession),
+                ),
+              _LinkRow(
+                icon: PeekIcons.desktop,
+                title: desktopTitle,
+                value: desktopStatus,
+                onTap: () => choose(_ListAction.desktop),
+              ),
+            ],
+          ),
+          SizedBox(height: theme.gutter),
+        ],
+      ),
+    );
+  }
+}
+
+/// A heading over a card, in the sheet's small capitals.
+class _SectionCaption extends StatelessWidget {
+  const _SectionCaption(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    return Padding(
+      padding: EdgeInsets.only(left: 6, top: theme.gutter, bottom: 8),
+      child: Text(label.toUpperCase(), style: _captionStyle(theme)),
+    );
+  }
+}
+
+/// The heading of the export table, with a column named over each button.
+class _ExportCaptions extends StatelessWidget {
+  const _ExportCaptions({required this.canShare});
+
+  final bool canShare;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    final strings = PeekScope.stringsOf(context);
+    final caption = _captionStyle(theme);
+    return Padding(
+      padding: EdgeInsets.only(top: theme.gutter, bottom: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 6),
+              child: Text(strings.exportAs.toUpperCase(), style: caption),
+            ),
+          ),
+          _ColumnCaption(strings.copy, style: caption),
+          if (canShare) _ColumnCaption(strings.share, style: caption),
+          const SizedBox(width: _FormatRow.endInset),
+        ],
+      ),
+    );
+  }
+}
+
+TextStyle _captionStyle(PeekTheme theme) =>
+    theme.caption.copyWith(color: theme.secondaryLabel, letterSpacing: 0.5);
+
+/// Rows as one card, separated by hairlines that start at the labels.
+class _Card extends StatelessWidget {
+  const _Card({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(theme.radius),
+      child: ColoredBox(
+        color: theme.card,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final (index, child) in children.indexed) ...[
+              if (index > 0) const PeekSeparator(indent: _FormatRow.labelInset),
+              child,
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A row that leads somewhere: a glyph, a name, where things stand, and a
+/// chevron.
+class _LinkRow extends StatelessWidget {
+  const _LinkRow({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.value,
+  });
+
+  final PeekIconData icon;
+  final String title;
+  final String? value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    final value = this.value;
+    return MergeSemantics(
+      child: Semantics(
+        button: true,
+        child: PeekTappable(
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: theme.minTapTarget + 8),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(14, 4, theme.gutter, 4),
+              child: Row(
+                children: [
+                  PeekIcon(icon, color: theme.accent),
+                  const SizedBox(width: 12),
+                  Expanded(child: Text(title, style: theme.body)),
+                  if (value != null) ...[
+                    const SizedBox(width: 10),
+                    // Expanded, not Flexible: a loose child would leave what
+                    // it does not use empty to its right, off the chevron.
+                    Expanded(
+                      child: Text(
+                        value,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.end,
+                        style: theme.mono.copyWith(
+                          fontSize: 11,
+                          color: theme.secondaryLabel,
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(width: 6),
+                  Icon(
+                    Icons.chevron_right,
+                    size: 18,
+                    color: theme.tertiaryLabel,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One way something can leave, and what it is called in each column.
+class _Format {
+  const _Format({
+    required this.icon,
+    required this.label,
+    required this.copyLabel,
+    required this.shareLabel,
+  });
+
+  final PeekIconData icon;
+  final String label;
+  final String copyLabel;
+  final String shareLabel;
+}
+
+/// What a sheet is about — a badge and a name — with the way out at the
+/// end, and a pin before it where there is something to pin.
+class _Header extends StatelessWidget {
+  const _Header({
+    required this.badge,
+    required this.title,
+    required this.onClose,
+    this.onPin,
+    this.pinned = false,
+  });
+
+  final Widget badge;
+  final String title;
+  final VoidCallback onClose;
+  final VoidCallback? onPin;
+  final bool pinned;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    final strings = PeekScope.stringsOf(context);
     return Row(
       children: [
-        PeekMethodBadge(request.method, large: true),
+        badge,
         const SizedBox(width: 10),
         Expanded(
           child: Text(
-            request.path.isEmpty ? '/' : request.path,
+            title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.headline.copyWith(fontSize: 17),
@@ -391,8 +569,8 @@ class _Header extends StatelessWidget {
         if (onPin case final onPin?) ...[
           _RoundButton(
             glyph: PeekIcons.pin,
-            tooltip: entry.isPinned ? strings.unpin : strings.pin,
-            selected: entry.isPinned,
+            tooltip: pinned ? strings.unpin : strings.pin,
+            selected: pinned,
             onPressed: onPin,
           ),
           const SizedBox(width: 10),

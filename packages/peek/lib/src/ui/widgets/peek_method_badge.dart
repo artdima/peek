@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../theme/peek_theme.dart';
+import 'peek_badge.dart';
 
 /// The HTTP method, in its own colour.
 final class PeekMethodBadge extends StatelessWidget {
@@ -18,24 +19,7 @@ final class PeekMethodBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
     final color = theme.colorForMethod(method);
-    if (large) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.16),
-          borderRadius: BorderRadius.circular(theme.radius * 0.6),
-        ),
-        child: Text(
-          method.toUpperCase(),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: theme.footnote.copyWith(
-            color: color,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      );
-    }
+    if (large) return PeekBadge(method, color: color);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
