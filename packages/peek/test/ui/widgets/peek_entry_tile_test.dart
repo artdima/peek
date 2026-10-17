@@ -121,13 +121,13 @@ void main() {
 
       await tester.longPress(find.byType(PeekEntryTile));
       await tester.pumpAndSettle();
-      expect(find.text('Pin'), findsOneWidget);
-      expect(find.text('Copy URL'), findsOneWidget);
-      expect(find.text('Copy as cURL'), findsOneWidget);
-      expect(find.text('Copy as text'), findsOneWidget);
-      expect(find.text('Export HAR'), findsOneWidget);
+      expect(find.byTooltip('Pin'), findsOneWidget);
+      expect(find.byTooltip('Copy URL'), findsOneWidget);
+      expect(find.byTooltip('Copy as cURL'), findsOneWidget);
+      expect(find.byTooltip('Copy as text'), findsOneWidget);
+      expect(find.byTooltip('Copy HAR'), findsOneWidget);
       // No delegate, so nothing that would need one.
-      expect(find.text('Share as HAR'), findsNothing);
+      expect(find.byTooltip('Share as HAR'), findsNothing);
     });
 
     testWidgets('says Unpin for a pinned entry', (tester) async {
@@ -138,14 +138,14 @@ void main() {
       );
       await tester.longPress(find.byType(PeekEntryTile));
       await tester.pumpAndSettle();
-      expect(find.text('Unpin'), findsOneWidget);
+      expect(find.byTooltip('Unpin'), findsOneWidget);
     });
 
     testWidgets('has no menu when the row does not offer one', (tester) async {
       await pumpTile(tester, PeekEntryTile(e1, menu: false));
       await tester.longPress(find.byType(PeekEntryTile));
       await tester.pumpAndSettle();
-      expect(find.text('Copy URL'), findsNothing);
+      expect(find.byTooltip('Copy URL'), findsNothing);
     });
 
     testWidgets('reads out as one label', (tester) async {

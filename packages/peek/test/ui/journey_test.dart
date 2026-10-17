@@ -154,7 +154,7 @@ void main() {
 
     await tester.tap(find.byTooltip(strings.requestActions));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(strings.copyUrl));
+    await tester.tap(find.byTooltip(strings.copyUrl));
     await tester.pumpAndSettle();
     expect(copied.single, 'https://api.example.com/orders?page=2');
     // The 'Copied' toast keeps a timer; let it run out before leaving.

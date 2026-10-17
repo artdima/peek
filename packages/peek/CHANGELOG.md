@@ -11,14 +11,23 @@
   through the browser's own share sheet where there is one (phones,
   Safari) and is saved as a file where there is not; a sheet closed
   without choosing shares nothing.
-- A call's menu shares it as text, not only as a HAR: Share URL, Share as
-  cURL, Share as text and Share as Markdown sit above Share as HAR and
-  appear where it does — with the app's `PeekShareDelegate`, or through
-  the browser on the web — so a failing call reaches a chat or a ticket in
-  one step. `peekEntryContent` builds the same content for an app's own
-  menu, in any `PeekShareFormat`; the four `PeekEntryAction`s and four
-  `PeekStrings` (`shareUrl`, `shareCurl`, `shareText`, `shareMarkdown`) are
-  new.
+- A call's sheet shares it as text, not only as a HAR, so a failing call
+  reaches a chat or a ticket in one step. The sheet is a table now: a row
+  per format — URL, cURL, Text, Markdown, HAR — with a Copy button at its
+  end and, where something can carry the call off (the app's
+  `PeekShareDelegate`, or the browser on the web), a Share button beside
+  it. Above the table the call is named the way its tile names it, with
+  the host, the outcome, the size and the time on a line of figures, and a
+  redirected call shows its hops as a bar, a segment per hop in the colour
+  of its status. Pin and Close are round buttons in the header; there is
+  no Cancel row. `peekEntryContent` builds what a row shares for an app's
+  own menu, in any `PeekEntryFormat`; `PeekEntryAction` gains `shareUrl`,
+  `shareCurl`, `shareText` and `shareMarkdown`; `PeekIcons.copy` is new and
+  `PeekIcons.share` is drawn as a tray an arrow leaves; `PeekMethodBadge`
+  with `large` is the pill that heads a sheet rather than a tile; and
+  `PeekStrings` gain `exportAs`, `formatUrl`, `formatCurl`, `formatText`,
+  `formatMarkdown`, `formatHar`, `copyHar`, `redirectCount`, `shareUrl`,
+  `shareCurl`, `shareText` and `shareMarkdown`.
 
 ## 2.0.0
 

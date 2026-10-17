@@ -299,7 +299,7 @@ void main() {
       await pumpScreen(tester, entries: [e1]);
       await tester.longPress(find.byType(PeekEntryTile));
       await settle(tester);
-      await tester.tap(find.text('Pin'));
+      await tester.tap(find.byTooltip('Pin'));
       await settle(tester);
       expect(store.find(e1.id)?.isPinned, isTrue);
       expect(find.byIcon(Icons.push_pin), findsOneWidget);
@@ -326,7 +326,7 @@ void main() {
       await pumpScreen(tester, entries: [e1]);
       await tester.longPress(find.byType(PeekEntryTile));
       await settle(tester);
-      await tester.tap(find.text('Copy as cURL'));
+      await tester.tap(find.byTooltip('Copy as cURL'));
       await settle(tester);
 
       expect(copied.single, startsWith('curl '));

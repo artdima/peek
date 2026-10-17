@@ -165,7 +165,7 @@ void main() {
 
       await tester.tap(find.byTooltip('Request actions'));
       await settle(tester);
-      expect(find.text('Copy as cURL'), findsOneWidget);
+      expect(find.byTooltip('Copy as cURL'), findsOneWidget);
     });
 
     testWidgets('keeps the selection across a change of layout', (

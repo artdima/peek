@@ -247,6 +247,31 @@ class PeekStrings {
   /// Exports an HTTP Archive.
   String get exportHar => 'Export HAR';
 
+  /// Copies an HTTP Archive of one call.
+  String get copyHar => 'Copy HAR';
+
+  /// Heads the formats a call can be written out in.
+  String get exportAs => 'Export as';
+
+  /// The URL alone, as a format.
+  String get formatUrl => 'URL';
+
+  /// A curl command, as a format.
+  String get formatCurl => 'cURL';
+
+  /// A plain-text summary, as a format.
+  String get formatText => 'Text';
+
+  /// A Markdown summary, as a format.
+  String get formatMarkdown => 'Markdown';
+
+  /// An HTTP Archive, as a format.
+  String get formatHar => 'HAR';
+
+  /// How many redirects a call followed.
+  String redirectCount(int count) =>
+      count == 1 ? '1 redirect' : '$count redirects';
+
   /// Shares the URL as text.
   String get shareUrl => 'Share URL';
 

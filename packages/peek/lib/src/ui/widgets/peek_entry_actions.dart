@@ -1,18 +1,26 @@
+import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/widgets.dart';
 
 import '../../core/export/peek_exporters.dart';
 import '../../core/model/peek_entry.dart';
+import '../../core/model/peek_response.dart';
+import '../../core/model/peek_status_class.dart';
 import '../../core/peek.dart';
 import '../../core/session/peek_session.dart';
 import '../../core/session/peek_session_header.dart';
+import '../icons/peek_icon.dart';
+import '../icons/peek_icon_data.dart';
 import '../icons/peek_icons.dart';
 import '../peek_scope.dart';
 import '../peek_share.dart';
 import '../theme/peek_theme.dart';
 import 'peek_copy_button.dart';
 import 'peek_desktop_sheet.dart';
+import 'peek_icon_button.dart';
 import 'peek_method_badge.dart';
+import 'peek_separator.dart';
 import 'peek_sheet.dart';
+import 'peek_tappable.dart';
 import 'peek_toast.dart';
 
 /// What a call's menu can do.
@@ -52,7 +60,7 @@ enum PeekEntryAction {
 }
 
 /// The ways one call can be handed to the platform.
-enum PeekShareFormat {
+enum PeekEntryFormat {
   /// The URL alone, as text.
   url,
 
@@ -71,9 +79,12 @@ enum PeekShareFormat {
 
 /// Offers what can be done with [entry], and does it.
 ///
-/// Sharing appears where something can carry it off — the app's
-/// [PeekShareDelegate], or the browser on the web: an option that cannot
-/// work is worse than no option.
+/// Every format the call can be written out in is a row, and what can be
+/// done with it sits at the row's end: copied, always, and handed to the
+/// platform where something can carry it off — the app's
+/// [PeekShareDelegate], or the browser on the web. An option that cannot
+/// work is worse than no option, so without either there is no share
+/// column.
 Future<void> showPeekEntryActions(
   BuildContext context,
   PeekEntry entry, {
@@ -86,79 +97,14 @@ Future<void> showPeekEntryActions(
   // that was tapped may have scrolled or gone.
   final origin = peekShareOrigin(context);
 
-  final action = await showPeekActions<PeekEntryAction>(
+  final action = await showPeekSheet<PeekEntryAction>(
     context,
-    header: _EntryHeader(entry),
-    actions: [
-      PeekAction(
-        value: PeekEntryAction.copyUrl,
-        label: strings.copyUrl,
-        icon: PeekIcons.link,
-        section: strings.copy,
-      ),
-      PeekAction(
-        value: PeekEntryAction.copyCurl,
-        label: strings.copyCurl,
-        icon: PeekIcons.curl,
-        section: strings.copy,
-      ),
-      PeekAction(
-        value: PeekEntryAction.copyText,
-        label: strings.copyText,
-        icon: PeekIcons.text,
-        section: strings.copy,
-      ),
-      PeekAction(
-        value: PeekEntryAction.copyMarkdown,
-        label: strings.copyMarkdown,
-        icon: PeekIcons.markdown,
-        section: strings.copy,
-      ),
-      PeekAction(
-        value: PeekEntryAction.copyHar,
-        label: strings.exportHar,
-        icon: PeekIcons.braces,
-        section: strings.copy,
-      ),
-      if (share != null) ...[
-        PeekAction(
-          value: PeekEntryAction.shareUrl,
-          label: strings.shareUrl,
-          icon: PeekIcons.link,
-          section: strings.share,
+    builder:
+        (context) => _EntrySheet(
+          entry: entry,
+          canShare: share != null,
+          canPin: includePin,
         ),
-        PeekAction(
-          value: PeekEntryAction.shareCurl,
-          label: strings.shareCurl,
-          icon: PeekIcons.curl,
-          section: strings.share,
-        ),
-        PeekAction(
-          value: PeekEntryAction.shareText,
-          label: strings.shareText,
-          icon: PeekIcons.text,
-          section: strings.share,
-        ),
-        PeekAction(
-          value: PeekEntryAction.shareMarkdown,
-          label: strings.shareMarkdown,
-          icon: PeekIcons.markdown,
-          section: strings.share,
-        ),
-        PeekAction(
-          value: PeekEntryAction.shareHar,
-          label: strings.shareHar,
-          icon: PeekIcons.braces,
-          section: strings.share,
-        ),
-      ],
-      if (includePin)
-        PeekAction(
-          value: PeekEntryAction.pin,
-          label: entry.isPinned ? strings.unpin : strings.pin,
-          icon: PeekIcons.pin,
-        ),
-    ],
   );
   if (action == null || !context.mounted) return;
 
@@ -180,23 +126,23 @@ Future<void> showPeekEntryActions(
       await peekCopy(context, PeekExporters.har.export([entry], pretty: true));
     case PeekEntryAction.shareUrl:
       await share?.share(
-        peekEntryContent(entry, PeekShareFormat.url, origin: origin),
+        peekEntryContent(entry, PeekEntryFormat.url, origin: origin),
       );
     case PeekEntryAction.shareCurl:
       await share?.share(
-        peekEntryContent(entry, PeekShareFormat.curl, origin: origin),
+        peekEntryContent(entry, PeekEntryFormat.curl, origin: origin),
       );
     case PeekEntryAction.shareText:
       await share?.share(
-        peekEntryContent(entry, PeekShareFormat.text, origin: origin),
+        peekEntryContent(entry, PeekEntryFormat.text, origin: origin),
       );
     case PeekEntryAction.shareMarkdown:
       await share?.share(
-        peekEntryContent(entry, PeekShareFormat.markdown, origin: origin),
+        peekEntryContent(entry, PeekEntryFormat.markdown, origin: origin),
       );
     case PeekEntryAction.shareHar:
       await share?.share(
-        peekEntryContent(entry, PeekShareFormat.har, origin: origin),
+        peekEntryContent(entry, PeekEntryFormat.har, origin: origin),
       );
   }
 }
@@ -264,40 +210,428 @@ Future<void> showPeekListActions(BuildContext context) async {
   }
 }
 
-/// The call a sheet is about: its method as a tile, its path and host.
-class _EntryHeader extends StatelessWidget {
-  const _EntryHeader(this.entry);
+/// The sheet of one call: what it is, how it went, and a table of the
+/// formats it can leave in.
+class _EntrySheet extends StatelessWidget {
+  const _EntrySheet({
+    required this.entry,
+    required this.canShare,
+    required this.canPin,
+  });
+
+  final PeekEntry entry;
+  final bool canShare;
+  final bool canPin;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    final strings = PeekScope.stringsOf(context);
+    final caption = theme.caption.copyWith(
+      color: theme.secondaryLabel,
+      letterSpacing: 0.5,
+    );
+    final redirects = entry.response?.redirects ?? const [];
+    void choose(PeekEntryAction action) => Navigator.of(context).pop(action);
+
+    final formats = [
+      _Format(
+        icon: PeekIcons.link,
+        label: strings.formatUrl,
+        copy: PeekEntryAction.copyUrl,
+        copyLabel: strings.copyUrl,
+        share: PeekEntryAction.shareUrl,
+        shareLabel: strings.shareUrl,
+      ),
+      _Format(
+        icon: PeekIcons.curl,
+        label: strings.formatCurl,
+        copy: PeekEntryAction.copyCurl,
+        copyLabel: strings.copyCurl,
+        share: PeekEntryAction.shareCurl,
+        shareLabel: strings.shareCurl,
+      ),
+      _Format(
+        icon: PeekIcons.text,
+        label: strings.formatText,
+        copy: PeekEntryAction.copyText,
+        copyLabel: strings.copyText,
+        share: PeekEntryAction.shareText,
+        shareLabel: strings.shareText,
+      ),
+      _Format(
+        icon: PeekIcons.markdown,
+        label: strings.formatMarkdown,
+        copy: PeekEntryAction.copyMarkdown,
+        copyLabel: strings.copyMarkdown,
+        share: PeekEntryAction.shareMarkdown,
+        shareLabel: strings.shareMarkdown,
+      ),
+      _Format(
+        icon: PeekIcons.braces,
+        label: strings.formatHar,
+        copy: PeekEntryAction.copyHar,
+        copyLabel: strings.copyHar,
+        share: PeekEntryAction.shareHar,
+        shareLabel: strings.shareHar,
+      ),
+    ];
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: theme.gutter),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 12),
+          _Header(
+            entry: entry,
+            onPin: canPin ? () => choose(PeekEntryAction.pin) : null,
+            onClose: () => Navigator.of(context).pop(),
+          ),
+          const SizedBox(height: 6),
+          _Summary(entry),
+          if (redirects.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            _RedirectChain(entry, redirects),
+          ],
+          Padding(
+            padding: EdgeInsets.only(top: theme.gutter, bottom: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: Text(strings.exportAs.toUpperCase(), style: caption),
+                  ),
+                ),
+                _ColumnCaption(strings.copy, style: caption),
+                if (canShare) _ColumnCaption(strings.share, style: caption),
+                const SizedBox(width: _FormatRow.endInset),
+              ],
+            ),
+          ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(theme.radius),
+            child: ColoredBox(
+              color: theme.card,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final (index, format) in formats.indexed) ...[
+                    if (index > 0)
+                      const PeekSeparator(indent: _FormatRow.labelInset),
+                    _FormatRow(
+                      format: format,
+                      onCopy: () => choose(format.copy),
+                      onShare: canShare ? () => choose(format.share) : null,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: theme.gutter),
+        ],
+      ),
+    );
+  }
+}
+
+/// One way a call can leave, and what it is called in each column.
+class _Format {
+  const _Format({
+    required this.icon,
+    required this.label,
+    required this.copy,
+    required this.copyLabel,
+    required this.share,
+    required this.shareLabel,
+  });
+
+  final PeekIconData icon;
+  final String label;
+  final PeekEntryAction copy;
+  final String copyLabel;
+  final PeekEntryAction share;
+  final String shareLabel;
+}
+
+/// The call a sheet is about — its method and path — with the pin and the
+/// way out at the end.
+class _Header extends StatelessWidget {
+  const _Header({
+    required this.entry,
+    required this.onPin,
+    required this.onClose,
+  });
+
+  final PeekEntry entry;
+  final VoidCallback? onPin;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    final strings = PeekScope.stringsOf(context);
+    final request = entry.request;
+    return Row(
+      children: [
+        PeekMethodBadge(request.method, large: true),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            request.path.isEmpty ? '/' : request.path,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.headline.copyWith(fontSize: 17),
+          ),
+        ),
+        const SizedBox(width: 8),
+        if (onPin case final onPin?) ...[
+          _RoundButton(
+            glyph: PeekIcons.pin,
+            tooltip: entry.isPinned ? strings.unpin : strings.pin,
+            selected: entry.isPinned,
+            onPressed: onPin,
+          ),
+          const SizedBox(width: 10),
+        ],
+        _RoundButton(
+          glyph: PeekIcons.close,
+          tooltip: strings.close,
+          onPressed: onClose,
+        ),
+      ],
+    );
+  }
+}
+
+/// A glyph on a disc, the way a sheet's own controls look.
+class _RoundButton extends StatelessWidget {
+  const _RoundButton({
+    required this.glyph,
+    required this.tooltip,
+    required this.onPressed,
+    this.selected = false,
+  });
+
+  final PeekIconData glyph;
+  final String tooltip;
+  final VoidCallback onPressed;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    return MergeSemantics(
+      child: Tooltip(
+        message: tooltip,
+        child: PeekTappable(
+          onTap: onPressed,
+          fade: true,
+          focusRadius: BorderRadius.circular(theme.minTapTarget / 2),
+          child: Semantics(
+            button: true,
+            child: SizedBox(
+              width: theme.minTapTarget,
+              height: theme.minTapTarget,
+              child: Center(
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color:
+                        selected
+                            ? theme.accent.withValues(alpha: 0.16)
+                            : theme.card,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: PeekIcon(
+                      glyph,
+                      color: selected ? theme.accent : theme.label,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Where the call went and how it ended, in one line of figures.
+class _Summary extends StatelessWidget {
+  const _Summary(this.entry);
 
   final PeekEntry entry;
 
   @override
   Widget build(BuildContext context) {
     final theme = PeekTheme.of(context);
-    final request = entry.request;
-    return Row(
+    final strings = PeekScope.stringsOf(context);
+    final metrics = strings.metrics(entry.duration, entry.responseSize);
+    final redirects = entry.response?.redirects.length ?? 0;
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(text: '${entry.request.host} · '),
+          TextSpan(
+            text: strings.outcome(entry),
+            style: TextStyle(
+              color: theme.colorForEntry(entry),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          if (metrics.isNotEmpty) TextSpan(text: ' · $metrics'),
+          if (redirects > 0)
+            TextSpan(text: ' · ${strings.redirectCount(redirects)}'),
+        ],
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: theme.mono.copyWith(color: theme.secondaryLabel),
+    );
+  }
+}
+
+/// The hops a call took to get where it ended, as a bar per hop in the
+/// colour of its status, with where each one pointed underneath.
+class _RedirectChain extends StatelessWidget {
+  const _RedirectChain(this.entry, this.redirects);
+
+  final PeekEntry entry;
+  final List<PeekRedirect> redirects;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    final strings = PeekScope.stringsOf(context);
+    final hops = [
+      for (final hop in redirects)
+        (
+          label: '${hop.statusCode} ${_pathOf(hop.location)}',
+          color: theme.colorForStatusClass(PeekStatusClass.of(hop.statusCode)),
+        ),
+      (label: strings.outcome(entry), color: theme.colorForEntry(entry)),
+    ];
+    final label = theme.mono.copyWith(
+      fontSize: 10,
+      color: theme.secondaryLabel,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        PeekMethodBadge(request.method, large: true),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                request.path.isEmpty ? '/' : request.path,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.headline,
-              ),
-              Text(
-                request.host,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.footnote.copyWith(color: theme.secondaryLabel),
+        Row(
+          children: [
+            for (final (index, hop) in hops.indexed) ...[
+              if (index > 0) const SizedBox(width: 3),
+              Expanded(
+                child: Container(
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: hop.color,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
               ),
             ],
-          ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            for (final (index, hop) in hops.indexed) ...[
+              if (index > 0) const SizedBox(width: 3),
+              Expanded(
+                child: Text(
+                  hop.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: label,
+                ),
+              ),
+            ],
+          ],
         ),
       ],
+    );
+  }
+
+  static String _pathOf(Uri location) =>
+      location.path.isEmpty ? '/' : location.path;
+}
+
+/// Heads a column of the table, over the buttons it names.
+class _ColumnCaption extends StatelessWidget {
+  const _ColumnCaption(this.label, {required this.style});
+
+  final String label;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: PeekIconButton.width,
+    child: Text(
+      label.toUpperCase(),
+      textAlign: TextAlign.center,
+      maxLines: 1,
+      style: style,
+    ),
+  );
+}
+
+/// One format of the table: its glyph and name, then a button per column.
+class _FormatRow extends StatelessWidget {
+  const _FormatRow({
+    required this.format,
+    required this.onCopy,
+    required this.onShare,
+  });
+
+  /// Where the name starts, past the glyph: what a hairline between rows
+  /// is indented by.
+  static const double labelInset = 14 + 20 + 12;
+
+  /// What keeps the last button off the card's edge.
+  static const double endInset = 8;
+
+  final _Format format;
+  final VoidCallback onCopy;
+  final VoidCallback? onShare;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = PeekTheme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          const SizedBox(width: 14),
+          PeekIcon(format.icon, color: theme.accent),
+          const SizedBox(width: 12),
+          Expanded(child: Text(format.label, style: theme.body)),
+          PeekIconButton(
+            glyph: PeekIcons.copy,
+            tooltip: format.copyLabel,
+            size: 20,
+            color: theme.label,
+            onPressed: onCopy,
+          ),
+          if (onShare case final onShare?)
+            PeekIconButton(
+              glyph: PeekIcons.share,
+              tooltip: format.shareLabel,
+              size: 20,
+              color: theme.label,
+              onPressed: onShare,
+            ),
+          const SizedBox(width: endInset),
+        ],
+      ),
     );
   }
 }
@@ -306,44 +640,44 @@ class _EntryHeader extends StatelessWidget {
 /// platform wants to know.
 ///
 /// The text formats go as [PeekShareKind.text], named after the host for a
-/// receiver that can only take a file; [PeekShareFormat.har] is
+/// receiver that can only take a file; [PeekEntryFormat.har] is
 /// [peekHarContent] of this one call.
 PeekShareContent peekEntryContent(
   PeekEntry entry,
-  PeekShareFormat format, {
+  PeekEntryFormat format, {
   Rect? origin,
 }) {
   final host = entry.request.host;
   return switch (format) {
-    PeekShareFormat.url => _textContent(
+    PeekEntryFormat.url => _textContent(
       entry,
       text: PeekExporters.url(entry),
       filename: '$host.txt',
       mimeType: 'text/plain',
       origin: origin,
     ),
-    PeekShareFormat.curl => _textContent(
+    PeekEntryFormat.curl => _textContent(
       entry,
       text: PeekExporters.curl.export(entry),
       filename: '$host.sh',
       mimeType: 'text/x-shellscript',
       origin: origin,
     ),
-    PeekShareFormat.text => _textContent(
+    PeekEntryFormat.text => _textContent(
       entry,
       text: PeekExporters.text.export(entry),
       filename: '$host.txt',
       mimeType: 'text/plain',
       origin: origin,
     ),
-    PeekShareFormat.markdown => _textContent(
+    PeekEntryFormat.markdown => _textContent(
       entry,
       text: PeekExporters.markdown.export(entry),
       filename: '$host.md',
       mimeType: 'text/markdown',
       origin: origin,
     ),
-    PeekShareFormat.har => peekHarContent([entry], host, origin: origin),
+    PeekEntryFormat.har => peekHarContent([entry], host, origin: origin),
   };
 }
 

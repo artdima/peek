@@ -10,8 +10,8 @@ final class PeekMethodBadge extends StatelessWidget {
   /// The method, shown uppercase.
   final String method;
 
-  /// Whether it is a tile rather than a tag, the way a sheet names its
-  /// call.
+  /// Whether it heads a sheet rather than tags a row, and so reads a size
+  /// up.
   final bool large;
 
   @override
@@ -20,22 +20,18 @@ final class PeekMethodBadge extends StatelessWidget {
     final color = theme.colorForMethod(method);
     if (large) {
       return Container(
-        width: 56,
-        height: 56,
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.16),
-          borderRadius: BorderRadius.circular(theme.radius),
+          borderRadius: BorderRadius.circular(theme.radius * 0.6),
         ),
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            method.toUpperCase(),
-            maxLines: 1,
-            style: theme.headline.copyWith(
-              color: color,
-              fontWeight: FontWeight.w700,
-            ),
+        child: Text(
+          method.toUpperCase(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: theme.footnote.copyWith(
+            color: color,
+            fontWeight: FontWeight.w700,
           ),
         ),
       );

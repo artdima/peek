@@ -80,11 +80,17 @@ void main() {
       await tester.longPress(find.byType(PeekEntryTile));
       await settle(tester);
 
+      expect(find.text('EXPORT AS'), findsOneWidget);
       expect(find.text('COPY'), findsOneWidget);
       expect(find.text('SHARE'), findsOneWidget);
-      expect(find.text('Pin'), findsOneWidget);
-      expect(find.text('Cancel'), findsOneWidget);
-      expect(find.text('api.example.com'), findsNWidgets(2));
+      for (final label in ['URL', 'cURL', 'Text', 'Markdown', 'HAR']) {
+        expect(find.text(label), findsOneWidget, reason: label);
+      }
+      expect(find.byTooltip('Pin'), findsOneWidget);
+      expect(find.byTooltip('Close'), findsOneWidget);
+      // The tile and the sheet's summary both name the host.
+      expect(find.textContaining('api.example.com'), findsNWidgets(2));
+      expect(find.textContaining('api.example.com · 200 · '), findsOneWidget);
       expect(
         tester.widget<PeekMethodBadge>(find.byType(PeekMethodBadge)).large,
         isTrue,
@@ -93,7 +99,30 @@ void main() {
       await expectGolden(find.byType(MaterialApp), 'actions-light');
     });
 
-    testWidgets('copies a call four ways', (tester) async {
+    testWidgets('draws the hops of a redirected call', (tester) async {
+      await pumpScreen(tester, entries: [redirected]);
+      await tester.longPress(find.byType(PeekEntryTile));
+      await settle(tester);
+
+      expect(find.textContaining('2 redirects'), findsOneWidget);
+      expect(find.text('301 /docs'), findsOneWidget);
+      expect(find.text('302 /docs/latest'), findsOneWidget);
+      // The last hop is where the call ended.
+      expect(find.text('200'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await expectGolden(find.byType(MaterialApp), 'actions-redirects');
+    });
+
+    testWidgets('closes from its own button', (tester) async {
+      await pumpScreen(tester, entries: [e1]);
+      await tester.longPress(find.byType(PeekEntryTile));
+      await settle(tester);
+      await tester.tap(find.byTooltip('Close'));
+      await settle(tester);
+      expect(find.text('EXPORT AS'), findsNothing);
+    });
+
+    testWidgets('copies a call five ways', (tester) async {
       final copied = mockClipboard(tester);
 
       for (final (label, check) in [
@@ -101,12 +130,12 @@ void main() {
         ('Copy as cURL', 'curl '),
         ('Copy as text', 'GET'),
         ('Copy as Markdown', '#'),
-        ('Export HAR', '"log"'),
+        ('Copy HAR', '"log"'),
       ]) {
         await pumpScreen(tester, entries: [e1]);
         await tester.longPress(find.byType(PeekEntryTile));
         await settle(tester);
-        await tester.tap(find.text(label));
+        await tester.tap(find.byTooltip(label));
         await settle(tester);
 
         expect(copied.last, contains(check), reason: label);
@@ -124,7 +153,7 @@ void main() {
 
       await tester.longPress(find.byType(PeekEntryTile));
       await settle(tester);
-      await tester.tap(find.text('Share as HAR'));
+      await tester.tap(find.byTooltip('Share as HAR'));
       await settle(tester);
 
       expect(shared.single.kind, PeekShareKind.file);
@@ -154,9 +183,7 @@ void main() {
         );
         await tester.longPress(find.byType(PeekEntryTile));
         await settle(tester);
-        await tester.ensureVisible(find.text(label));
-        await tester.pump();
-        await tester.tap(find.text(label));
+        await tester.tap(find.byTooltip(label));
         await settle(tester);
 
         final content = shared.last;
@@ -181,14 +208,15 @@ void main() {
 
       expect(find.text('COPY'), findsOneWidget);
       expect(find.text('SHARE'), findsNothing);
-      expect(find.textContaining('Share'), findsNothing);
+      expect(find.byTooltip('Share URL'), findsNothing);
+      expect(find.byTooltip('Share as HAR'), findsNothing);
     });
 
     testWidgets('pins from the menu', (tester) async {
       await pumpScreen(tester, entries: [e1]);
       await tester.longPress(find.byType(PeekEntryTile));
       await settle(tester);
-      await tester.tap(find.text('Pin'));
+      await tester.tap(find.byTooltip('Pin'));
       await settle(tester);
 
       expect(controller.peek.store.find(e1.id)?.isPinned, isTrue);

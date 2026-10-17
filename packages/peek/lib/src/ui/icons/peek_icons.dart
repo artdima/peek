@@ -105,17 +105,26 @@ abstract final class PeekIcons {
     ],
   );
 
-  /// Hands the call to the platform.
+  /// Hands the call to the platform: a tray with an arrow leaving it.
   static const PeekIconData share = PeekIconData(
     width: 24,
     height: 24,
     strokeWidth: 2,
     paths: [
-      'M15 5C15 3.343 16.343 2 18 2C19.657 2 21 3.343 21 5C21 6.657 19.657 8 18 8C16.343 8 15 6.657 15 5Z',
-      'M3 12C3 10.343 4.343 9 6 9C7.657 9 9 10.343 9 12C9 13.657 7.657 15 6 15C4.343 15 3 13.657 3 12Z',
-      'M15 19C15 17.343 16.343 16 18 16C19.657 16 21 17.343 21 19C21 20.657 19.657 22 18 22C16.343 22 15 20.657 15 19Z',
-      'M8.59 13.51L15.42 17.49',
-      'M15.41 6.51L8.59 10.49',
+      'M4 12L4 20C4 21.105 4.895 22 6 22L18 22C19.105 22 20 21.105 20 20L20 12',
+      'M16 6L12 2L8 6',
+      'M12 2L12 15',
+    ],
+  );
+
+  /// Puts the call on the clipboard: one sheet over another.
+  static const PeekIconData copy = PeekIconData(
+    width: 24,
+    height: 24,
+    strokeWidth: 2,
+    paths: [
+      'M10 8L20 8C21.105 8 22 8.895 22 10L22 20C22 21.105 21.105 22 20 22L10 22C8.895 22 8 21.105 8 20L8 10C8 8.895 8.895 8 10 8Z',
+      'M4 16C2.895 16 2 15.105 2 14L2 4C2 2.895 2.895 2 4 2L14 2C15.105 2 16 2.895 16 4',
     ],
   );
 
