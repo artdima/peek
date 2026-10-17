@@ -127,6 +127,7 @@ void main() {
       await tester.tap(find.text('Share as HAR'));
       await settle(tester);
 
+      expect(shared.single.kind, PeekShareKind.file);
       expect(shared.single.filename, endsWith('.har'));
       expect(shared.single.mimeType, 'application/json');
       expect(shared.single.text, contains('api.example.com/users'));
@@ -135,6 +136,51 @@ void main() {
         shared.single.origin,
         tester.getRect(find.byType(PeekEntryTile).first),
       );
+    });
+
+    testWidgets('shares a call four ways as text', (tester) async {
+      final shared = <PeekShareContent>[];
+
+      for (final (label, filename, mimeType, check) in [
+        ('Share URL', 'api.example.com.txt', 'text/plain', 'https://'),
+        ('Share as cURL', 'api.example.com.sh', 'text/x-shellscript', 'curl '),
+        ('Share as text', 'api.example.com.txt', 'text/plain', 'GET'),
+        ('Share as Markdown', 'api.example.com.md', 'text/markdown', '#'),
+      ]) {
+        await pumpScreen(
+          tester,
+          entries: [e1],
+          share: PeekShareDelegate.from((content) async => shared.add(content)),
+        );
+        await tester.longPress(find.byType(PeekEntryTile));
+        await settle(tester);
+        await tester.ensureVisible(find.text(label));
+        await tester.tap(find.text(label));
+        await settle(tester);
+
+        final content = shared.last;
+        expect(content.kind, PeekShareKind.text, reason: label);
+        expect(content.filename, filename, reason: label);
+        expect(content.mimeType, mimeType, reason: label);
+        expect(content.subject, 'GET /users — api.example.com', reason: label);
+        expect(content.text, contains(check), reason: label);
+        expect(
+          content.origin,
+          tester.getRect(find.byType(PeekEntryTile).first),
+          reason: label,
+        );
+      }
+      expect(shared, hasLength(4));
+    });
+
+    testWidgets('offers sharing only with a delegate', (tester) async {
+      await pumpScreen(tester, entries: [e1]);
+      await tester.longPress(find.byType(PeekEntryTile));
+      await settle(tester);
+
+      expect(find.text('COPY'), findsOneWidget);
+      expect(find.text('SHARE'), findsNothing);
+      expect(find.textContaining('Share'), findsNothing);
     });
 
     testWidgets('pins from the menu', (tester) async {

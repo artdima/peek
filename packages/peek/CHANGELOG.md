@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased
+
+- `PeekShareContent.kind` says what a `PeekShareDelegate` is handed:
+  `PeekShareKind.text` — a URL, a command or a summary to paste where text
+  goes — or `PeekShareKind.file`, a HAR or a session to attach. It defaults
+  to `file`, so a delegate written before this one goes on attaching
+  everything; one that tells the two apart hands text to the platform as
+  text, as the example now does with `share_plus`. On the web, text goes
+  through the browser's own share sheet where there is one (phones,
+  Safari) and is saved as a file where there is not; a sheet closed
+  without choosing shares nothing.
+- A call's menu shares it as text, not only as a HAR: Share URL, Share as
+  cURL, Share as text and Share as Markdown sit above Share as HAR and
+  appear where it does — with the app's `PeekShareDelegate`, or through
+  the browser on the web — so a failing call reaches a chat or a ticket in
+  one step. `peekEntryContent` builds the same content for an app's own
+  menu, in any `PeekShareFormat`; the four `PeekEntryAction`s and four
+  `PeekStrings` (`shareUrl`, `shareCurl`, `shareText`, `shareMarkdown`) are
+  new.
+
 ## 2.0.0
 
 Remote viewing: the calls Peek records can be watched live on a Mac, in

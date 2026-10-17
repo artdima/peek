@@ -35,8 +35,38 @@ enum PeekEntryAction {
   /// Copy an HTTP Archive of this one call.
   copyHar,
 
-  /// Hand an HTTP Archive of this one call to the platform.
+  /// Hand the URL to the platform as text.
+  shareUrl,
+
+  /// Hand a curl command that replays the call to the platform as text.
+  shareCurl,
+
+  /// Hand a plain-text summary to the platform as text.
+  shareText,
+
+  /// Hand a Markdown summary to the platform as text.
+  shareMarkdown,
+
+  /// Hand an HTTP Archive of this one call to the platform as a file.
   shareHar,
+}
+
+/// The ways one call can be handed to the platform.
+enum PeekShareFormat {
+  /// The URL alone, as text.
+  url,
+
+  /// A curl command that replays the call, as text.
+  curl,
+
+  /// A plain-text summary, as text.
+  text,
+
+  /// A Markdown summary, as text.
+  markdown,
+
+  /// An HTTP Archive holding the call, as a file.
+  har,
 }
 
 /// Offers what can be done with [entry], and does it.
@@ -90,13 +120,38 @@ Future<void> showPeekEntryActions(
         icon: PeekIcons.braces,
         section: strings.copy,
       ),
-      if (share != null)
+      if (share != null) ...[
+        PeekAction(
+          value: PeekEntryAction.shareUrl,
+          label: strings.shareUrl,
+          icon: PeekIcons.link,
+          section: strings.share,
+        ),
+        PeekAction(
+          value: PeekEntryAction.shareCurl,
+          label: strings.shareCurl,
+          icon: PeekIcons.curl,
+          section: strings.share,
+        ),
+        PeekAction(
+          value: PeekEntryAction.shareText,
+          label: strings.shareText,
+          icon: PeekIcons.text,
+          section: strings.share,
+        ),
+        PeekAction(
+          value: PeekEntryAction.shareMarkdown,
+          label: strings.shareMarkdown,
+          icon: PeekIcons.markdown,
+          section: strings.share,
+        ),
         PeekAction(
           value: PeekEntryAction.shareHar,
           label: strings.shareHar,
-          icon: PeekIcons.share,
+          icon: PeekIcons.braces,
           section: strings.share,
         ),
+      ],
       if (includePin)
         PeekAction(
           value: PeekEntryAction.pin,
@@ -123,9 +178,25 @@ Future<void> showPeekEntryActions(
       await peekCopy(context, PeekExporters.markdown.export(entry));
     case PeekEntryAction.copyHar:
       await peekCopy(context, PeekExporters.har.export([entry], pretty: true));
+    case PeekEntryAction.shareUrl:
+      await share?.share(
+        peekEntryContent(entry, PeekShareFormat.url, origin: origin),
+      );
+    case PeekEntryAction.shareCurl:
+      await share?.share(
+        peekEntryContent(entry, PeekShareFormat.curl, origin: origin),
+      );
+    case PeekEntryAction.shareText:
+      await share?.share(
+        peekEntryContent(entry, PeekShareFormat.text, origin: origin),
+      );
+    case PeekEntryAction.shareMarkdown:
+      await share?.share(
+        peekEntryContent(entry, PeekShareFormat.markdown, origin: origin),
+      );
     case PeekEntryAction.shareHar:
       await share?.share(
-        peekHarContent([entry], entry.request.host, origin: origin),
+        peekEntryContent(entry, PeekShareFormat.har, origin: origin),
       );
   }
 }
@@ -229,6 +300,70 @@ class _EntryHeader extends StatelessWidget {
       ],
     );
   }
+}
+
+/// One call written out as [format], shared from [origin] where the
+/// platform wants to know.
+///
+/// The text formats go as [PeekShareKind.text], named after the host for a
+/// receiver that can only take a file; [PeekShareFormat.har] is
+/// [peekHarContent] of this one call.
+PeekShareContent peekEntryContent(
+  PeekEntry entry,
+  PeekShareFormat format, {
+  Rect? origin,
+}) {
+  final host = entry.request.host;
+  return switch (format) {
+    PeekShareFormat.url => _textContent(
+      entry,
+      text: PeekExporters.url(entry),
+      filename: '$host.txt',
+      mimeType: 'text/plain',
+      origin: origin,
+    ),
+    PeekShareFormat.curl => _textContent(
+      entry,
+      text: PeekExporters.curl.export(entry),
+      filename: '$host.sh',
+      mimeType: 'text/x-shellscript',
+      origin: origin,
+    ),
+    PeekShareFormat.text => _textContent(
+      entry,
+      text: PeekExporters.text.export(entry),
+      filename: '$host.txt',
+      mimeType: 'text/plain',
+      origin: origin,
+    ),
+    PeekShareFormat.markdown => _textContent(
+      entry,
+      text: PeekExporters.markdown.export(entry),
+      filename: '$host.md',
+      mimeType: 'text/markdown',
+      origin: origin,
+    ),
+    PeekShareFormat.har => peekHarContent([entry], host, origin: origin),
+  };
+}
+
+PeekShareContent _textContent(
+  PeekEntry entry, {
+  required String text,
+  required String filename,
+  required String mimeType,
+  required Rect? origin,
+}) {
+  final request = entry.request;
+  final path = request.path.isEmpty ? '/' : request.path;
+  return PeekShareContent(
+    kind: PeekShareKind.text,
+    filename: filename,
+    mimeType: mimeType,
+    subject: '${request.method} $path — ${request.host}',
+    origin: origin,
+    text: text,
+  );
 }
 
 /// An HTTP Archive of [entries], named after [subject], shared from

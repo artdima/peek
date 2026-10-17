@@ -247,6 +247,18 @@ class PeekStrings {
   /// Exports an HTTP Archive.
   String get exportHar => 'Export HAR';
 
+  /// Shares the URL as text.
+  String get shareUrl => 'Share URL';
+
+  /// Shares a curl command as text.
+  String get shareCurl => 'Share as cURL';
+
+  /// Shares a plain-text summary as text.
+  String get shareText => 'Share as text';
+
+  /// Shares a Markdown summary as text.
+  String get shareMarkdown => 'Share as Markdown';
+
   /// Shares an HTTP Archive of everything the list shows.
   String get shareHar => 'Share as HAR';
 
