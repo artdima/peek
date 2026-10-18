@@ -1,10 +1,6 @@
 <p align="center">
-  <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="assets/hero-dark.jpg">
-    <img src="assets/hero-light.jpg" alt="Peek —— Flutter 网络日志工具：请求、响应和错误，直接在应用内查看。支持 dio、talker、chopper 和 http。" width="860">
-  </picture>
+  <img src="assets/hero-light.jpg#gh-light-mode-only" alt="Peek —— Flutter 网络日志工具：请求、响应和错误，直接在应用内查看。支持 dio、talker、chopper 和 http。" width="860">
+  <img src="assets/hero-dark.jpg#gh-dark-mode-only" alt="Peek —— Flutter 网络日志工具：请求、响应和错误，直接在应用内查看。支持 dio、talker、chopper 和 http。" width="860">
 </p>
 
 <p align="center">

@@ -1,10 +1,6 @@
 <p align="center">
-  <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="assets/hero-dark.jpg">
-    <img src="assets/hero-light.jpg" alt="Peek — сетевой логер для Flutter: запросы, ответы и ошибки прямо в приложении. Подключается к dio, talker, chopper и http." width="860">
-  </picture>
+  <img src="assets/hero-light.jpg#gh-light-mode-only" alt="Peek — сетевой логер для Flutter: запросы, ответы и ошибки прямо в приложении. Подключается к dio, talker, chopper и http." width="860">
+  <img src="assets/hero-dark.jpg#gh-dark-mode-only" alt="Peek — сетевой логер для Flutter: запросы, ответы и ошибки прямо в приложении. Подключается к dio, talker, chopper и http." width="860">
 </p>
 
 <p align="center">

@@ -1,10 +1,6 @@
 <p align="center">
-  <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="assets/hero-dark.jpg">
-    <img src="assets/hero-light.jpg" alt="Peek — Flutter 向けネットワークロガー：リクエスト、レスポンス、エラーをアプリ内で確認。dio、talker、chopper、http に対応。" width="860">
-  </picture>
+  <img src="assets/hero-light.jpg#gh-light-mode-only" alt="Peek — Flutter 向けネットワークロガー：リクエスト、レスポンス、エラーをアプリ内で確認。dio、talker、chopper、http に対応。" width="860">
+  <img src="assets/hero-dark.jpg#gh-dark-mode-only" alt="Peek — Flutter 向けネットワークロガー：リクエスト、レスポンス、エラーをアプリ内で確認。dio、talker、chopper、http に対応。" width="860">
 </p>
 
 <p align="center">

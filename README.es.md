@@ -1,10 +1,6 @@
 <p align="center">
-  <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="assets/hero-dark.jpg">
-    <img src="assets/hero-light.jpg" alt="Peek — un logger de red para Flutter: peticiones, respuestas y errores, dentro de la propia app. Se conecta a dio, talker, chopper y http." width="860">
-  </picture>
+  <img src="assets/hero-light.jpg#gh-light-mode-only" alt="Peek — un logger de red para Flutter: peticiones, respuestas y errores, dentro de la propia app. Se conecta a dio, talker, chopper y http." width="860">
+  <img src="assets/hero-dark.jpg#gh-dark-mode-only" alt="Peek — un logger de red para Flutter: peticiones, respuestas y errores, dentro de la propia app. Se conecta a dio, talker, chopper y http." width="860">
 </p>
 
 <p align="center">

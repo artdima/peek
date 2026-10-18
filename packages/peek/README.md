@@ -1,10 +1,5 @@
 <p align="center">
-  <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://raw.githubusercontent.com/artdima/peek/main/assets/hero-dark.jpg">
-    <img src="https://raw.githubusercontent.com/artdima/peek/main/assets/hero-light.jpg" alt="Peek — a network logger for Flutter: requests, responses and failures, right inside the app. Plugs into dio, talker, chopper and http." width="860">
-  </picture>
+  <img src="https://raw.githubusercontent.com/artdima/peek/main/assets/hero-light.jpg" alt="Peek — a network logger for Flutter: requests, responses and failures, right inside the app. Plugs into dio, talker, chopper and http." width="860">
 </p>
 
 <p align="center">
