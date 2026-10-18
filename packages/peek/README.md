@@ -2,13 +2,9 @@
   <picture>
     <source
       media="(prefers-color-scheme: dark)"
-      srcset="https://raw.githubusercontent.com/artdima/peek/main/assets/peek-logo-dark.png">
-    <img src="https://raw.githubusercontent.com/artdima/peek/main/assets/peek-logo.png" width="320" alt="Peek">
+      srcset="https://raw.githubusercontent.com/artdima/peek/main/assets/hero-dark.jpg">
+    <img src="https://raw.githubusercontent.com/artdima/peek/main/assets/hero-light.jpg" alt="Peek — a network logger for Flutter: requests, responses and failures, right inside the app. Plugs into dio, talker, chopper and http." width="860">
   </picture>
-</p>
-
-<p align="center">
-  <em>A beautiful in-app network inspector for Flutter: every call your app makes, as it happened.</em>
 </p>
 
 <p align="center">
@@ -18,31 +14,42 @@
   <a href="https://github.com/artdima/peek/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT"></a>
 </p>
 
----
+<p align="center">
+  <b>English</b> ·
+  <a href="https://github.com/artdima/peek/blob/main/README.ru.md">Русский</a> ·
+  <a href="https://github.com/artdima/peek/blob/main/README.zh-CN.md">简体中文</a> ·
+  <a href="https://github.com/artdima/peek/blob/main/README.es.md">Español</a> ·
+  <a href="https://github.com/artdima/peek/blob/main/README.pt-BR.md">Português</a> ·
+  <a href="https://github.com/artdima/peek/blob/main/README.ja.md">日本語</a>
+</p>
 
-**What Peek is.** A network inspector that lives inside the app. An adapter
-sits beside the client you already build — Dio, Chopper, `package:http` — and
-reports every call it makes; with Talker, where the calls are logged already,
-it reads them instead of recording them twice. What arrives is a console you
-open on the device: searchable, filterable, one call at a time down to the
-last header, with export as cURL, HAR, Markdown or text.
+**What Peek is.** Peek is a network logger for Flutter with the calls shown
+right inside the app: requests, responses, headers and failures. Search and
+filters find the call you are after, and a call exports as cURL, HAR,
+Markdown or text.
 
-**What Peek is not.** A participant in the request, or a second console
-logger. Peek does not create a client, does not wrap `Dio`, does not touch
-`HttpOverrides` and does not print a line anywhere — keep the console logger
-you like. A call goes out as the app built it and comes back as it arrived:
-nothing is delayed, retried, rewritten or dropped along the way, and
-`package:http`, the one client with nowhere to watch from, is wrapped only to
-pass every byte straight through. An adapter is a pair of eyes, not a pair of
-hands — and if anything inside Peek fails, the failure reaches
-`PeekOptions.onError`, never your app.
+Peek attaches to Dio, Chopper and `package:http` through adapters. If you
+use Talker, Peek takes the network logs it already keeps, without recording
+them twice.
 
-**Inspired by Pulse.** Peek is inspired by
+**How it works.** Peek watches the calls without changing what they carry or
+how they behave: nothing is delayed, retried or rewritten. It creates no
+client, uses no `HttpOverrides` and prints nothing to the console — keep the
+console logger you are used to.
+
+`package:http` needs a wrapper, and it passes the data through unchanged. If
+something goes wrong inside Peek itself, the error goes to
+`PeekOptions.onError` and the app carries on.
+
+**Inspired by Pulse.** The idea of Peek is inspired by
 [Pulse](https://github.com/kean/Pulse), the network logger for Apple
-platforms. It is an independent project, written from scratch for Flutter.
+platforms. Peek is an independent project, written from scratch for Flutter.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/artdima/peek/main/assets/screens.png" alt="Peek: the console, a call and a JSON body" width="800">
+  <img src="https://raw.githubusercontent.com/artdima/peek/main/assets/screenshots/phones-light.png" width="860" alt="Peek in the light theme: the console, one call, a JSON body and the export sheet">
+</p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/artdima/peek/main/assets/screenshots/phones-dark.png" width="860" alt="Peek in the dark theme: the console, one call, a JSON body and the export sheet">
 </p>
 
 ## Quick start
@@ -157,12 +164,16 @@ final peek = Peek(
 
 ## Peek Pro
 
-[Peek Pro](https://github.com/artdima/peek-pro) is a Mac app that shows the
-calls live while the app runs on a phone, a simulator or an emulator: a
-bigger screen, search across everything, several apps at once and sessions
-saved to files. Add [`peek_remote`](https://github.com/artdima/peek/tree/main/packages/peek_remote), start it in debug
-builds, and pair once from Peek's menu — Connect to Peek Pro — with the
-code Peek Pro shows:
+[Peek Pro](https://github.com/artdima/peek-pro) is a Mac app for watching
+the network logs of a phone, a simulator or an emulator in real time. On
+the big screen you can search the calls, follow several apps at once and
+save sessions to files.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/artdima/peek/main/assets/screenshots/peek-pro.png" alt="Peek Pro on a Mac: the calls of two devices and two saved sessions, one call open in full" width="860">
+</p>
+
+To connect, add [`peek_remote`](https://github.com/artdima/peek/tree/main/packages/peek_remote) and start it in debug builds:
 
 ```dart
 if (kDebugMode) {
@@ -170,9 +181,13 @@ if (kDebugMode) {
 }
 ```
 
-[`doc/remote.md`](https://github.com/artdima/peek/blob/main/doc/remote.md) is the guide, from setting up to what never
-leaves the device. Anyone building another viewer finds the protocol and
-the `.peek` file format in [`doc/spec/`](https://github.com/artdima/peek/tree/main/doc/spec).
+Then pick Connect to Peek Pro in Peek's menu and enter the code the Mac app
+shows. The connection is set up once.
+
+The full guide is [`doc/remote.md`](https://github.com/artdima/peek/blob/main/doc/remote.md): how to set the connection up
+and what stays on the device. If you are building a log viewer of your
+own, the protocol and the `.peek` file format are described in
+[`doc/spec/`](https://github.com/artdima/peek/tree/main/doc/spec).
 
 ## Writing your own adapter
 
