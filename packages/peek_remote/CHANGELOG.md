@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0
+
+Released alongside `peek` 2.1.0. The code in this package is unchanged.
+
 ## 2.0.0
 
 The first release — numbered with the rest of Peek, which moves as one. It

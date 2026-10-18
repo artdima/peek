@@ -14,7 +14,7 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^1.5.0
-  peek: ^2.0.0
+  peek: ^2.1.0
   peek_chopper: ^2.0.0
   peek_dio: ^2.0.0
   peek_http: ^2.0.0

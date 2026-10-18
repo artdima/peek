@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0
+
+Released alongside `peek` 2.1.0. The code in this package is unchanged.
+
 ## 2.0.0
 
 Released alongside `peek` 2.0.0, which brings remote viewing in Peek Pro.

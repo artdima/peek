@@ -3,6 +3,35 @@
 Each package keeps its own changelog; this one says what a release is.
 Versions move together, so every package always carries the same number.
 
+## 2.1.0
+
+**More ways to share a call.** Send a URL, a cURL command, text or
+Markdown straight to a chat or a ticket — as text, not a file. HAR export
+is still there. On the web, the browser's own Share menu is used.
+
+**Redesigned sheets.** The formats sit in a table with Copy and Share. The
+call's header shows the status, the size, the time and the chain of
+redirects. The list's menu follows the same style and shows how the link to
+Peek Pro stands.
+
+**Empty states and the dark theme.** A radar picture and a hint say why the
+list is empty: nothing recorded yet, recording paused, or filters on. The
+dark theme's neutral colours are refreshed, and sheets stand out better
+against the screen.
+
+**Example and docs.** A new home screen in the example, and a refreshed
+README with a banner and screenshots, in six languages.
+
+**Upgrading**
+
+- In your own share delegate, handle `PeekShareKind.text` and `file`
+  separately, or text will be sent as a file.
+- If you use an exhaustive `switch` over `PeekEntryAction` without
+  `default`, add the four new cases.
+
+Everything changed is in [`peek`](packages/peek/CHANGELOG.md); the
+adapters and `peek_remote` carry the number.
+
 ## 2.0.0
 
 Remote viewing. A sixth package,

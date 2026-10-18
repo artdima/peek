@@ -1,6 +1,16 @@
 # Changelog
 
-## Unreleased
+## 2.1.0
+
+More ways to share a call, redesigned sheets, empty states with a picture
+and a refreshed dark theme.
+
+**Upgrading from 2.0.** Nothing breaks, but two things are worth a look. A
+`PeekShareDelegate` that ignores `PeekShareContent.kind` sends text as a
+file — handle `PeekShareKind.text` and `PeekShareKind.file` separately, as
+the example does. A `switch` over `PeekEntryAction` that names every value
+needs four more cases: `shareUrl`, `shareCurl`, `shareText`,
+`shareMarkdown`.
 
 - `PeekShareContent.kind` says what a `PeekShareDelegate` is handed:
   `PeekShareKind.text` — a URL, a command or a summary to paste where text
