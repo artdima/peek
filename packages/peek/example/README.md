@@ -44,7 +44,9 @@ phone and Peek on the other — two views of one program over the same
 views and names each phone, and `lib/web_demo.dart` draws a phone's screen
 around each of them. The switch under the left phone picks its app: a
 sneaker shop, which the page opens with, or the example itself, which the
-page calls the playground.
+page calls the playground. The one above the phones picks their theme;
+`lib/web_demo_page_web.dart` is where the program hears what the page
+picked.
 
 The shop, in `lib/shop/`, is a small app of the kind Peek is for: a
 catalogue, a page per shoe, favourites and a bag that orders. Its server

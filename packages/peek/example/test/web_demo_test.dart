@@ -77,4 +77,10 @@ void main() {
       expect(tester.getSize(find.text('9:41')).height, lessThan(20));
     });
   });
+
+  group('DemoTheme', () {
+    test('follows the system while no page has picked a theme', () {
+      expect(DemoTheme.current, ThemeMode.system);
+    });
+  });
 }

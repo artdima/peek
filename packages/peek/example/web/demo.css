@@ -16,7 +16,7 @@
   /* Tall enough to read, short enough that both phones fit the window
      whole, and narrow enough that they fit side by side. */
   --screen-h: min(
-    clamp(520px, 100svh - 220px, 852px),
+    clamp(520px, 100svh - 268px, 852px),
     (100vw - 300px) * 1.084
   );
   --device-w: calc(var(--screen-h) * 0.4613 * 1.062);
@@ -201,7 +201,7 @@ strong {
 .wallpaper {
   position: relative;
   margin: 0;
-  padding: 44px 32px 30px;
+  padding: 28px 32px 30px;
   overflow: hidden;
   border-radius: 20px;
   background: var(--wallpaper);
@@ -311,8 +311,9 @@ strong {
   text-align: center;
 }
 
-/* The app on the left phone, under it. */
-.apps {
+/* The switches on the wallpaper: the phones' theme above them, the app
+   under the left one and, on a narrow screen, which phone to show. */
+.pills {
   display: inline-flex;
   padding: 4px;
   border-radius: 100px;
@@ -320,8 +321,11 @@ strong {
   backdrop-filter: blur(12px);
 }
 
-.apps button {
-  padding: 7px 20px;
+.pills button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 18px;
   border: 0;
   border-radius: 100px;
   background: transparent;
@@ -330,9 +334,28 @@ strong {
   cursor: pointer;
 }
 
-.apps button[aria-checked="true"] {
+.pills button[aria-checked="true"],
+.pills button[aria-selected="true"] {
   background: #fff;
   color: #000;
+}
+
+.pills svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.wallpaper__top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 24px;
 }
 
 .flow {
@@ -360,27 +383,6 @@ strong {
 
 .switch {
   display: none;
-  width: max-content;
-  margin: 0 auto 20px;
-  padding: 4px;
-  border-radius: 100px;
-  background: rgb(0 0 0 / 0.28);
-  backdrop-filter: blur(12px);
-}
-
-.switch button {
-  padding: 7px 20px;
-  border: 0;
-  border-radius: 100px;
-  background: transparent;
-  color: rgb(255 255 255 / 0.85);
-  font: 600 15px/1.4 var(--font);
-  cursor: pointer;
-}
-
-.switch button[aria-selected="true"] {
-  background: #fff;
-  color: #000;
 }
 
 .wallpaper__note {
@@ -432,7 +434,7 @@ strong {
 @media (max-width: 879px) {
   :root {
     --gutter: 16px;
-    --screen-h: min(100svh - 200px, 852px, (100vw - 72px) * 2.04);
+    --screen-h: min(100svh - 230px, 852px, (100vw - 72px) * 2.04);
   }
 
   .bar__inner {
@@ -470,7 +472,15 @@ strong {
   }
 
   .switch {
-    display: flex;
+    display: inline-flex;
+  }
+
+  .wallpaper__top {
+    padding-inline: 12px;
+  }
+
+  .pills button {
+    padding-inline: 14px;
   }
 
   .phones {

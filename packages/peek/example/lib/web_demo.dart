@@ -4,8 +4,8 @@ import 'dart:ui' show FlutterView, PointerDeviceKind;
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 
-import 'web_demo_role.dart'
-    if (dart.library.js_interop) 'web_demo_role_web.dart';
+import 'web_demo_page.dart'
+    if (dart.library.js_interop) 'web_demo_page_web.dart';
 
 /// What a view of the web page shows: one of the two apps on the left
 /// phone, or Peek on the right.
@@ -25,6 +25,23 @@ enum DemoPhone {
   /// nothing.
   static DemoPhone of(int viewId) =>
       values.asNameMap()[pageRoleOf(viewId)] ?? shop;
+}
+
+/// The phones' theme, as the switch above them picks it.
+abstract final class DemoTheme {
+  /// The pick so far; the system's while there is none.
+  static ThemeMode get current => _modeOf(pageTheme()) ?? ThemeMode.system;
+
+  /// Calls [listener] with each new pick.
+  static void listen(ValueChanged<ThemeMode> listener) => onPageTheme((theme) {
+    if (_modeOf(theme) case final mode?) listener(mode);
+  });
+
+  static ThemeMode? _modeOf(String? theme) => switch (theme) {
+    'light' => ThemeMode.light,
+    'dark' => ThemeMode.dark,
+    _ => null,
+  };
 }
 
 /// One widget per view the page adds, so a single program draws on both

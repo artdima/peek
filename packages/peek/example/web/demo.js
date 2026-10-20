@@ -1,3 +1,23 @@
+// Above the phones, their theme. The page keeps the pick on `window`, where
+// Flutter reads it when it starts, and calls Flutter's listener on a change.
+(() => {
+  const buttons = [...document.querySelectorAll('[data-theme]')];
+  if (buttons.length === 0) return;
+
+  const pick = (theme) => {
+    window.peekDemoTheme = theme;
+    for (const button of buttons) {
+      button.setAttribute('aria-checked', String(button.dataset.theme === theme));
+    }
+    window.peekDemoOnTheme?.(theme);
+  };
+
+  pick(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  for (const button of buttons) {
+    button.addEventListener('click', () => pick(button.dataset.theme));
+  }
+})();
+
 // Under the left phone, the app it runs: the page tells Flutter by
 // replacing the phone's view with one that names the other app.
 (() => {

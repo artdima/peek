@@ -81,7 +81,13 @@ class _WebDemoState extends State<_WebDemo> {
   final Peek _peek = Peek();
   late final ExampleClients _clients = ExampleClients(_peek);
   late final ShopApi _shop = ShopApi(buildShopClient(_peek));
-  ThemeMode _mode = ThemeMode.system;
+  ThemeMode _mode = DemoTheme.current;
+
+  @override
+  void initState() {
+    super.initState();
+    DemoTheme.listen((mode) => setState(() => _mode = mode));
+  }
 
   @override
   void dispose() {
@@ -105,7 +111,7 @@ class _WebDemoState extends State<_WebDemo> {
               peek: _peek,
               clients: _clients,
               share: null,
-              onModeChanged: (mode) => setState(() => _mode = mode),
+              onModeChanged: null,
             ),
             DemoPhone.shop => ShopHome(api: _shop),
             DemoPhone.peek => PeekScreen(peek: _peek),
@@ -278,7 +284,10 @@ class _Home extends StatefulWidget {
   final Peek peek;
   final ExampleClients clients;
   final PeekShareDelegate? share;
-  final ValueChanged<ThemeMode> onModeChanged;
+
+  /// Switches the theme; on the web page the switch is the page's, so
+  /// there is none.
+  final ValueChanged<ThemeMode>? onModeChanged;
 
   @override
   State<_Home> createState() => _HomeState();
@@ -418,20 +427,25 @@ class _HomeState extends State<_Home> {
               padding.bottom + 112,
             ),
             children: [
-              Align(
-                alignment: Alignment.centerRight,
-                child: IconButton(
-                  tooltip: 'Toggle theme',
-                  color: palette.ink,
-                  onPressed:
-                      () => widget.onModeChanged(
-                        dark ? ThemeMode.light : ThemeMode.dark,
-                      ),
-                  icon: Icon(
-                    dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+              if (widget.onModeChanged case final onModeChanged?)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    tooltip: 'Toggle theme',
+                    color: palette.ink,
+                    onPressed:
+                        () => onModeChanged(
+                          dark ? ThemeMode.light : ThemeMode.dark,
+                        ),
+                    icon: Icon(
+                      dark
+                          ? Icons.light_mode_outlined
+                          : Icons.dark_mode_outlined,
+                    ),
                   ),
-                ),
-              ),
+                )
+              else
+                const SizedBox(height: 16),
               Text('Peek example', style: palette.title),
               const SizedBox(height: 8),
               Text(
