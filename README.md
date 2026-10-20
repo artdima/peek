@@ -29,6 +29,10 @@ Peek attaches to Dio, Chopper and `package:http` through adapters. If you
 use Talker, Peek takes the network logs it already keeps, without recording
 them twice.
 
+<p align="center">
+  <a href="https://artdima.github.io/peek/"><img src="assets/demo-button.png" width="300" alt="Open the live demo: runs in your browser, no install"></a>
+</p>
+
 **How it works.** Peek watches the calls without changing what they carry or
 how they behave: nothing is delayed, retried or rewritten. It creates no
 client, uses no `HttpOverrides` and prints nothing to the console — keep the

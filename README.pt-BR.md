@@ -24,6 +24,10 @@
 
 O Peek se conecta ao Dio, ao Chopper e ao `package:http` por meio de adaptadores. Se você usa o Talker, o Peek aproveita os logs de rede que ele já registra, sem duplicá-los.
 
+<p align="center">
+  <a href="https://artdima.github.io/peek/"><img src="assets/demo-button.png" width="300" alt="Abrir a demo ao vivo: roda no navegador, sem instalar nada"></a>
+</p>
+
 **Como funciona.** O Peek observa as requisições sem alterar seu conteúdo nem seu comportamento: não as atrasa, não as repete e não as reescreve. Ele não cria cliente, não usa `HttpOverrides` e não imprime nada no console — você pode continuar usando o logger de console de sempre.
 
 O `package:http` precisa de um wrapper, que repassa os dados sem alterações. Se algo der errado dentro do próprio Peek, o erro vai para `PeekOptions.onError` e o app continua funcionando.

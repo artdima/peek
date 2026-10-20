@@ -24,6 +24,10 @@
 
 Peek 通过适配器接入 Dio、Chopper 和 `package:http`。如果你使用 Talker，Peek 会直接读取 Talker 已记录的网络日志，不会重复记录。
 
+<p align="center">
+  <a href="https://artdima.github.io/peek/"><img src="assets/demo-button.png" width="300" alt="打开在线演示：在浏览器中运行，无需安装"></a>
+</p>
+
 **工作原理。** Peek 只观察请求，不改变其内容和行为：不会延迟、重试或改写请求。它不创建客户端，不使用 `HttpOverrides`，也不会向控制台输出任何内容——你可以继续使用熟悉的控制台日志工具。
 
 `package:http` 需要一个包装器，它会原样传递数据。如果 Peek 自身出错，错误会交给 `PeekOptions.onError` 处理，不会中断应用的运行。

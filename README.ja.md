@@ -24,6 +24,10 @@
 
 Peek はアダプターを介して Dio、Chopper、`package:http` に接続します。Talker を使っている場合は、Talker がすでに記録しているネットワークログを重複させずに取り込みます。
 
+<p align="center">
+  <a href="https://artdima.github.io/peek/"><img src="assets/demo-button.png" width="300" alt="ライブデモを開く：ブラウザで動作、インストール不要"></a>
+</p>
+
 **仕組み。** Peek はリクエストを観察するだけで、内容や挙動は変えません。遅延、再試行、書き換えは一切行いません。クライアントを作成せず、`HttpOverrides` も使わず、コンソールにも何も出力しません。使い慣れたコンソールロガーはそのまま使えます。
 
 `package:http` にはラッパーが必要ですが、データは変更されずにそのまま渡されます。Peek 自体でエラーが起きた場合は `PeekOptions.onError` に渡され、アプリの動作は止まりません。
