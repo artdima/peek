@@ -311,6 +311,30 @@ strong {
   text-align: center;
 }
 
+/* The app on the left phone, under it. */
+.apps {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 100px;
+  background: rgb(0 0 0 / 0.28);
+  backdrop-filter: blur(12px);
+}
+
+.apps button {
+  padding: 7px 20px;
+  border: 0;
+  border-radius: 100px;
+  background: transparent;
+  color: rgb(255 255 255 / 0.85);
+  font: 600 15px/1.4 var(--font);
+  cursor: pointer;
+}
+
+.apps button[aria-checked="true"] {
+  background: #fff;
+  color: #000;
+}
+
 .flow {
   display: grid;
   flex: 0 0 auto;
@@ -318,7 +342,7 @@ strong {
   align-self: center;
   width: 48px;
   height: 48px;
-  margin-bottom: 52px;
+  margin-bottom: 64px;
   border-radius: 50%;
   background: rgb(255 255 255 / 0.16);
   backdrop-filter: blur(12px);

@@ -42,19 +42,19 @@
   <main>
     <section class="wrap intro">
       <h1>Peek Demo</h1>
-      <p class="kicker">The Peek example, running in your browser</p>
+      <p class="kicker">Peek, running in your browser</p>
       <ol class="steps">
         <li>
-          <strong>Run a scenario</strong>
-          in the example app: a real call through Dio, Talker, Chopper or
-          http.
+          <strong>Use the app</strong>
+          buy a pair of sneakers in the shop, or switch to the playground
+          under the phone and run a scenario.
         </li>
         <li>
-          <strong>Watch it arrive</strong>
-          in Peek, the moment it is made.
+          <strong>Watch the calls arrive</strong>
+          in Peek, the moment they are made.
         </li>
         <li>
-          <strong>Open the call</strong>
+          <strong>Open a call</strong>
           to read its headers, body and timing.
         </li>
       </ol>
@@ -69,14 +69,19 @@
         <div class="phones">
           <figure class="device" id="phone-app">
             <div class="device__frame">
-              <div class="device__screen" data-peek-view="app" aria-label="The Peek example app">
+              <div class="device__screen" data-peek-view="shop" aria-label="A sneaker shop">
                 <div class="device__boot" aria-hidden="true">
                   <span class="device__island"></span>
                   <span class="device__spinner"></span>
                 </div>
               </div>
             </div>
-            <figcaption>The example app</figcaption>
+            <figcaption>
+              <div class="apps" role="radiogroup" aria-label="App on this phone">
+                <button type="button" role="radio" aria-checked="true" data-app="shop" data-label="A sneaker shop">Shop</button>
+                <button type="button" role="radio" aria-checked="false" data-app="example" data-label="The Peek example app">Playground</button>
+              </div>
+            </figcaption>
           </figure>
 
           <div class="flow" aria-hidden="true">
@@ -99,9 +104,9 @@
         <p class="wallpaper__note wallpaper__note--failed">The demo could not start in this browser.</p>
       </div>
       <p class="demo__note">
-        The calls go from your browser to httpbin.org and
-        jsonplaceholder.typicode.com. Offline, “Add calls without a network”
-        fills Peek with made-up ones.
+        The shop talks to a pretend server inside the page, through Dio and
+        Peek’s interceptor. The playground’s calls go from your browser to
+        httpbin.org and jsonplaceholder.typicode.com.
       </p>
     </section>
   </main>

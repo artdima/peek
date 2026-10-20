@@ -37,12 +37,22 @@ Peek is opened from the floating button with `showPeek`. Redaction is left
 at its default here — off — so the tokens the scenarios send are visible.
 
 On the web the example is the demo page,
-[artdima.github.io/peek](https://artdima.github.io/peek/): the app on one
+[artdima.github.io/peek](https://artdima.github.io/peek/): an app on one
 phone and Peek on the other — two views of one program over the same
 `Peek`, so a call made on the left arrives on the right.
 `web/index.html` lays the page out, `web/flutter_bootstrap.js` adds the
 views and names each phone, and `lib/web_demo.dart` draws a phone's screen
-around each of them.
+around each of them. The switch under the left phone picks its app: a
+sneaker shop, which the page opens with, or the example itself, which the
+page calls the playground.
+
+The shop, in `lib/shop/`, is a small app of the kind Peek is for: a
+catalogue, a page per shoe, favourites and a bag that orders. Its server
+is pretended inside the app — `PaceServer`, a Dio adapter — so its calls
+are the same for every visitor and still go through `PeekDioInterceptor`
+like any other. Two of them fail the way they do in a real shop: the last
+pair of a size has gone by the time it is added to the bag (409), and the
+first payment finds the provider busy (503).
 
 ```sh
 flutter run -d chrome

@@ -7,21 +7,31 @@ import 'package:flutter/material.dart';
 import 'web_demo_role.dart'
     if (dart.library.js_interop) 'web_demo_role_web.dart';
 
-/// Which of the web page's two phones a view is.
+/// What a view of the web page shows: one of the two apps on the left
+/// phone, or Peek on the right.
 enum DemoPhone {
-  /// The example itself, where the calls are made.
-  app,
+  /// A sneaker shop whose server is pretended inside the page; the left
+  /// phone opens with it.
+  shop,
+
+  /// The example itself, scenarios that make real calls; the page calls it
+  /// the playground.
+  example,
 
   /// Peek, showing the calls as they are made.
   peek;
 
-  /// The phone the page put view [viewId] on; [app] when it named none.
+  /// What the page asked view [viewId] to show; [shop] when it named
+  /// nothing.
   static DemoPhone of(int viewId) =>
-      values.asNameMap()[pageRoleOf(viewId)] ?? app;
+      values.asNameMap()[pageRoleOf(viewId)] ?? shop;
 }
 
 /// One widget per view the page adds, so a single program draws on both
 /// phones and shares everything it holds between them.
+///
+/// The page changes the app on a phone by replacing its view with one
+/// that names another, so views come and go while the program runs.
 class DemoViews extends StatefulWidget {
   /// Creates the views, each showing what [builder] gives for its phone.
   const DemoViews({required this.builder, super.key});

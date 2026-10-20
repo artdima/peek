@@ -11,6 +11,8 @@ import 'http_scenarios.dart';
 import 'remote_setup.dart';
 import 'scenarios.dart';
 import 'share.dart';
+import 'shop/shop_api.dart';
+import 'shop/shop_app.dart';
 import 'web_demo.dart';
 
 void main() {
@@ -64,9 +66,9 @@ class _PeekExampleAppState extends State<PeekExampleApp> {
   );
 }
 
-/// The example on its web page: the app on one phone and Peek on the
+/// The example on its web page: an app on one phone and Peek on the
 /// other, over one instance, so a call made on the left shows up on the
-/// right.
+/// right. The left phone runs the example or the shop, as the page asks.
 class _WebDemo extends StatefulWidget {
   const _WebDemo();
 
@@ -78,11 +80,13 @@ class _WebDemoState extends State<_WebDemo> {
   // No remote: a browser tab cannot reach Peek Pro.
   final Peek _peek = Peek();
   late final ExampleClients _clients = ExampleClients(_peek);
+  late final ShopApi _shop = ShopApi(buildShopClient(_peek));
   ThemeMode _mode = ThemeMode.system;
 
   @override
   void dispose() {
     _clients.dispose();
+    _shop.dio.close();
     _peek.dispose();
     super.dispose();
   }
@@ -93,20 +97,24 @@ class _WebDemoState extends State<_WebDemo> {
         (phone) => _app(
           mode: _mode,
           builder: (context, child) => PhoneScreen(child: child!),
+          theme: phone == DemoPhone.shop ? shopTheme(Brightness.light) : null,
+          darkTheme:
+              phone == DemoPhone.shop ? shopTheme(Brightness.dark) : null,
           home: switch (phone) {
-            DemoPhone.app => _Home(
+            DemoPhone.example => _Home(
               peek: _peek,
               clients: _clients,
               share: null,
               onModeChanged: (mode) => setState(() => _mode = mode),
             ),
+            DemoPhone.shop => ShopHome(api: _shop),
             DemoPhone.peek => PeekScreen(peek: _peek),
           },
         ),
   );
 }
 
-/// The example's app around [home], in its own colours.
+/// An app around [home], in the example's colours unless given others.
 ///
 /// Without a [title] the browser tab keeps the one its page gave it.
 Widget _app({
@@ -114,12 +122,14 @@ Widget _app({
   required Widget home,
   String? title,
   TransitionBuilder? builder,
+  ThemeData? theme,
+  ThemeData? darkTheme,
 }) => MaterialApp(
   title: title,
   debugShowCheckedModeBanner: false,
   themeMode: mode,
-  theme: _Palette.light.themeData(Brightness.light),
-  darkTheme: _Palette.dark.themeData(Brightness.dark),
+  theme: theme ?? _Palette.light.themeData(Brightness.light),
+  darkTheme: darkTheme ?? _Palette.dark.themeData(Brightness.dark),
   builder: builder,
   home: home,
 );

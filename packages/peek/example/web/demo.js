@@ -1,3 +1,25 @@
+// Under the left phone, the app it runs: the page tells Flutter by
+// replacing the phone's view with one that names the other app.
+(() => {
+  const buttons = [...document.querySelectorAll('[data-app]')];
+  const host = document.querySelector('#phone-app [data-peek-view]');
+  if (!host) return;
+
+  for (const button of buttons) {
+    button.addEventListener('click', () => {
+      if (host.dataset.peekView === button.dataset.app) return;
+      host.dataset.peekView = button.dataset.app;
+      host.setAttribute('aria-label', button.dataset.label);
+      for (const other of buttons) {
+        other.setAttribute('aria-checked', String(other === button));
+      }
+      document.dispatchEvent(
+        new CustomEvent('peekdemo:switch', { detail: { host } }),
+      );
+    });
+  }
+})();
+
 // On a narrow screen the phones sit in a row that scrolls sideways; the
 // switch above them picks one, and follows when the row is swiped.
 (() => {
