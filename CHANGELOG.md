@@ -3,6 +3,21 @@
 Each package keeps its own changelog; this one says what a release is.
 Versions move together, so every package always carries the same number.
 
+## 2.1.1
+
+**A live demo.** Try Peek in the browser, with nothing to install:
+[artdima.github.io/peek](https://artdima.github.io/peek/). An app runs on
+one phone and Peek on the other, so a call made in the app shows up in
+Peek at once. The app is a sneaker shop, or the example's scenarios in the
+Playground, and a switch above the phones turns them light or dark.
+
+**Example and docs.** The example builds for the web and is the demo page,
+with a sneaker shop beside its scenarios. The README links the demo with a
+badge and a button, in six languages.
+
+No package code changed: the release brings the README and the example
+with the demo to pub.dev. The adapters and `peek_remote` carry the number.
+
 ## 2.1.0
 
 **More ways to share a call.** Send a URL, a cURL command, text or

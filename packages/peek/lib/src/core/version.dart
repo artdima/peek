@@ -1,4 +1,4 @@
 /// The version of the `peek` package, as written into exports.
 ///
 /// Kept in step with `pubspec.yaml` by the release checklist.
-const String peekVersion = '2.1.0';
+const String peekVersion = '2.1.1';

@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.1.1
+
+A live demo of Peek in the browser:
+[artdima.github.io/peek](https://artdima.github.io/peek/). The code of the
+package is unchanged.
+
+- The README links the demo, with a badge and a button under the intro.
+- The example runs on the web as the demo page: an app on one phone and
+  Peek on the other, two views of one program over the same `Peek`.
+  Besides its scenarios, which the page calls the Playground, it has a
+  sneaker shop whose server is pretended inside the app as a Dio adapter,
+  so its calls are the same for every visitor.
+
 ## 2.1.0
 
 More ways to share a call, redesigned sheets, empty states with a picture
