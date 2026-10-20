@@ -36,6 +36,18 @@ at the screens without a network.
 Peek is opened from the floating button with `showPeek`. Redaction is left
 at its default here — off — so the tokens the scenarios send are visible.
 
+On the web the example is the demo page,
+[artdima.github.io/peek](https://artdima.github.io/peek/): the app on one
+phone and Peek on the other — two views of one program over the same
+`Peek`, so a call made on the left arrives on the right.
+`web/index.html` lays the page out, `web/flutter_bootstrap.js` adds the
+views and names each phone, and `lib/web_demo.dart` draws a phone's screen
+around each of them.
+
+```sh
+flutter run -d chrome
+```
+
 ```sh
 flutter test integration_test
 ```

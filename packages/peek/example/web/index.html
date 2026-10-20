@@ -1,46 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
+  <!-- Replaced by `flutter build web --base-href`; GitHub Pages serves the
+       page from /peek/. -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A live demo of Peek, the network logger for Flutter: run a call on one phone and watch it arrive in Peek on the other.">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:title" content="Peek Demo">
+  <meta property="og:description" content="Run a call on one phone and watch it arrive in Peek on the other.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://raw.githubusercontent.com/artdima/peek/main/assets/hero-light.jpg">
 
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="peek_example">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
-
-  <title>peek_example</title>
+  <title>Peek Demo</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="demo.css">
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
+  <header class="bar">
+    <div class="wrap wrap--wide bar__inner">
+      <a class="brand" href="./">
+        <svg viewBox="0 0 228 228" aria-hidden="true">
+          <rect width="228" height="228" rx="50" fill="#0c0e0c"/>
+          <rect x="42" y="54" width="144" height="28" rx="14" fill="#61dc6b"/>
+          <rect x="42" y="102" width="90" height="28" rx="14" fill="#f4ce23"/>
+          <rect x="42" y="150" width="54" height="28" rx="14" fill="#f14e46"/>
+        </svg>
+        Peek
+        <span class="badge">Demo</span>
+      </a>
+      <nav class="nav" aria-label="Project">
+        <a href="https://pub.dev/packages/peek">pub.dev</a>
+        <a href="https://github.com/artdima/peek">GitHub</a>
+      </nav>
+    </div>
+  </header>
 
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
+  <main>
+    <section class="wrap intro">
+      <h1>Peek Demo</h1>
+      <p class="kicker">The Peek example, running in your browser</p>
+      <ol class="steps">
+        <li>
+          <strong>Run a scenario</strong>
+          in the example app: a real call through Dio, Talker, Chopper or
+          http.
+        </li>
+        <li>
+          <strong>Watch it arrive</strong>
+          in Peek, the moment it is made.
+        </li>
+        <li>
+          <strong>Open the call</strong>
+          to read its headers, body and timing.
+        </li>
+      </ol>
+    </section>
+
+    <section class="wrap wrap--wide demo" aria-label="Demo">
+      <div class="wallpaper">
+        <div class="switch" role="tablist" aria-label="Phone">
+          <button type="button" role="tab" aria-selected="true" aria-controls="phone-app">App</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="phone-peek">Peek</button>
+        </div>
+        <div class="phones">
+          <figure class="device" id="phone-app">
+            <div class="device__frame">
+              <div class="device__screen" data-peek-view="app" aria-label="The Peek example app">
+                <div class="device__boot" aria-hidden="true">
+                  <span class="device__island"></span>
+                  <span class="device__spinner"></span>
+                </div>
+              </div>
+            </div>
+            <figcaption>The example app</figcaption>
+          </figure>
+
+          <div class="flow" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </div>
+
+          <figure class="device" id="phone-peek">
+            <div class="device__frame">
+              <div class="device__screen" data-peek-view="peek" aria-label="Peek, showing the calls">
+                <div class="device__boot" aria-hidden="true">
+                  <span class="device__island"></span>
+                  <span class="device__spinner"></span>
+                </div>
+              </div>
+            </div>
+            <figcaption>Peek</figcaption>
+          </figure>
+        </div>
+        <noscript><p class="wallpaper__note">The demo needs JavaScript.</p></noscript>
+        <p class="wallpaper__note wallpaper__note--failed">The demo could not start in this browser.</p>
+      </div>
+      <p class="demo__note">
+        The calls go from your browser to httpbin.org and
+        jsonplaceholder.typicode.com. Offline, “Add calls without a network”
+        fills Peek with made-up ones.
+      </p>
+    </section>
+  </main>
+
+  <footer class="wrap wrap--wide footer">
+    <nav class="footer__links" aria-label="Project">
+      <a href="https://github.com/artdima/peek">GitHub</a>
+      <a href="https://pub.dev/packages/peek">pub.dev</a>
+      <a href="https://github.com/artdima/peek/issues">Report an Issue</a>
+    </nav>
+    <p>MIT © 2026 Dmitriy Medyannik</p>
+  </footer>
+
+  <script src="demo.js" defer></script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

@@ -1,0 +1,54 @@
+name: Demo
+
+# The example, built for the web, is the demo page on GitHub Pages:
+# https://artdima.github.io/peek/. It follows the releases, so what a
+# visitor tries is what pub.dev serves; run it by hand to publish between
+# them.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build the example for the web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: .fvmrc
+          cache: true
+
+      - run: flutter pub get
+
+      # Pages serves a project site from /<repository>/.
+      - run: flutter build web --release --base-href /peek/
+        working-directory: packages/peek/example
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: packages/peek/example/build/web
+
+  deploy:
+    name: Publish to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

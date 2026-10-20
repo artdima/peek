@@ -1,0 +1,482 @@
+/* The demo page, after pulselogger.com: a white page in the system font,
+   bold headings and the phones on a wallpaper. */
+
+:root {
+  --bg: #fff;
+  --text: #333;
+  --heading: #000;
+  --muted: #abb8c3;
+  --bar: #f0f0f0;
+  --screen: #fff;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans,
+    Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  --content: 700px;
+  --wide: 1160px;
+  --gutter: 24px;
+  /* Tall enough to read, short enough that both phones fit the window
+     whole, and narrow enough that they fit side by side. */
+  --screen-h: min(
+    clamp(520px, 100svh - 220px, 852px),
+    (100vw - 300px) * 1.084
+  );
+  --device-w: calc(var(--screen-h) * 0.4613 * 1.062);
+  /* The logo's three colours, warm like the wallpapers behind Pulse's
+     screenshots. */
+  --wallpaper:
+    radial-gradient(55% 70% at 10% 10%, rgb(97 220 107 / 0.95), transparent 65%),
+    radial-gradient(55% 70% at 90% 15%, rgb(244 206 35 / 0.9), transparent 65%),
+    radial-gradient(70% 80% at 60% 105%, rgb(241 78 70 / 0.95), transparent 70%),
+    linear-gradient(180deg, #f7b733, #f0643c);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0d10;
+    --text: #c4ccd4;
+    --heading: #f3f5f7;
+    --muted: #6f7c88;
+    --bar: #15181d;
+    --screen: #0b0d10;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 18px/1.6 var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+.wrap {
+  width: min(var(--content), 100% - 2 * var(--gutter));
+  margin-inline: auto;
+}
+
+.wrap--wide {
+  width: min(var(--wide), 100% - 2 * var(--gutter));
+}
+
+/* Header */
+
+.bar {
+  background: var(--bar);
+}
+
+.bar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  height: 64px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--heading);
+  font-size: 20px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.brand svg {
+  width: 30px;
+  height: 30px;
+}
+
+.badge {
+  padding: 2px 9px;
+  border-radius: 100px;
+  background: var(--heading);
+  color: var(--bg);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.nav {
+  display: flex;
+  gap: 28px;
+}
+
+.nav a,
+.footer__links a {
+  text-decoration: none;
+}
+
+.nav a:hover,
+.footer__links a:hover {
+  text-decoration: underline;
+}
+
+/* Text */
+
+h1 {
+  margin: 0;
+  color: var(--heading);
+  font-size: clamp(44px, 7vw, 64px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+p {
+  margin: 0 0 20px;
+}
+
+strong {
+  color: var(--heading);
+  font-weight: 600;
+}
+
+.kicker {
+  margin: 10px 0 36px;
+  color: var(--muted);
+}
+
+.intro {
+  padding: 64px 0 40px;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin: 0;
+  padding: 0;
+  counter-reset: step;
+  font-size: 16px;
+  line-height: 1.5;
+  list-style: none;
+}
+
+.steps li {
+  counter-increment: step;
+}
+
+.steps li::before {
+  content: counter(step);
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: var(--heading);
+  color: var(--bg);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.steps strong {
+  display: block;
+  font-size: 17px;
+}
+
+/* The demo */
+
+.demo {
+  padding-top: 8px;
+}
+
+.wallpaper {
+  position: relative;
+  margin: 0;
+  padding: 44px 32px 30px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--wallpaper);
+}
+
+.phones {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(24px, 5vw, 80px);
+}
+
+.device {
+  flex: 0 0 auto;
+  width: var(--device-w);
+  margin: 0;
+  container-type: inline-size;
+}
+
+.device__frame {
+  position: relative;
+  padding: 2.9cqw;
+  border-radius: 15.4cqw;
+  background: #050506;
+  box-shadow:
+    inset 0 0 0 0.5cqw #2c2c2e,
+    0 0 0 0.35cqw #55565a,
+    0 40px 80px -28px rgb(0 0 0 / 0.6);
+}
+
+/* The side buttons: volume on the left, power on the right. */
+.device__frame::before,
+.device__frame::after {
+  content: "";
+  position: absolute;
+  width: 0.9cqw;
+  border-radius: 1cqw;
+  background: #3a3b3f;
+}
+
+.device__frame::before {
+  top: 24%;
+  left: -0.9cqw;
+  height: 13%;
+}
+
+.device__frame::after {
+  top: 29%;
+  right: -0.9cqw;
+  height: 19%;
+}
+
+.device__screen {
+  position: relative;
+  aspect-ratio: 393 / 852;
+  overflow: hidden;
+  border-radius: 12.4cqw;
+  background: var(--screen);
+}
+
+/* Over the placeholder, which shows until the first frame is drawn. */
+.device__screen > flutter-view {
+  position: relative;
+  z-index: 1;
+}
+
+.device__boot {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+/* Where the app's own island will be: 125 × 37 at 11 from the top. */
+.device__island {
+  position: absolute;
+  top: 1.29%;
+  left: 50%;
+  width: 31.8%;
+  height: 4.34%;
+  border-radius: 100px;
+  background: #000;
+  transform: translateX(-50%);
+}
+
+.device__spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgb(127 127 127 / 0.25);
+  border-top-color: rgb(127 127 127 / 0.8);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.device figcaption {
+  margin-top: 20px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.flow {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  align-self: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 52px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.16);
+  backdrop-filter: blur(12px);
+}
+
+.flow svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.switch {
+  display: none;
+  width: max-content;
+  margin: 0 auto 20px;
+  padding: 4px;
+  border-radius: 100px;
+  background: rgb(0 0 0 / 0.28);
+  backdrop-filter: blur(12px);
+}
+
+.switch button {
+  padding: 7px 20px;
+  border: 0;
+  border-radius: 100px;
+  background: transparent;
+  color: rgb(255 255 255 / 0.85);
+  font: 600 15px/1.4 var(--font);
+  cursor: pointer;
+}
+
+.switch button[aria-selected="true"] {
+  background: #fff;
+  color: #000;
+}
+
+.wallpaper__note {
+  margin: 24px 0 0;
+  color: #fff;
+  text-align: center;
+}
+
+.wallpaper__note--failed,
+.is-failed .device__spinner {
+  display: none;
+}
+
+.is-failed .wallpaper__note--failed {
+  display: block;
+}
+
+.demo__note {
+  max-width: var(--content);
+  margin: 16px auto 0;
+  color: var(--muted);
+  font-size: 15px;
+  text-align: center;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin-top: 56px;
+  padding: 28px 0 40px;
+  border-top: 1px solid var(--bar);
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.footer p {
+  margin: 0;
+}
+
+.footer__links {
+  display: flex;
+  gap: 24px;
+}
+
+/* One phone at a time when two do not fit: they sit in a row that
+   scrolls, and the switch picks one. */
+@media (max-width: 879px) {
+  :root {
+    --gutter: 16px;
+    --screen-h: min(100svh - 200px, 852px, (100vw - 72px) * 2.04);
+  }
+
+  .bar__inner {
+    height: 56px;
+  }
+
+  .nav {
+    gap: 18px;
+    font-size: 16px;
+  }
+
+  .intro {
+    padding: 40px 0 32px;
+  }
+
+  .steps {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .steps li {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    column-gap: 12px;
+  }
+
+  .steps li::before {
+    grid-row: span 2;
+    margin: 0;
+  }
+
+  .wallpaper {
+    padding: 20px 0 24px;
+    border-radius: 16px;
+  }
+
+  .switch {
+    display: flex;
+  }
+
+  .phones {
+    justify-content: flex-start;
+    gap: 24px;
+    padding-inline: calc((100% - var(--device-w)) / 2);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .phones::-webkit-scrollbar {
+    display: none;
+  }
+
+  .device {
+    scroll-snap-align: center;
+  }
+
+  .flow {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .device__spinner {
+    animation: none;
+  }
+}

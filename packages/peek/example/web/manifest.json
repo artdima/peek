@@ -1,11 +1,11 @@
 {
-    "name": "peek_example",
-    "short_name": "peek_example",
+    "name": "Peek",
+    "short_name": "Peek",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FFFFFF",
+    "theme_color": "#FFFFFF",
+    "description": "Peek, a network logger for Flutter: make a call on one phone and watch it arrive in Peek on the other.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

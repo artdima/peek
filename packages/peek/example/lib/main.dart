@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/material.dart';
 import 'package:peek/peek.dart';
@@ -10,8 +11,17 @@ import 'http_scenarios.dart';
 import 'remote_setup.dart';
 import 'scenarios.dart';
 import 'share.dart';
+import 'web_demo.dart';
 
-void main() => runApp(const PeekExampleApp());
+void main() {
+  // The web page embeds two views of one program, the app and Peek beside
+  // it, so there is no implicit view to run in.
+  if (PlatformDispatcher.instance.implicitView == null) {
+    runWidget(const _WebDemo());
+  } else {
+    runApp(const PeekExampleApp());
+  }
+}
 
 /// Makes real calls, four ways, so Peek has something real to show.
 class PeekExampleApp extends StatefulWidget {
@@ -42,12 +52,9 @@ class _PeekExampleAppState extends State<PeekExampleApp> {
   }
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
+  Widget build(BuildContext context) => _app(
     title: 'Peek example',
-    debugShowCheckedModeBanner: false,
-    themeMode: _mode,
-    theme: _Palette.light.themeData(Brightness.light),
-    darkTheme: _Palette.dark.themeData(Brightness.dark),
+    mode: _mode,
     home: _Home(
       peek: _peek,
       clients: _clients,
@@ -56,6 +63,66 @@ class _PeekExampleAppState extends State<PeekExampleApp> {
     ),
   );
 }
+
+/// The example on its web page: the app on one phone and Peek on the
+/// other, over one instance, so a call made on the left shows up on the
+/// right.
+class _WebDemo extends StatefulWidget {
+  const _WebDemo();
+
+  @override
+  State<_WebDemo> createState() => _WebDemoState();
+}
+
+class _WebDemoState extends State<_WebDemo> {
+  // No remote: a browser tab cannot reach Peek Pro.
+  final Peek _peek = Peek();
+  late final ExampleClients _clients = ExampleClients(_peek);
+  ThemeMode _mode = ThemeMode.system;
+
+  @override
+  void dispose() {
+    _clients.dispose();
+    _peek.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => DemoViews(
+    builder:
+        (phone) => _app(
+          mode: _mode,
+          builder: (context, child) => PhoneScreen(child: child!),
+          home: switch (phone) {
+            DemoPhone.app => _Home(
+              peek: _peek,
+              clients: _clients,
+              share: null,
+              onModeChanged: (mode) => setState(() => _mode = mode),
+            ),
+            DemoPhone.peek => PeekScreen(peek: _peek),
+          },
+        ),
+  );
+}
+
+/// The example's app around [home], in its own colours.
+///
+/// Without a [title] the browser tab keeps the one its page gave it.
+Widget _app({
+  required ThemeMode mode,
+  required Widget home,
+  String? title,
+  TransitionBuilder? builder,
+}) => MaterialApp(
+  title: title,
+  debugShowCheckedModeBanner: false,
+  themeMode: mode,
+  theme: _Palette.light.themeData(Brightness.light),
+  darkTheme: _Palette.dark.themeData(Brightness.dark),
+  builder: builder,
+  home: home,
+);
 
 /// The example's own colours: green ink on paper, or on near-black.
 ///
