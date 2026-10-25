@@ -35,7 +35,7 @@ jobs:
       - run: flutter build web --release --base-href /peek/
         working-directory: packages/peek/example
 
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: packages/peek/example/build/web
 
